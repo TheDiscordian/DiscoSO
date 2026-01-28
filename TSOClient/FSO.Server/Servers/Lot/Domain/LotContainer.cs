@@ -821,8 +821,9 @@ namespace FSO.Server.Servers.Lot.Domain
                 {
                     Tuning = Tuning
                 });
-                Lot.Tick();
             }
+
+            Lot.Tick();
 
             Lot.Context.UpdateTSOBuildableArea();
 
