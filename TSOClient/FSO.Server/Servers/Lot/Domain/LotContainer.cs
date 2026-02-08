@@ -874,8 +874,6 @@ namespace FSO.Server.Servers.Lot.Domain
                     }
                 }
             }
-            LotActive.Set();
-            ActiveYet = true;
 
             if (JobLot)
             {
@@ -887,7 +885,11 @@ namespace FSO.Server.Servers.Lot.Domain
                     State = Lot.Save(),
                     Run = false,
                 });
+                Lot.Tick();
             }
+
+            LotActive.Set();
+            ActiveYet = true;
         }
 
         public void UpdateTuning(IEnumerable<DynTuningEntry> tuning)
