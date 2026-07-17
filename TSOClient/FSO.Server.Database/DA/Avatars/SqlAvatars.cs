@@ -147,6 +147,11 @@ namespace FSO.Server.Database.DA.Avatars
             Context.Connection.Query("UPDATE fso_avatars SET move_date = @date WHERE avatar_id = @id", new { id = id, date = date });
         }
 
+        public void UpdateDaysPlayed(uint id, uint days_played, uint last_played_day)
+        {
+            Context.Connection.Query("UPDATE fso_avatars SET days_played = @days_played, last_played_day = @last_played_day WHERE avatar_id = @id", new { id = id, days_played = days_played, last_played_day = last_played_day });
+        }
+
         public void UpdateMayorNhood(uint id, uint? nhood)
         {
             Context.Connection.Query("UPDATE fso_avatars SET mayor_nhood = @nhood WHERE avatar_id = @id", new { id = id, nhood = nhood });

@@ -1379,7 +1379,15 @@ namespace FSO.Server.Servers.Lot.Domain
             var rage = (uint)((now - user.register_date) / ((long)60 * 60 * 24));
             var age = (uint)((now - avatar.date) / ((long)60 * 60 * 24));
 
-            state.SkillLock = (short)(20 + age / 7);
+            // DiscoSO: skill locks scale with days actually PLAYED (1 per 5 days), not calendar age.
+            var playDay = (uint)(now / ((long)60 * 60 * 24));
+            if (avatar.last_played_day < playDay)
+            {
+                avatar.days_played += 1;
+                avatar.last_played_day = playDay;
+                using (var ddb = DAFactory.Get()) ddb.Avatars.UpdateDaysPlayed(avatar.avatar_id, avatar.days_played, avatar.last_played_day);
+            }
+            state.SkillLock = (short)(20 + avatar.days_played / 3);
             state.SkillLockBody = (short)(avatar.lock_body*100);
             state.SkillLockCharisma = (short)(avatar.lock_charisma * 100);
             state.SkillLockCooking = (short)(avatar.lock_cooking * 100);
@@ -1560,6 +1568,13 @@ namespace FSO.Server.Servers.Lot.Domain
             {
 
             }
+        }
+
+        public void GiftMoney(uint avatarId, int amount)
+        {
+            if (Lot?.Context?.ObjectQueries == null || !Lot.Context.ObjectQueries.AvatarsByPersist.ContainsKey(avatarId)) return;
+            LOG.Info("DiscoSO gift: crediting " + amount + " to avatar " + avatarId + " on lot " + Context.DbId);
+            VMGlobalLink?.PerformTransaction(Lot, false, uint.MaxValue, avatarId, amount, (success, transferAmount, uid1, budget1, uid2, budget2) => { });
         }
 
         public void ForceShutdown()

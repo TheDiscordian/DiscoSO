@@ -98,6 +98,23 @@ namespace FSO.Server.Servers.City
             Kernel.Get<EventSystem>().Init();
         }
 
+        public void GiftMoney(uint avatarId, int amount)
+        {
+            try
+            {
+                using (var da = DAFactory.Get())
+                {
+                    var claim = da.AvatarClaims.GetByAvatarID(avatarId);
+                    uint lotId = (claim != null) ? claim.location : 0;
+                    if (lotId != 0)
+                        Kernel.Get<Domain.LotServerPicker>().BroadcastMessage(new FSO.Server.Protocol.Gluon.Packets.GiftMoneyRequest { LotId = (int)lotId, AvatarId = avatarId, Amount = amount });
+                    else
+                        da.Avatars.Transaction(uint.MaxValue, avatarId, amount, 0);
+                }
+            }
+            catch (System.Exception e) { LOG.Error(e, "GiftMoney failed"); }
+        }
+
         public override void Shutdown()
         {
             Shutdown(ShutdownType.SHUTDOWN).RunSynchronously();

@@ -23,6 +23,8 @@ namespace FSO.Server.Servers.City.Domain
 
         public List<DbEvent> ActiveEvents = new List<DbEvent>();
         public DateTime Next = new DateTime(0);
+        private float LastBonusMul = -1;
+        private int LastOnline = -1;
 
         public EventSystem(IDAFactory da, CityServerContext ctx, ISessions sessions, IKernel kernel, Tuning tuning)
         {
@@ -41,6 +43,7 @@ namespace FSO.Server.Servers.City.Domain
 
         public void TickEvents()
         {
+            CheckPopulationBonus();
             var time = DateTime.UtcNow;
             if (time > Next) //check events every hour
             {
@@ -130,6 +133,35 @@ namespace FSO.Server.Servers.City.Domain
             {
                 UserJoinedEvent(session, evt, false);
             }
+        }
+
+        private void CheckPopulationBonus()
+        {
+            try
+            {
+                var online = Sessions.Clone().OfType<IVoltronSession>().Count(x => !x.IsAnonymous);
+                float skillMul, socialMul;
+                if (online <= 2) { skillMul = 3f; socialMul = 1f / 3f; }       //1-2 online
+                else if (online <= 4) { skillMul = 2f; socialMul = 0.5f; }     //3-4 online
+                else if (online <= 6) { skillMul = 1.5f; socialMul = 0.75f; }  //5-6 online
+                else { skillMul = 1f; socialMul = 1f; }                        //7+ normal
+                if (skillMul != LastBonusMul)
+                {
+                    using (var da = DA.Get())
+                    {
+                        da.Tuning.SetTuning("discoso", 0, 0, skillMul);
+                        da.Tuning.SetTuning("discoso", 0, 1, socialMul);
+                    }
+                    LastBonusMul = skillMul;
+                }
+                if (online != LastOnline)
+                {
+                    LastOnline = online;
+                    TuningDomain.BroadcastTuningUpdate(true);
+                    LOG.Info("DiscoSO population bonus: " + online + " online -> " + skillMul + "x skill/money, " + socialMul + "x social");
+                }
+            }
+            catch (Exception e) { LOG.Error(e, "DiscoSO population bonus check failed"); }
         }
 
         public void UserJoinedEvent(IVoltronSession session, DbEvent evt, bool alreadyOnline)

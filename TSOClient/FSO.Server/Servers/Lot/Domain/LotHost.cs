@@ -200,6 +200,17 @@ namespace FSO.Server.Servers.Lot.Domain
             return true;
         }
 
+        public void GiftMoney(int lotId, uint avatarId, int amount)
+        {
+            List<LotHostEntry> lots;
+            lock (Lots) lots = Lots.Values.ToList();
+            foreach (var lot in lots)
+            {
+                var container = lot.Container;
+                lot.InBackground(() => container?.GiftMoney(avatarId, amount));
+            }
+        }
+
         public void UpdateTuning(bool immediately)
         {
             LOG.Info("Updating tuning on lot server " + Config.Call_Sign + "...");

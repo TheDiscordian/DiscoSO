@@ -182,6 +182,15 @@ namespace FSO.SimAntics.Primitives
                         context.Thread.TempRegisters[0] = (short)amount;
                     }
                 }
+                else if (type == VMTransferFundsExpenseType.IncomeJob
+                    || type == VMTransferFundsExpenseType.IncomeRobotJob
+                    || type == VMTransferFundsExpenseType.IncomeRestaurantJob
+                    || type == VMTransferFundsExpenseType.IncomeClubJob)
+                {
+                    //DiscoSO: double job income when the low-population bonus is active
+                    var dgm = context.VM.Tuning?.GetTuning("discoso", 0, 0) ?? 1f;
+                    if (dgm > 1f) amount = (int)System.Math.Round(amount * dgm);
+                }
 
                 context.Thread.BlockingState = new VMTransferFundsState();
 

@@ -36,6 +36,7 @@ namespace FSO.Server.Database.DA.Avatars
         void UpdateAvatarLotSave(uint id, DbAvatar avatar);
         void UpdateAvatarJobLevel(DbJobLevel jobLevel);
         void UpdateMoveDate(uint id, uint date);
+        void UpdateDaysPlayed(uint id, uint days_played, uint last_played_day);
         void UpdateMayorNhood(uint id, uint? nhood);
 
         List<DbAvatar> SearchExact(int shard_id, string name, int limit);

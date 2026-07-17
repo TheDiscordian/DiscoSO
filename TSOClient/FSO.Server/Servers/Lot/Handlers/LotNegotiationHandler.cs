@@ -79,5 +79,10 @@ namespace FSO.Server.Servers.Lot.Handlers
         {
             Lots.UpdateTuning(request.UpdateInstantly);
         }
+
+        public void Handle(IGluonSession session, GiftMoneyRequest request)
+        {
+            Lots.GiftMoney(request.LotId, request.AvatarId, request.Amount);
+        }
     }
 }

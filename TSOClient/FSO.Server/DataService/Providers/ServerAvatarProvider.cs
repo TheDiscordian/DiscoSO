@@ -330,7 +330,7 @@ namespace FSO.Server.DataService.Providers
                 AvatarSkills_LockLv_Mechanical = dbAvatar.lock_mechanical
             };
             result.Avatar_PrivacyMode = dbAvatar.privacy_mode;
-            result.Avatar_SkillsLockPoints = (ushort)(20 + result.Avatar_Age/7);
+            result.Avatar_SkillsLockPoints = (ushort)(20 + dbAvatar.days_played/3);
             result.Avatar_ModerationLevel = dbAvatar.moderation_level;
             result.Avatar_MayorNhood = (uint)(dbAvatar.mayor_nhood ?? 0);
 

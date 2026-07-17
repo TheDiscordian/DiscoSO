@@ -795,11 +795,12 @@ namespace FSO.SimAntics
         public int SkillGameplayMul(VM vm)
         {
             if (ForceEnableSkill || PersistID == 0 || vm.TS1) return 1;
+            int gm = (int)(vm.Tuning?.GetTuning("discoso", 0, 0) ?? 1f); if (gm < 1) gm = 1; //DiscoSO low-pop skill/money multiplier (integer)
             var mode = vm.TSOState.SkillMode;
-            if (vm.TSOState.PropertyCategory == 7 && ((VMTSOAvatarState)TSOState).Flags.HasFlag(VMTSOAvatarFlags.NewPlayer)) return 2; //welcome category: 2x for visitors under a week old
-            else if (mode == 0) return 1;
+            if (vm.TSOState.PropertyCategory == 7 && ((VMTSOAvatarState)TSOState).Flags.HasFlag(VMTSOAvatarFlags.NewPlayer)) return 2 * gm; //welcome category: 2x for visitors under a week old
+            else if (mode == 0) return gm;
             else if (mode == 1)
-                return (AvatarState.Permissions == VMTSOAvatarPermissions.Visitor) ? 0 : 1;
+                return (AvatarState.Permissions == VMTSOAvatarPermissions.Visitor) ? 0 : gm;
             else return 0;
         }
 

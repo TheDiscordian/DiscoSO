@@ -20,6 +20,7 @@
 
         TuningChanged,
         CitySendMail,
+        GiftMoneyRequest,
 
         Unknown
     }
@@ -60,6 +61,8 @@
                     return GluonPacketType.TuningChanged;
                 case 0x0015:
                     return GluonPacketType.CitySendMail;
+                case 0x0016:
+                    return GluonPacketType.GiftMoneyRequest;
                 default:
                     return GluonPacketType.Unknown;
             }
@@ -99,6 +102,8 @@
                     return 0x0014;
                 case GluonPacketType.CitySendMail:
                     return 0x0015;
+                case GluonPacketType.GiftMoneyRequest:
+                    return 0x0016;
             }
 
             return 0xFFFF;

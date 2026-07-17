@@ -50,6 +50,8 @@
         public uint? custom_guid { get; set; }
         public uint move_date { get; set; }
         public uint name_date { get; set; }
+        public uint days_played { get; set; }
+        public uint last_played_day { get; set; }
         public int? mayor_nhood { get; set; }
     }
 

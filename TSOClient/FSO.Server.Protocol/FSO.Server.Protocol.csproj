@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FSO.Server.Protocol</RootNamespace>
     <AssemblyName>FSO.Server.Protocol</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -143,6 +143,7 @@
     <Compile Include="Gluon\Model\ClaimType.cs" />
     <Compile Include="Gluon\Packets\AdvertiseCapacity.cs" />
     <Compile Include="Gluon\Packets\CityNotify.cs" />
+    <Compile Include="Gluon\Packets\GiftMoneyRequest.cs" />
     <Compile Include="Gluon\Packets\HealthPing.cs" />
     <Compile Include="Gluon\Packets\HealthPingResponse.cs" />
     <Compile Include="Gluon\Packets\IGluonCall.cs" />

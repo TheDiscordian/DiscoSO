@@ -110,6 +110,8 @@ namespace FSO.SimAntics.Entities
             UpdateCategory(context);
             int sleepState = (avatar.GetMotiveData(VMMotive.SleepState) == 0)?1:0;
 
+            float pm = context.VM.Tuning?.GetTuning("discoso",0,0) ?? 1f; if (pm < 1f) pm = 1f; //DiscoSO: skill/pet multiplier (tuning 0,0)
+            float sm = context.VM.Tuning?.GetTuning("discoso",0,1) ?? 1f; if (sm > 1f || sm <= 0f) sm = 1f; //DiscoSO: social-decay multiplier (tuning 0,1)
             int moodSum = 0;
 
             for (int i = 0; i < 7; i++) {
@@ -138,6 +140,8 @@ namespace FSO.SimAntics.Entities
                         frac = FlatSimMotives[10] + 
                             FracMul((FlatSimMotives[11] * (100+motive)), lotMul);
                         frac /= 2; //make this less harsh right now, til I can work out how multiplayer bonus is meant to work
+                        if (!avatar.IsPet && sm < 1f) frac = (int)(frac * sm); //DiscoSO: players' slower social decay
+                        if (avatar.IsPet && pm > 1f) frac = (int)(frac * pm); //DiscoSO: pets' faster social decay only
                         break;
                 }
 

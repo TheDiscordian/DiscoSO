@@ -16,7 +16,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
 
         public VMNetAvatarPersistState AvatarState;
 
-        public static ushort CurVer = 0xFFEE;
+        public static ushort CurVer = 0xFFEF;
 
         //variables used locally for deferred avatar loading
 

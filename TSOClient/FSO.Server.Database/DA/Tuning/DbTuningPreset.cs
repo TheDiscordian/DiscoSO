@@ -1,4 +1,4 @@
-﻿namespace FSO.Server.Database.DA.Tuning
+namespace FSO.Server.Database.DA.Tuning
 {
     public class DbTuningPreset
     {

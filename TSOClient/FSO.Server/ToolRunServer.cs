@@ -118,6 +118,7 @@ namespace FSO.Server
                 api.OnBroadcastMessage += BroadcastMessage;
                 api.OnRequestUserDisconnect += RequestedUserDisconnect;
                 api.OnRequestMailNotify += RequestedMailNotify;
+                api.OnGiftMoney += RequestedGiftMoney;
             }
 
             foreach (var cityServer in Config.Services.Cities)
@@ -281,6 +282,14 @@ namespace FSO.Server
         /// Disconnects a user ingame.
         /// </summary>
         /// <param name="user_id">ID of user to be disconnected.</param>
+        private void RequestedGiftMoney(uint avatarId, int amount)
+        {
+            foreach (var city in CityServers)
+            {
+                try { city.GiftMoney(avatarId, amount); } catch (Exception e) { LOG.Error(e, "gift money failed"); }
+            }
+        }
+
         private void RequestedUserDisconnect(uint user_id)
         {
             //TODO: select shard to send disconnection request
