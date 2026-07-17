@@ -141,7 +141,7 @@ namespace FSO.Server.Servers.City.Domain
             {
                 var online = Sessions.Clone().OfType<IVoltronSession>().Count(x => !x.IsAnonymous);
                 float skillMul, socialMul;
-                if (online <= 2) { skillMul = 3f; socialMul = 1f / 3f; }       //1-2 online
+                if (online <= 2) { skillMul = 2f; socialMul = 0.5f; }          //1-2 online (was 3x; pets follow this value, capped by design at 2x)
                 else if (online <= 4) { skillMul = 2f; socialMul = 0.5f; }     //3-4 online
                 else if (online <= 6) { skillMul = 1.5f; socialMul = 0.75f; }  //5-6 online
                 else { skillMul = 1f; socialMul = 1f; }                        //7+ normal
