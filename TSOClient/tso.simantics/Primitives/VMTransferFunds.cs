@@ -175,6 +175,11 @@ namespace FSO.SimAntics.Primitives
                     } else
                     {
                         amount = (int)System.Math.Round(amount * (double)skillGameplay);
+                        //DiscoSO: write the scaled amount back to transient sources (Local/Temp) so the
+                        //object's own display math sees the multiplied value. Persistent scopes excluded.
+                        var aOwner = operand.GetAmountOwner();
+                        if (aOwner == VMVariableScope.Local || aOwner == VMVariableScope.Temps)
+                            VMMemory.SetBigVariable(context, aOwner, (short)operand.AmountData, amount);
                         //HACK: this is the best hack ever. You read me? the best.
                         //For single money objects, overwrite temp 0 with our modified payout value.
                         //this is where the calculated payout is. It's read again from here later to show the money amount over head.
