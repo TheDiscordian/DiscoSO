@@ -49,7 +49,7 @@ namespace FSO.Server.Api.Core.Utils
                 try
                 {
                     MailMessage message = new MailMessage();
-                    message.From = new MailAddress(api.Config.SmtpUser, "FreeSO Staff");
+                    message.From = new MailAddress(api.Config.SmtpUser, "DiscoSO Staff");
                     message.To.Add(to);
                     message.Subject = subject;
                     message.IsBodyHtml = true;

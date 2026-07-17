@@ -361,7 +361,7 @@ namespace FSO.Server
 
                 string timeString = (remaining % 60 == 0 && remaining > 60) ? ((remaining / 60) + " minutes") : (remaining + " seconds");
                 LOG.Info("Shutdown in " + timeString);
-                BroadcastMessage("FreeSO Server", "Shutting down", "The game server will go down for maintenance in " + timeString + ".");
+                BroadcastMessage("DiscoSO Server", "Shutting down", "The game server will go down for maintenance in " + timeString + ".");
             }
 
             await Task.Delay((int)remaining * 1000);
