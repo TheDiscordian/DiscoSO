@@ -110,7 +110,7 @@ namespace FSO.SimAntics.Entities
             UpdateCategory(context);
             int sleepState = (avatar.GetMotiveData(VMMotive.SleepState) == 0)?1:0;
 
-            float pm = context.VM.Tuning?.GetTuning("discoso",0,0) ?? 1f; if (pm < 1f) pm = 1f; //DiscoSO: skill/pet multiplier (tuning 0,0)
+            float pm = context.VM.Tuning?.GetTuning("discoso",0,2) ?? 1f; if (pm < 1f) pm = 1f; //DiscoSO: pet social decay multiplier (tuning 0,2), set by the city server capped at 2x
             float sm = context.VM.Tuning?.GetTuning("discoso",0,1) ?? 1f; if (sm > 1f || sm <= 0f) sm = 1f; //DiscoSO: social-decay multiplier (tuning 0,1)
             int moodSum = 0;
 
