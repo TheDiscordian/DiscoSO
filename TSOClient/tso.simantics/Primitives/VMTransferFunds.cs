@@ -166,15 +166,15 @@ namespace FSO.SimAntics.Primitives
                 {
                     //might have to zero out the money earned
                     var destObj = context.VM.GetAvatarByPersist(target);
-                    var skillGameplay = destObj?.SkillGameplayMul(context.VM) ?? 1;
-                    if (skillGameplay == 0)
+                    var skillGameplay = destObj?.SkillGameplayMulF(context.VM) ?? 1f;
+                    if (skillGameplay <= 0f)
                     {
                         context.Thread.TempXL[0] = 0;
                         context.Thread.BlockingState = null;
                         return VMPrimitiveExitCode.GOTO_TRUE;
                     } else
                     {
-                        amount *= skillGameplay;
+                        amount = (int)System.Math.Round(amount * (double)skillGameplay);
                         //HACK: this is the best hack ever. You read me? the best.
                         //For single money objects, overwrite temp 0 with our modified payout value.
                         //this is where the calculated payout is. It's read again from here later to show the money amount over head.
@@ -189,7 +189,7 @@ namespace FSO.SimAntics.Primitives
                 {
                     //DiscoSO: double job income when the low-population bonus is active
                     var dgm = context.VM.Tuning?.GetTuning("discoso", 0, 0) ?? 1f;
-                    if (dgm > 1f) amount = (int)System.Math.Round(amount * dgm);
+                    if (dgm > 1f && dgm <= 10f) amount = (int)System.Math.Round(amount * (double)dgm);
                 }
 
                 context.Thread.BlockingState = new VMTransferFundsState();

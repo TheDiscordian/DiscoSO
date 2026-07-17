@@ -794,14 +794,22 @@ namespace FSO.SimAntics
         public bool ForceEnableSkill;
         public int SkillGameplayMul(VM vm)
         {
-            if (ForceEnableSkill || PersistID == 0 || vm.TS1) return 1;
-            int gm = (int)(vm.Tuning?.GetTuning("discoso", 0, 0) ?? 1f); if (gm < 1) gm = 1; //DiscoSO low-pop skill/money multiplier (integer)
+            //keep this int overload: FSO.Client.dll (UIHeadlineRenderer) binds to it; changing the signature crashes shipped clients
+            return (int)SkillGameplayMulF(vm);
+        }
+
+        public float SkillGameplayMulF(VM vm)
+        {
+            if (ForceEnableSkill || PersistID == 0 || vm.TS1) return 1f;
+            float gm = vm.Tuning?.GetTuning("discoso", 0, 0) ?? 1f; //DiscoSO low-pop skill/money multiplier
+            if (float.IsNaN(gm) || gm < 1f) gm = 1f;
+            else if (gm > 10f) gm = 10f;
             var mode = vm.TSOState.SkillMode;
-            if (vm.TSOState.PropertyCategory == 7 && ((VMTSOAvatarState)TSOState).Flags.HasFlag(VMTSOAvatarFlags.NewPlayer)) return 2 * gm; //welcome category: 2x for visitors under a week old
+            if (vm.TSOState.PropertyCategory == 7 && ((VMTSOAvatarState)TSOState).Flags.HasFlag(VMTSOAvatarFlags.NewPlayer)) return 2f * gm; //welcome category: 2x for visitors under a week old
             else if (mode == 0) return gm;
             else if (mode == 1)
-                return (AvatarState.Permissions == VMTSOAvatarPermissions.Visitor) ? 0 : gm;
-            else return 0;
+                return (AvatarState.Permissions == VMTSOAvatarPermissions.Visitor) ? 0f : gm;
+            else return 0f;
         }
 
         public virtual void SetMotiveChange(VMMotive motive, short PerHourChange, short MaxValue)
@@ -911,18 +919,18 @@ namespace FSO.SimAntics
                 case VMPersonDataVariable.CreativitySkill:
                 case VMPersonDataVariable.LogicSkill:
                 case VMPersonDataVariable.MechanicalSkill:
-                    int skillMul = 1;
+                    float skillMul = 1f;
                     if (Thread != null)
                     {
-                        skillMul = SkillGameplayMul(Thread.Context.VM);
+                        skillMul = SkillGameplayMulF(Thread.Context.VM);
                     }
-                    if (skillMul == 0) return true;
-                    else if (skillMul != 1)
+                    if (skillMul <= 0f) return true;
+                    else if (skillMul != 1f)
                     {
                         var delta = value - PersonData[(ushort)variable];
-                        if (delta > 0 && (skillMul != 0 || delta == 1)) //only improve gradual increases. do not affect decreases.
+                        if (delta > 0) //only improve gradual increases. do not affect decreases.
                         {
-                            delta *= skillMul;
+                            delta = (int)System.Math.Round(delta * (double)skillMul);
                             value = (short)(PersonData[(ushort)variable] + delta);
                         }
                     }
