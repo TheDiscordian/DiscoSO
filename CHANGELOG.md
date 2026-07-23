@@ -38,7 +38,6 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ### Fixed
 - Skill-object payouts now display the bonus-multiplied amount instead of the base amount.
-- The in-client auto-update path repaired end-to-end — version-mismatched clients now download and install the current client cleanly.
 
 ## DiscoSO launch 🪩 — 2026
 
