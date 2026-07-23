@@ -32,9 +32,9 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ### Added
 - A 1.5× bonus tier at 5–6 players online — bonus tiers now support fractional multipliers.
-- A custom outdoor shower, the Pre-Chlorination Station, tuned and rated for its price point. 🚿
 
 ### Changed
+- The Pre-Chlorination Station outdoor shower retuned: a sensible fill rate and a catalogue rating that matches its price. 🚿
 - Server-sent strings rebranded: DiscoSO Server broadcasts, DiscoSO Staff mail senders, and mail templates pointing at tso.thedisco.zone.
 - Shower upgrade ladders restored to stock tuning after an audit of object stats against real gameplay rates.
 
@@ -45,27 +45,18 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ## DiscoSO launch 🪩 — 2026
 
-The initial DiscoSO feature set, on top of the FreeSO engine.
+What DiscoSO changed from stock FreeSO at launch.
 
 ### Gameplay 🎮
-- **Quiet-server bonuses**: 3× / 2× / 1.5× skill and money gain when 1–2 / 3–4 / 5–6 players are online (normal at 7+), with social decay slowed to match so lone Sims stay happy.
+- **Quiet-server bonuses**: 3× / 2× / 1.5× skill and money gain when 1–2 / 3–4 / 5–6 players are online (normal at 7+), with social decay slowed to match so lone Sims stay happy. Applies on welcome lots too, stacking with their built-in double rate.
 - **Skill locks that grow with you**: total skill points cap at 20 + a third of your days played.
-- **Welcome lots pay double** for new players, stacking with the quiet-server bonus.
 - **Live simoleon gifts** 💸 — staff gifts arrive in your budget instantly, no relog needed.
-- **Community lots** — staff-maintained, always-open downtown-style lots.
-- **Curated catalogue** with seasonal items, custom objects, and per-item availability.
 
 ### Client 💿
-- Version-gated auto-update: outdated clients are prompted and updated in-client.
 - DiscoSO branding throughout.
 
 ### Launcher 🚀 (v1.0.0 – v1.0.4)
-- Full DiscoSO launcher for Windows, Linux, and Mac: installs the game and client in one flow.
-- Linux dependency handling (including Arch), self-update notifications, and the DiscoSO news feed.
-
-### Server 🛠️
-- Graceful restarts: in-game countdown announcements, and every lot saves before shutdown.
-- In-game events system, staff mail, and moderation tooling.
+- Forked from the upstream FreeSO launcher: rebranded and repointed at DiscoSO hosting and news, Linux dependency handling (including Arch), and Mac builds.
 
 ### Website 🌐
 - [tso.thedisco.zone](https://tso.thedisco.zone) — homepage, downloads, and news (which also feeds the launcher's blog panel).
