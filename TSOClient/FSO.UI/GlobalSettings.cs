@@ -1,4 +1,5 @@
 ﻿using FSO.Common;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -8,13 +9,35 @@ namespace FSO.Client
     {
         private static GlobalSettings defaultInstance;
 
+        //settings live in the user profile so client updates and reinstalls don't reset them.
+        //an existing config.ini in UserDir is migrated over once.
+        private static string SettingsPath()
+        {
+            var legacy = Path.Combine(FSOEnvironment.UserDir, "config.ini");
+            try
+            {
+                var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DiscoSO");
+                var path = Path.Combine(dir, "config.ini");
+                if (!File.Exists(path))
+                {
+                    Directory.CreateDirectory(dir);
+                    if (File.Exists(legacy)) File.Copy(legacy, path);
+                }
+                return path;
+            }
+            catch
+            {
+                return legacy;
+            }
+        }
+
         public static GlobalSettings Default
         {
             get
             {
                 if (defaultInstance == null)
                 {
-                    defaultInstance = new GlobalSettings(Path.Combine(FSOEnvironment.UserDir, "config.ini"));
+                    defaultInstance = new GlobalSettings(SettingsPath());
                     if (defaultInstance.DPIScaleFactor > 4 || defaultInstance.DPIScaleFactor == 0)
                         defaultInstance.DPIScaleFactor = 1; //sanity check
                     if (defaultInstance.ChatWindowsOpacity == 0 || defaultInstance.ChatWindowsOpacity > 1)

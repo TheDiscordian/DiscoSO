@@ -6,6 +6,7 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ### Changed
 - Smarter update check: the client now updates only when it is older than the server's version, so optional client releases no longer force everyone to re-download.
+- Client settings (graphics, audio, chat, and more) now live in your user profile (`AppData/DiscoSO` on Windows, `~/.config/DiscoSO` on Linux) and survive client updates and reinstalls. Existing settings migrate over automatically. ⚙️
 
 ## 1.0.11 — July 2026 🎨
 
