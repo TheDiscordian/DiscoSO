@@ -2,10 +2,10 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website. Game versions follow the server's version gate (shown in-game as e.g. `1.0.10-0`).
 
-## Unreleased 🚧
+## 1.0.11 — July 2026 🎨
 
 ### Added
-- **Build-mode eyedropper** 🎨 — middle-click in build mode samples the floor or wallpaper under the cursor and selects it in the catalog, ready to place. With the wallpaper category open, walls are sampled in preference to floors. Middle-drag camera rotation is unchanged. ([#1](https://github.com/TheDiscordian/DiscoSO/pull/1))
+- **Build-mode eyedropper** — middle-click in build mode samples the floor or wallpaper under the cursor and selects it in the catalog, ready to place. With the wallpaper category open, walls are sampled in preference to floors. Middle-drag camera rotation is unchanged. ([#1](https://github.com/TheDiscordian/DiscoSO/pull/1))
 
 ## 1.0.10 — July 2026 🐾
 
