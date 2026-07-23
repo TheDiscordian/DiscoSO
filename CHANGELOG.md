@@ -36,7 +36,6 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 ### Changed
 - The Pre-Chlorination Station outdoor shower retuned: a sensible fill rate and a catalogue rating that matches its ability. 🚿
 - Server-sent strings rebranded: DiscoSO Server broadcasts, DiscoSO Staff mail senders, and mail templates pointing at tso.thedisco.zone.
-- Shower upgrade ladders restored to stock tuning after an audit of object stats against real gameplay rates.
 
 ### Fixed
 - Skill-object payouts now display the bonus-multiplied amount instead of the base amount.
