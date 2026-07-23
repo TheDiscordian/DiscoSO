@@ -2,11 +2,14 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website. Game versions follow the server's version gate (shown in-game as e.g. `1.0.10-0`).
 
-## Unreleased 🚧
+## 1.0.12 — July 2026 💾
 
 ### Changed
 - Smarter update check: the client now updates only when it is older than the server's version, so optional client releases no longer force everyone to re-download.
 - Client settings (graphics, audio, chat, and more) now live in your user profile (`AppData/DiscoSO` on Windows, `~/.config/DiscoSO` on Linux) and survive client updates and reinstalls. Existing settings migrate over automatically. ⚙️
+
+### Fixed
+- Top-100 property bonuses now pay only for days the lot actually opened — days where nobody visited the property at all no longer pay out. 🏠
 
 ## 1.0.11 — July 2026 🎨
 
