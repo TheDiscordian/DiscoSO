@@ -142,14 +142,38 @@ namespace FSO.Client.Regulators
 
             var str = GlobalSettings.Default.ClientVersion;
             var authstr = auth.FSOBranch + "-" + auth.FSOVersion;
+            if (str == authstr) return false;
 
-            return str != authstr;
+            //the server's version is a minimum: only update when the client is older.
+            //non-numeric branches (e.g. "beta") fall back to exact match.
+            var client = ParseVersion(str);
+            var server = ParseVersion(authstr);
+            if (client == null || server == null) return true;
 
-            /*
-            var split = str.LastIndexOf('-');
-            int verNum = 0;
-            int.TryParse(split.)
-            */
+            int len = (client.Length > server.Length) ? client.Length : server.Length;
+            for (int i = 0; i < len; i++)
+            {
+                int c = (i < client.Length) ? client[i] : 0;
+                int s = (i < server.Length) ? server[i] : 0;
+                if (c != s) return c < s;
+            }
+            return false;
+        }
+
+        private static int[] ParseVersion(string version)
+        {
+            var split = version.LastIndexOf('-');
+            if (split == -1) return null;
+            int update;
+            if (!int.TryParse(version.Substring(split + 1), out update)) return null;
+            var parts = version.Substring(0, split).Split('.');
+            var result = new int[parts.Length + 1];
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (!int.TryParse(parts[i], out result[i])) return null;
+            }
+            result[parts.Length] = update;
+            return result;
         }
 
         protected override void OnBeforeTransition(RegulatorState oldState, RegulatorState newState, object data)
