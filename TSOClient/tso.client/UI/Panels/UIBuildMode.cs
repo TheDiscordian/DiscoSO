@@ -1,10 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using FSO.Common.Rendering.Framework.Model;
 using FSO.Client.UI.Controls;
 using FSO.Client.UI.Controls.Catalog;
 using FSO.Client.UI.Framework;
+using FSO.Client.UI.Model;
+using FSO.HIT;
 using FSO.SimAntics.Model.TSOPlatform;
 
 namespace FSO.Client.UI.Panels
@@ -42,6 +47,9 @@ namespace FSO.Client.UI.Panels
         private UIButton RoofShallowBtn;
         private uint TicksSinceRoof = 0;
         private bool SendRoofValue = false;
+
+        private bool MiddleWasDown;
+        private Point MiddleDownAt;
 
         public UIBuildMode(UILotControl lotController) : base("buildpanel", lotController)
         {
@@ -220,7 +228,77 @@ namespace FSO.Client.UI.Panels
                 SendRoofValue = false;
                 TicksSinceRoof = 0;
             }
+            UpdateEyedropper(state);
             base.Update(state);
+        }
+
+        private void UpdateEyedropper(UpdateState state)
+        {
+            if (state.TouchMode) return;
+            var middle = state.MouseState.MiddleButton == ButtonState.Pressed;
+            if (middle && !MiddleWasDown) MiddleDownAt = state.MouseState.Position;
+            if (!middle && MiddleWasDown && LotController.MouseIsOn)
+            {
+                //only a stationary click samples - middle drag is camera rotation
+                var moved = state.MouseState.Position - MiddleDownAt;
+                if (Math.Abs(moved.X) + Math.Abs(moved.Y) < 8) Eyedrop(state);
+            }
+            MiddleWasDown = middle;
+        }
+
+        private void Eyedrop(UpdateState state)
+        {
+            var arch = LotController.vm.Context.Architecture;
+            var world = LotController.World;
+            var tilePos = world.EstTileAtPosWithScroll(LotController.GetScaledPoint(state.MouseState.Position).ToVector2());
+            if (tilePos.X < 0 || tilePos.Y < 0 || tilePos.X >= arch.Width || tilePos.Y >= arch.Height) return;
+            short x = (short)tilePos.X, y = (short)tilePos.Y;
+            var level = world.State.Level;
+
+            var floorPat = arch.GetFloor(x, y, level).Pattern;
+            var wall = arch.GetWall(x, y, level);
+            var wallPat = wall.TopLeftPattern;
+            if (wallPat == 0) wallPat = wall.TopRightPattern;
+            if (wallPat == 0) wallPat = wall.BottomLeftPattern;
+            if (wallPat == 0) wallPat = wall.BottomRightPattern;
+
+            //wallpaper category prefers sampling walls, everything else prefers floors
+            ushort pattern; int category;
+            if (floorPat != 0 && !(CurrentCategory == UICatalog.Catalog[8] && wallPat != 0))
+            {
+                pattern = floorPat;
+                category = (floorPat >= 65534) ? 5 : 9;
+            }
+            else
+            {
+                pattern = wallPat;
+                category = 8;
+            }
+
+            if (pattern == 0 || !SelectCatalogItem(category, pattern))
+                HITVM.Get().PlaySoundEvent(UISounds.Error);
+        }
+
+        private bool SelectCatalogItem(int category, ulong resID)
+        {
+            var target = UICatalog.Catalog[category];
+            if (CurrentCategory != target)
+            {
+                var button = CategoryMap.FirstOrDefault(e => e.Value == category).Key;
+                if (button == null) return false;
+                ChangeCategory(button);
+            }
+            var index = Catalog.Filtered.FindIndex(e => e.Special != null && e.Special.ResID == resID);
+            if (index == -1 && Catalog.Filtered != Catalog.Selected)
+            {
+                Catalog.SetSearchTerm("");
+                index = Catalog.Filtered.FindIndex(e => e.Special != null && e.Special.ResID == resID);
+            }
+            if (index == -1) return false;
+            SetPage(index / Catalog.PageSize);
+            Catalog_OnSelectionChange(index);
+            HITVM.Get().PlaySoundEvent(UISounds.Click);
+            return true;
         }
     }
 }
