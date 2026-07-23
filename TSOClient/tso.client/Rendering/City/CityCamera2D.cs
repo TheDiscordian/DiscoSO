@@ -369,9 +369,11 @@ namespace FSO.Client.Rendering.City
                         m_MouseState.X - m_MouseStart.X) / Math.PI) * 4) + 4;
                     ChangeCursor(dir);*/
                 }
-                else if (GlobalSettings.Default.EdgeScroll && state.ProcessMouseEvents) //edge scroll check - do this even if mouse events are blocked
+                else if (GlobalSettings.Default.EdgeScroll && state.ProcessMouseEvents && city.HandleMouse) //edge scroll check - only while the mouse is over the city, not UI
                 {
-                    if (m_MouseState.X > screen.ScreenWidth - 32)
+                    //mouse coords are raw window pixels - compare against the live viewport, not the logical UI size
+                    var vp = GameFacade.GraphicsDevice.Viewport;
+                    if (m_MouseState.X > vp.Width - 32)
                     {
                         Triggered = true;
                         m_TargVOffX += m_ScrollSpeed * rScale;
@@ -383,7 +385,7 @@ namespace FSO.Client.Rendering.City
                         m_TargVOffX -= m_ScrollSpeed * rScale;
                         CursorManager.INSTANCE.SetCursor(CursorType.ArrowLeft);
                     }
-                    if (m_MouseState.Y > screen.ScreenHeight - 32)
+                    if (m_MouseState.Y > vp.Height - 32)
                     {
                         Triggered = true;
                         m_TargVOffY -= m_ScrollSpeed * rScale;

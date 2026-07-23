@@ -113,6 +113,7 @@ namespace FSO.Client.Rendering.City
         private DateTime LastCityUpdate = DateTime.Now;
 
         private MouseState m_MouseState, m_LastMouseState;
+        private bool m_MouseDownOverCity;
         private int m_ScrHeight, m_ScrWidth;
         private Vector2 LastTargOff;
         public float m_ZoomProgress
@@ -1197,19 +1198,25 @@ namespace FSO.Client.Rendering.City
                     if (m_MouseState.RightButton == ButtonState.Pressed && m_LastMouseState.RightButton == ButtonState.Released)
                     {
                     }
-                    else if (m_MouseState.LeftButton == ButtonState.Released && m_LastMouseState.LeftButton == ButtonState.Pressed && !(Camera is ITouchable)) //if clicked...
+                    else if (m_MouseState.LeftButton == ButtonState.Released && m_LastMouseState.LeftButton == ButtonState.Pressed && m_MouseDownOverCity && !(Camera is ITouchable)) //if clicked...
                     {
                         Click(m_MouseState.Position, state);
                     }
 
-                    if (m_VecSelTile != null && m_MouseState.LeftButton == ButtonState.Pressed && m_LastMouseState.LeftButton == ButtonState.Released) //if mousedown...
-                        Plugin?.TileMouseDown(m_VecSelTile.Value);
+                    if (m_MouseState.LeftButton == ButtonState.Pressed && m_LastMouseState.LeftButton == ButtonState.Released) //if mousedown...
+                    {
+                        m_MouseDownOverCity = true; //clicks only count if the press also began over the city, not UI
+                        if (m_VecSelTile != null) Plugin?.TileMouseDown(m_VecSelTile.Value);
+                    }
                 }
                 else
                 {
                     m_SelTile = new int[] { -1, -1 };
                     m_VecSelTile = null;
                 }
+
+                if (m_MouseState.LeftButton == ButtonState.Released && m_LastMouseState.LeftButton == ButtonState.Pressed)
+                    m_MouseDownOverCity = false;
 
                 FixedTimeUpdate(state);
 
