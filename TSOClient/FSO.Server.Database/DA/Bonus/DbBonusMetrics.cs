@@ -10,5 +10,6 @@ namespace FSO.Server.Database.DA.Bonus
         public int? visitor_minutes { get; set; }
         public byte? property_rank { get; set; }
         public byte? sim_rank { get; set; }
+        public long lot_active { get; set; }
     }
 }

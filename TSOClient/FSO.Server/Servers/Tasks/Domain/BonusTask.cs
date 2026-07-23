@@ -107,7 +107,8 @@ namespace FSO.Server.Servers.Tasks.Domain
                         bonus_visitor = (int)(Math.Floor((double)x.visitor_minutes / (double)60) * tuning.visitor_bonus.per_unit * multiplier);
                     }
 
-                    if(x.property_rank != null){
+                    //only pay the property bonus for days the lot actually hosted a visit (any type)
+                    if(x.property_rank != null && x.lot_active != 0){
                         bonus_property = (100 - x.property_rank.Value + 1) * tuning.property_bonus.per_unit;
 
                         if(tuning.property_bonus.overrides != null &&
@@ -124,7 +125,7 @@ namespace FSO.Server.Servers.Tasks.Domain
                         bonus_visitor = bonus_visitor,
                         bonus_sim = bonus_sim
                     };
-                }));
+                }).Where(x => x.bonus_property != null || x.bonus_visitor != null || x.bonus_sim != null));
             }
         }
 

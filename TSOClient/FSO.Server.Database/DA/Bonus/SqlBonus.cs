@@ -25,6 +25,9 @@ namespace FSO.Server.Database.DA.Bonus
                            l.category,
 			             (SELECT lvt.minutes from fso_lot_visit_totals lvt where lvt.lot_id = r.lot_id AND lvt.date = CAST(@p_date as DATE)) as visitor_minutes,
 			             (SELECT rank from fso_lot_top_100 lt100 WHERE lt100.lot_id = r.lot_id) as property_rank,
+			             (EXISTS (SELECT 1 FROM fso_lot_visits lv WHERE lv.lot_id = r.lot_id
+			                AND lv.time_created < DATE_ADD(CAST(@p_date as DATE), INTERVAL 1 DAY)
+			                AND (lv.time_closed IS NULL OR lv.time_closed > CAST(@p_date as DATE)))) as lot_active,
 			             NULL as sim_rank
 		            FROM fso_avatars a
 			            LEFT JOIN fso_roommates r ON r.avatar_id = a.avatar_id
