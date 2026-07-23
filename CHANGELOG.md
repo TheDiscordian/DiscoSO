@@ -6,6 +6,7 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ### Fixed
 - City screen: edge scrolling no longer fires while the mouse is over a UI window, and clicks that start on a UI element (e.g. dragging a window aside) no longer fall through to the city and zoom into a lot. 🖱️
+- City screen: the bottom and right edge-scroll zones now sit at the actual screen edges — they previously covered a large part of the screen at higher resolutions. 📐
 
 ## 1.0.12 — July 2026 💾
 
