@@ -26,7 +26,6 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ### Changed
 - Pet social decay is now tuned separately from the quiet-server bonus, so pets want attention at a sensible rate no matter how the player bonuses shift: 2× decay when 1–2 players are online, 2× at 3–4, and 1.5× at 5–6.
-- The 1–2 players online bonus tier is restored to 3× skill and money gain.
 
 ## 1.0.5 – 1.0.9 — July 2026 🔧
 
