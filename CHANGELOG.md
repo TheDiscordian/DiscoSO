@@ -2,7 +2,7 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website. Game versions follow the server's version gate (shown in-game as e.g. `1.0.10-0`).
 
-## Unreleased 🚧
+## 1.0.13 — July 2026 🖱️
 
 ### Fixed
 - City screen: edge scrolling no longer fires while the mouse is over a UI window, and clicks that start on a UI element (e.g. dragging a window aside) no longer fall through to the city and zoom into a lot. 🖱️
