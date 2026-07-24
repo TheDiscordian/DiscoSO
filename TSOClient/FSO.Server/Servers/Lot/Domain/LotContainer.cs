@@ -783,6 +783,25 @@ namespace FSO.Server.Servers.Lot.Domain
             VMLotTerrainRestoreTools.EnsureCoreObjects(Lot, restoreType);
             if (isNew) VMLotTerrainRestoreTools.PopulateBlankTerrain(Lot);
 
+            //reflect outstanding bills in the mailbox ("Number of Bills Inside") before clients join
+            if (!JobLot && !isCommunity)
+            {
+                try
+                {
+                    int billCount;
+                    using (var db = DAFactory.Get())
+                    {
+                        billCount = db.LotBills.GetOutstanding(Context.DbId).Count;
+                    }
+                    var mailbox = Lot.Entities.FirstOrDefault(x => x.Object.OBJ.GUID == 0x39CCF441 || x.Object.OBJ.GUID == 0xEF121974 || x.Object.OBJ.GUID == 0x729C4842);
+                    mailbox?.MultitileGroup.BaseObject?.SetAttribute(1, (short)Math.Min(short.MaxValue, billCount));
+                }
+                catch (Exception e)
+                {
+                    LOG.Warn(e, "failed to set mailbox bill count for lot " + Context.DbId);
+                }
+            }
+
             ResyncTime();
 
             if (Lot.Tuning == null || (Lot.Tuning.GetTuning("forcedTuning", 0, 0) ?? 0f) == 0f)
@@ -923,13 +942,25 @@ namespace FSO.Server.Servers.Lot.Domain
                 SimAntics.Primitives.VMFindLocationFor.FindLocationFor(bulletin, mailbox, Lot.Context, VMPlaceRequestFlags.UserPlacement);
             }
 
-            //stalls start open on community lots
-            foreach (var ent in Lot.Entities)
+            //stalls start open on community lots - run the cart's own open tree (DiscoSO piff tree 4210,
+            //"Manage/Open" without the ownership gate; checks "Is open?" itself so it no-ops on open stalls)
+            var stallGroups = Lot.Entities.Where(x => IsStall(x)).Select(x => x.MultitileGroup).Where(x => x != null).Distinct().ToList();
+            foreach (var group in stallGroups)
             {
-                if (ent.MultitileGroup?.BaseObject == ent && IsStall(ent) && ent.GetAttribute(1) == 0)
+                var ent = group.Objects.FirstOrDefault(o => o.TreeTable?.InteractionByIndex?.Values.Any(i => i.ActionFunction == 4102) == true);
+                if (ent == null) continue; //not an openable cart (e.g. the cheap counter)
+                var tree = ent.GetRoutineWithOwner(4210, Lot.Context);
+                if (tree == null) continue; //foodcounter.piff not installed
+                var frame = new VMStackFrame
                 {
-                    ent.SetAttribute(1, 1); //attribute 1 = "Is open?"
-                }
+                    Caller = ent,
+                    Callee = ent,
+                    CodeOwner = tree.owner,
+                    Routine = tree.routine,
+                    StackObject = ent,
+                    Args = new short[4]
+                };
+                VMThread.EvaluateCheck(Lot.Context, ent, frame);
             }
         }
 
@@ -1051,7 +1082,7 @@ namespace FSO.Server.Servers.Lot.Domain
                             foreach (var group in groups)
                             {
                                 if (group.Objects.Any(o => o.GetValue(VMStackObjectVariable.LightingContribution) > 0)) litLamps++;
-                                if (IsStall(group.BaseObject) && group.BaseObject.GetAttribute(1) > 0) openStalls++; //attribute 1 = "Is open?"
+                                if (IsStall(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(1) > 0)) openStalls++; //"Is open?" lives on the control segment, not the base tile
                             }
                             if (litLamps > 0 || openStalls > 0)
                             {

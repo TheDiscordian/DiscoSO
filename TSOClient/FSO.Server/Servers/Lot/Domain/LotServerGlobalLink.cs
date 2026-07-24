@@ -127,6 +127,41 @@ namespace FSO.Server.Servers.Lot.Domain
             });
         }
 
+        public void PayLotBills(VM vm, uint payerId)
+        {
+            var ava = vm.GetAvatarByPersist(payerId);
+            if (ava == null || ((VMTSOAvatarState)ava.TSOState).Permissions < VMTSOAvatarPermissions.Roommate) return;
+            Host.InBackground(() =>
+            {
+                using (var db = DAFactory.Get())
+                {
+                    var outstanding = db.LotBills.GetOutstanding(Context.DbId);
+                    if (outstanding.Count == 0) return;
+                    var total = outstanding.Sum(x => (long)x.amount);
+                    var payer = db.Avatars.Get(payerId);
+                    if (payer == null || total <= 0 || total > payer.budget) return;
+                    var today = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
+                    var ids = outstanding.Select(x => x.bill_id).ToList();
+                    //settling runs inside the money transaction, so payment and clearing are atomic
+                    var result = db.Avatars.Transaction(payerId, uint.MaxValue, (int)total, 108,
+                        () => db.LotBills.MarkPaid(ids, payerId, today) > 0);
+                    if (result != null && result.success)
+                    {
+                        vm.SendCommand(new VMNetAsyncResponseCmd(0, new VMTransferFundsState
+                        {
+                            Responded = true,
+                            Success = true,
+                            TransferAmount = (int)total,
+                            UID1 = payerId,
+                            Budget1 = (uint)result.source_budget,
+                            UID2 = uint.MaxValue,
+                            Budget2 = 0
+                        }));
+                    }
+                }
+            });
+        }
+
         public void RequestRoommate(VM vm, uint avatarID, int mode, byte permissions)
         {
             //0 = initiate. 1 = accept. 2 = reject.
