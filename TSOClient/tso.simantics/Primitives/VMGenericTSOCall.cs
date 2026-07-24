@@ -469,6 +469,11 @@ namespace FSO.SimAntics.Primitives
                         var gobj = context.StackObject as VMGameObject;
                         return (gobj != null && !gobj.Disabled.HasFlag(VMGameObjectDisableFlags.LotCategoryWrong)) ? VMPrimitiveExitCode.GOTO_TRUE : VMPrimitiveExitCode.GOTO_FALSE;
                     }
+                case VMGenericTSOCallMode.DiscoSOPayBills: //200
+                    //server pays all outstanding property bills for this lot (roommates only);
+                    //the budget change syncs back through the normal transaction response
+                    context.VM.GlobalLink?.PayLotBills(context.VM, context.Caller.PersistID);
+                    return VMPrimitiveExitCode.GOTO_TRUE;
                 default:
                     return VMPrimitiveExitCode.GOTO_TRUE;
             }

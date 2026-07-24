@@ -73,6 +73,11 @@ namespace FSO.SimAntics.Engine.TSOTransaction
             return true;
         }
 
+        public void PayLotBills(VM vm, uint payerId)
+        {
+            //server-only behaviour; no client-side prediction needed
+        }
+
         public void PerformTransaction(VM vm, bool testOnly, uint uid1, uint uid2, int amount, short type, VMAsyncTransactionCallback callback)
         {
             PerformTransaction(vm, testOnly, uid1, uid2, amount, type, 0, callback);

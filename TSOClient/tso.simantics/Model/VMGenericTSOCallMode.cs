@@ -84,6 +84,9 @@
         FSOIsStackObjectTradable = 138,
         FSOSetStackObjectTransient = 139,
         FSOIsStackObjectPendingRoommateDeletion = 140,
-        FSOIsStackObjectAllowedByLotCategory = 141
+        FSOIsStackObjectAllowedByLotCategory = 141,
+
+        //DiscoSO functions
+        DiscoSOPayBills = 200
     }
 }
