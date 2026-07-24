@@ -2,6 +2,7 @@
 using System.IO;
 using FSO.LotView.Model;
 using FSO.SimAntics.Model.TSOPlatform;
+using FSO.SimAntics.Primitives;
 using FSO.SimAntics.Entities;
 using FSO.SimAntics.Model;
 using FSO.SimAntics.Model.Platform;
@@ -71,6 +72,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
             else if (vm.GlobalLink != null && item != null)
             {
                 vm.GlobalLink.PerformTransaction(vm, false, uint.MaxValue, caller.PersistID, (int)value,
+                (short)VMTransferFundsExpenseType.ExpenseObjectPurchase,
                 (bool success, int transferAmount, uint uid1, uint budget1, uint uid2, uint budget2) =>
                 {
                     //check if we got the money back? there's really no reason for that to fail
@@ -169,6 +171,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
 
             //perform the transaction. If it succeeds, requeue the command
             vm.GlobalLink.PerformTransaction(vm, false, caller?.PersistID ?? uint.MaxValue, uint.MaxValue, value,
+                (short)VMTransferFundsExpenseType.ExpenseObjectPurchase,
                 (bool success, int transferAmount, uint uid1, uint budget1, uint uid2, uint budget2) =>
                 {
                     if (success)

@@ -385,7 +385,14 @@ namespace FSO.SimAntics.Primitives
         ExpenseSodaMachineRefill = 69,
         IncomePinballPlayers = 70,
         ExpensePinball = 71,
-        ExpenseFridgeRefill = 72
+        ExpenseFridgeRefill = 72,
+
+        //DiscoSO ledger codes
+        ExpenseObjectPurchase = 100,
+        IncomeObjectSellback = 101,
+        ExpenseArchitecture = 102,
+        ExpenseObjectUpgrade = 103,
+        ExpenseLotExpansion = 104
     }
     
 

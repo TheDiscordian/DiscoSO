@@ -313,7 +313,12 @@ namespace FSO.Client.UI.Panels
                 case 67: case 68: case 69: return "Soda machine";
                 case 70: case 71: return "Pinball";
                 case 72: return "Fridge restocking";
-                case 102: return "Building"; //DiscoSO code: build-mode architecture costs
+                //DiscoSO ledger codes
+                case 100: return "Purchases";
+                case 101: return "Sell-backs";
+                case 102: return "Building";
+                case 103: return "Upgrades";
+                case 104: return "Lot expansion";
                 default: return "Other";
             }
         }
