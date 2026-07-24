@@ -1088,9 +1088,9 @@ namespace FSO.Server.Servers.Lot.Domain
                         return;
                     }
 
-                    //usage metering: sample once per in-game hour (60 real seconds).
-                    //each sample adds 1 game hour per lit lamp and per open stall.
-                    if (!JobLot && ++UsageSampleTicker >= TICKRATE * 60)
+                    //usage metering: sample once per in-game hour (TicksPerMinute x 60 ticks - 5 real
+                    //minutes on TSO lots). each sample adds 1 game hour per lit lamp and per open stall.
+                    if (!JobLot && ++UsageSampleTicker >= Lot.Context.Clock.TicksPerMinute * 60)
                     {
                         UsageSampleTicker = 0;
                         try
