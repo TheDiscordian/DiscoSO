@@ -581,7 +581,7 @@ namespace FSO.Client.UI.Panels
                     break;
                 case 2:
                     foreach (var evt in Data.Events)
-                        lines.Add(evt.Title + " - " + epoch.AddSeconds(evt.StartTime).ToString("MMM d"));
+                        lines.Add(evt.Title + " - " + epoch.AddSeconds(evt.StartTime).ToString("MMM d h:mmtt"));
                     break;
             }
             return lines;

@@ -231,12 +231,12 @@ namespace FSO.Server.Servers.City.Handlers
                     Type = x.permissions_level
                 }).ToList();
 
-                var events = da.Events.GetRecentAndUpcoming(DateTime.UtcNow.AddDays(-30), 20).Select(x => new LotLogEvent
+                var events = da.LotEvents.GetRecent(lot.lot_id, 30).Select(x => new LotLogEvent
                 {
-                    Title = x.title ?? "",
-                    Description = x.description ?? "",
-                    StartTime = (uint)(x.start_day - epoch).TotalSeconds,
-                    EndTime = (uint)(x.end_day - epoch).TotalSeconds
+                    Title = FormatLotEvent(x),
+                    Description = "",
+                    StartTime = (uint)(x.time - epoch).TotalSeconds,
+                    EndTime = (uint)(x.time - epoch).TotalSeconds
                 }).ToList();
 
                 return new cTSONetMessageStandard()
@@ -252,6 +252,32 @@ namespace FSO.Server.Servers.City.Handlers
                         Events = events
                     }
                 };
+            }
+        }
+
+        private static string FormatLotEvent(FSO.Server.Database.DA.LotEvents.DbLotEvent evt)
+        {
+            var actor = evt.actor_name ?? "A roommate";
+            var target = evt.target_name ?? "someone";
+            switch (evt.type)
+            {
+                case FSO.Server.Database.DA.LotEvents.DbLotEventType.admit_add: return actor + " admitted " + target;
+                case FSO.Server.Database.DA.LotEvents.DbLotEventType.admit_remove: return actor + " un-admitted " + target;
+                case FSO.Server.Database.DA.LotEvents.DbLotEventType.ban_add: return actor + " banned " + target;
+                case FSO.Server.Database.DA.LotEvents.DbLotEventType.ban_remove: return actor + " unbanned " + target;
+                case FSO.Server.Database.DA.LotEvents.DbLotEventType.admit_mode:
+                    switch (evt.value)
+                    {
+                        case 0: return actor + " opened the lot to everyone";
+                        case 1: return actor + " set admit list only";
+                        case 2: return actor + " set ban list mode";
+                        default: return actor + " closed the lot";
+                    }
+                case FSO.Server.Database.DA.LotEvents.DbLotEventType.lot_expanded: return actor + " expanded the lot ($" + evt.value + ")";
+                case FSO.Server.Database.DA.LotEvents.DbLotEventType.category: return actor + " changed the category to " + ((FSO.Common.Enum.LotCategory)evt.value).ToString();
+                case FSO.Server.Database.DA.LotEvents.DbLotEventType.renamed: return actor + " renamed the lot to " + (evt.data ?? "?");
+                case FSO.Server.Database.DA.LotEvents.DbLotEventType.description: return actor + " updated the description";
+                default: return actor + " did something";
             }
         }
 

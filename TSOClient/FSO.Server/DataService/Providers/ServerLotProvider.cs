@@ -3,6 +3,7 @@ using FSO.Common.DataService.Model;
 using FSO.Common.Domain.Realestate;
 using FSO.Common.Domain.RealestateDomain;
 using FSO.Server.Database.DA;
+using FSO.Server.Database.DA.LotEvents;
 using FSO.Server.Database.DA.Lots;
 using Ninject;
 using System;
@@ -278,6 +279,7 @@ namespace FSO.Server.DataService.Providers
                     var desc = value as string;
                     if (desc != null && desc.Length > 500)
                         throw new Exception("Description too long!");
+                    LogLotEvent(lot, context, DbLotEventType.description);
                     break;
 
                 case "Lot_Name":
@@ -288,6 +290,7 @@ namespace FSO.Server.DataService.Providers
                     //Lot_Name is a special case, it has to be unique so we have to hit the db in the security check
                     //for this mutation.
                     TryChangeLotName(lot, (string)value);
+                    LogLotEvent(lot, context, DbLotEventType.renamed, null, 0, (string)value);
                     break;
 
                 case "Lot_Category":
@@ -303,6 +306,7 @@ namespace FSO.Server.DataService.Providers
                     if (((Epoch.Now - lot.Lot_LastCatChange) / (60 * 60)) < 168){
                         throw new SecurityException("You must wait 7 days to change your lot category again");
                     }
+                    LogLotEvent(lot, context, DbLotEventType.category, null, (int)(byte)value);
                     break;
 
                 case "Lot_SkillGamemode":
@@ -344,6 +348,7 @@ namespace FSO.Server.DataService.Providers
                                     avatar_id = removedAva,
                                     admit_type = (byte)atype
                                 });
+                                LogLotEvent(lot, context, (atype == 0) ? DbLotEventType.admit_remove : DbLotEventType.ban_remove, removedAva);
                                 break;
                             case MutationType.ARRAY_SET_ITEM:
                                 //Add a new bookmark
@@ -354,6 +359,7 @@ namespace FSO.Server.DataService.Providers
                                     avatar_id = newAva,
                                     admit_type = (byte)atype
                                 });
+                                LogLotEvent(lot, context, (atype == 0) ? DbLotEventType.admit_add : DbLotEventType.ban_add, newAva);
                                 break;
                         }
                     }
@@ -364,10 +370,33 @@ namespace FSO.Server.DataService.Providers
                     var mode = (byte)value;
                     if (mode < 0 || mode > 3) 
                         throw new Exception("Invalid admit mode!");
+                    LogLotEvent(lot, context, DbLotEventType.admit_mode, null, mode);
                     break;
                 default:
                     throw new SecurityException("Field: " + path + " may not be mutated by users");
             }
+        }
+
+
+        private void LogLotEvent(Lot lot, ISecurityContext context, DbLotEventType type, uint? target = null, int value = 0, string data = null)
+        {
+            try
+            {
+                var actor = (context as FSO.Server.Framework.Voltron.IVoltronSession)?.AvatarId;
+                using (var db = DAFactory.Get())
+                {
+                    db.LotEvents.Create(new DbLotEvent
+                    {
+                        lot_id = (int)lot.DbId,
+                        avatar_id = actor,
+                        target_avatar_id = target,
+                        type = type,
+                        value = value,
+                        data = data
+                    });
+                }
+            }
+            catch { } //the log must never break the mutation itself
         }
 
         private void TryChangeLotName(Lot lot, string name)
