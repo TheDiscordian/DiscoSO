@@ -1011,8 +1011,28 @@ namespace FSO.Server.Servers.Lot.Domain
                     Args = new short[4]
                 };
                 var result = VMThread.EvaluateCheck(Lot.Context, ent, frame);
+
+                //4210's is-open guard skips vendor creation when the load tree already opened the
+                //cart, so run the cart's own vendor tree (4149) too - it reuses an existing vendor
+                VMPrimitiveExitCode? vendorResult = null;
+                var vendorTree = ent.GetRoutineWithOwner(4149, Lot.Context);
+                if (vendorTree != null)
+                {
+                    var vframe = new VMStackFrame
+                    {
+                        Caller = ent,
+                        Callee = ent,
+                        CodeOwner = vendorTree.owner,
+                        Routine = vendorTree.routine,
+                        StackObject = ent,
+                        Args = new short[4]
+                    };
+                    vendorResult = VMThread.EvaluateCheck(Lot.Context, ent, vframe);
+                }
+
                 LOG.Info("community stall auto-open on lot " + Context.DbId + ": " + ((ent as VMGameObject)?.Object?.OBJ?.ChunkLabel ?? "?")
-                    + " -> " + result + ", open=[" + string.Join(",", group.Objects.Select(o => o.GetAttribute(1)))
+                    + " -> " + result + ", vendor -> " + (vendorResult?.ToString() ?? "NO_TREE")
+                    + ", open=[" + string.Join(",", group.Objects.Select(o => o.GetAttribute(1)))
                     + "] stock=[" + string.Join(",", group.Objects.Select(o => o.GetAttribute(3))) + "]");
             }
         }
