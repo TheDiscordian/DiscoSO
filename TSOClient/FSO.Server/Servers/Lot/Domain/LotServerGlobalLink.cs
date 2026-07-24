@@ -72,6 +72,21 @@ namespace FSO.Server.Servers.Lot.Domain
                     var result = (testOnly)?db.Avatars.TestTransaction(uid1, uid2, amount, 0):db.Avatars.Transaction(uid1, uid2, amount, type);
                     if (result == null) result = new Database.DA.Avatars.DbTransactionResult() { success = false };
 
+                    if (!testOnly && result.success && type == (short)VMTransferFundsExpenseType.ExpenseLotExpansion)
+                    {
+                        try
+                        {
+                            db.LotEvents.Create(new Database.DA.LotEvents.DbLotEvent
+                            {
+                                lot_id = Context.DbId,
+                                avatar_id = uid1,
+                                type = Database.DA.LotEvents.DbLotEventType.lot_expanded,
+                                value = amount
+                            });
+                        }
+                        catch { }
+                    }
+
                     var finalAmount = amount;
 
                     //update client side budgets for avatars involved.

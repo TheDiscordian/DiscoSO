@@ -272,6 +272,19 @@ namespace FSO.Server.Database.DA
             }
         }
 
+        private FSO.Server.Database.DA.LotEvents.ILotEvents _LotEvents;
+        public FSO.Server.Database.DA.LotEvents.ILotEvents LotEvents
+        {
+            get
+            {
+                if (_LotEvents == null)
+                {
+                    _LotEvents = new FSO.Server.Database.DA.LotEvents.SqlLotEvents(Context);
+                }
+                return _LotEvents;
+            }
+        }
+
         private ILotTop100 _LotTop100;
         public ILotTop100 LotTop100
         {

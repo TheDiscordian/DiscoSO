@@ -53,6 +53,7 @@ namespace FSO.Server.Database.DA
         IBookmarks Bookmarks { get; }
         IOutfits Outfits { get; }
         ILotVisits LotVisits { get; }
+        FSO.Server.Database.DA.LotEvents.ILotEvents LotEvents { get; }
         ILotVisitTotals LotVisitTotals { get; }
         ILotTop100 LotTop100 { get; }
         IBonus Bonus { get; }
