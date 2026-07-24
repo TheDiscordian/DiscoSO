@@ -1,6 +1,6 @@
 # DiscoSO 🪩
 
-The game engine behind **[DiscoSO](https://tso.thedisco.zone)** — a free, community-run revival of *The Sims Online*. Our city, Starlight Crater, is always online.
+The game engine behind **[DiscoSO](https://tso.thedisco.zone)** — a free, community-run revival of *The Sims Online*. Our city, Starlight City, is always online.
 
 👉 **To play:** create a free account at [tso.thedisco.zone](https://tso.thedisco.zone) and grab the [DiscoSO Launcher](https://github.com/TheDiscordian/discoso-launcher) — it downloads everything for you and connects you straight to the server. 🏡
 
