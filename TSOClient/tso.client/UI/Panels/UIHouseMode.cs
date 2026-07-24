@@ -90,6 +90,11 @@ namespace FSO.Client.UI.Panels
 
             CurrentPanel = -1;
             LotControl = lotController;
+
+            //bills entry points grey out while the discoso_bills rates are zero (tuning syncs to the lot VM)
+            var billsTuning = LotControl?.vm?.Tuning;
+            BillsButton.Disabled = !(((billsTuning?.GetTuning("discoso_bills", 0, 0) ?? 0) > 0)
+                || ((billsTuning?.GetTuning("discoso_bills", 0, 1) ?? 0) > 0));
         }
 
         private void SetMode(Framework.UIElement button)

@@ -116,6 +116,7 @@ namespace FSO.Client.UI.Panels
             ExpensesTabButton.OnButtonClick += b => SelectTab(4);
 
             ExpensesTabButton.Disabled = false; //EA's script ships it disabled
+            DebtTabButton.Disabled = true; //enabled when the server reports a nonzero bills rate
 
             CloseButton.OnButtonClick += b => FindController<BudgetController>()?.Close();
 
@@ -135,6 +136,7 @@ namespace FSO.Client.UI.Panels
         public void SetData(GetAvatarBudgetResponse data)
         {
             Data = data;
+            DebtTabButton.Disabled = !data.BillsEnabled;
             SetTabValues();
             RefreshList();
         }
