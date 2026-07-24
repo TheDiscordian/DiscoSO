@@ -2,11 +2,14 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased
+## 1.0.17 — July 2026 🔄
 
 ### Changed
 - New Sims now start with $150. 💵
 - The Budget Window now refreshes itself while open, so bills paid at the mailbox, and fresh metered charges, show up right away. 🔄
+
+### Fixed
+- Refilling a pet food bowl now counts under Refills and maintenance in the Budget Window, instead of From objects. 🐾
 
 ## 1.0.16 — July 2026 💸
 

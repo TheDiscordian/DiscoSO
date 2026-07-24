@@ -131,6 +131,7 @@ namespace FSO.Server.Servers.Lot.Domain
         {
             var ava = vm.GetAvatarByPersist(payerId);
             if (ava == null || ((VMTSOAvatarState)ava.TSOState).Permissions < VMTSOAvatarPermissions.Roommate) return;
+            var queued = DateTime.UtcNow;
             Host.InBackground(() =>
             {
                 using (var db = DAFactory.Get())
@@ -147,6 +148,8 @@ namespace FSO.Server.Servers.Lot.Domain
                         () => db.LotBills.MarkPaid(ids, payerId, today) > 0);
                     if (result != null && result.success)
                     {
+                        LOG.Info("bills paid at mailbox: lot " + Context.DbId + " total $" + total + " by " + payerId
+                            + " (" + (int)(DateTime.UtcNow - queued).TotalMilliseconds + " ms after queue)");
                         vm.SendCommand(new VMNetAsyncResponseCmd(0, new VMTransferFundsState
                         {
                             Responded = true,
