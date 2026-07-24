@@ -73,5 +73,21 @@ namespace FSO.Server.Database.DA.Roommates
             return Context.Connection.Execute("UPDATE fso_roommates SET permissions_level = @level WHERE avatar_id = @avatar_id AND lot_id = @lot_id",
                 new { level = level, avatar_id = avatar_id, lot_id = lot_id }) > 0;
         }
+    
+        public List<DbRoommateInfo> GetLotRoommatesWithInfo(int lot_id)
+        {
+            return Context.Connection.Query<DbRoommateInfo>(
+                "SELECT a.name, a.move_date, r.permissions_level FROM fso_roommates r "
+                + "JOIN fso_avatars a ON a.avatar_id = r.avatar_id "
+                + "WHERE r.lot_id = @lot_id AND r.is_pending = 0 ORDER BY r.permissions_level DESC",
+                new { lot_id = lot_id }).ToList();
+        }
+    }
+
+    public class DbRoommateInfo
+    {
+        public string name { get; set; }
+        public uint move_date { get; set; }
+        public byte permissions_level { get; set; }
     }
 }

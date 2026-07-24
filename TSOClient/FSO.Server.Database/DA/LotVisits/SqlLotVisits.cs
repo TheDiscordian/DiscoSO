@@ -78,5 +78,21 @@ namespace FSO.Server.Database.DA.LotVisitors
                     "AND (time_created BETWEEN @start AND @end OR time_closed BETWEEN @start and @end)",
                 new { start = start, end = end, neighborhood_id = neighborhood_id }, buffered: false);
         }
+    
+        public List<DbLotVisitSummary> GetRecentVisits(int lot_id, int limit)
+        {
+            return Context.Connection.Query<DbLotVisitSummary>(
+                "SELECT a.name, v.time_created, v.type FROM fso_lot_visits v "
+                + "JOIN fso_avatars a ON a.avatar_id = v.avatar_id "
+                + "WHERE v.lot_id = @lot_id ORDER BY v.time_created DESC LIMIT @limit",
+                new { lot_id = lot_id, limit = limit }).ToList();
+        }
+    }
+
+    public class DbLotVisitSummary
+    {
+        public string name { get; set; }
+        public System.DateTime time_created { get; set; }
+        public DbLotVisitorType type { get; set; }
     }
 }

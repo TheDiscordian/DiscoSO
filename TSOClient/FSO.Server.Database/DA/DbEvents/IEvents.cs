@@ -8,6 +8,7 @@ namespace FSO.Server.Database.DA.DbEvents
     {
         PagedList<DbEvent> All(int offset = 0, int limit = 20, string orderBy = "start_day");
         List<DbEvent> GetActive(DateTime time);
+        List<DbEvent> GetRecentAndUpcoming(DateTime cutoff, int limit);
         int Add(DbEvent evt);
         bool Delete(int event_id);
 

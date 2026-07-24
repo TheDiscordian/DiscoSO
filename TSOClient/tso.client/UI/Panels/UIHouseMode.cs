@@ -20,6 +20,7 @@ using FSO.SimAntics.Model.TSOPlatform;
 using FSO.Client.Utils;
 using FSO.Client.Controllers.Panels;
 using FSO.Client.Controllers;
+using FSO.Common.DatabaseService.Model;
 using FSO.Common.DataService.Model;
 using FSO.Client.UI.Screens;
 
@@ -80,7 +81,6 @@ namespace FSO.Client.UI.Panels
             };
 
             BillsButton.Disabled = true;
-            LogButton.Disabled = true;
 
             foreach (var btn in BtnToMode.Keys)
                 btn.OnButtonClick += SetMode;
@@ -129,6 +129,7 @@ namespace FSO.Client.UI.Panels
                         break;
                     case 3:
                         Panel = new UILogPanel(LotControl);
+                        ControllerUtils.BindController<LotLogController>(Panel);
                         break;
                     case 4:
                         Panel = new UIAdmitBanPanel(LotControl);
@@ -418,9 +419,121 @@ namespace FSO.Client.UI.Panels
     /// </summary>
     public class UILogPanel : UIContainer
     {
+        public UIButton RoommatesLogButton { get; set; }
+        public UIButton VisitorsLogButton { get; set; }
+        public UIButton EventsLogButtton { get; set; } //EA's uis really names it with three t's
+        public UIButton RoommatesUpButton { get; set; }
+        public UIButton RoommatesDownButton { get; set; }
+        public UIButton EventsUpButton { get; set; }
+        public UIButton EventsDownButton { get; set; }
+        public UIButton VisitorsPreviousPageButton { get; set; }
+        public UIButton VisitorsNextPageButton { get; set; }
+        public UILabel TitleLabel { get; set; }
+        public UILabel RoommatesTitleText { get; set; }
+        public UILabel EventsTitleText { get; set; }
+        public UILabel VisitorsTitleText { get; set; }
+
+        private UIImage LogBackground;
+        private UILabel[] Rows;
+        private GetLotLogResponse Data;
+        private int Mode; //0 roommates, 1 visitors, 2 events
+        private int Offset;
+        private const int RowCount = 5;
+
         public UILogPanel(UILotControl lotController)
         {
-            this.RenderScript("logpanel.uis");
+            var script = this.RenderScript("logpanel.uis");
+
+            LogBackground = script.Create<UIImage>("LogBackground");
+            AddAt(0, LogBackground);
+
+            Rows = new UILabel[RowCount];
+            for (int i = 0; i < RowCount; i++)
+            {
+                var row = new UILabel();
+                row.Position = new Vector2(74, 20 + i * 17);
+                row.Size = new Vector2(144, 16);
+                row.Alignment = TextAlignment.Left | TextAlignment.Middle;
+                row.CaptionStyle = RoommatesTitleText.CaptionStyle.Clone();
+                row.CaptionStyle.Shadow = true;
+                row.Caption = "";
+                Add(row);
+                Rows[i] = row;
+            }
+
+            RoommatesLogButton.OnButtonClick += b => SetLogMode(0);
+            VisitorsLogButton.OnButtonClick += b => SetLogMode(1);
+            EventsLogButtton.OnButtonClick += b => SetLogMode(2);
+            RoommatesUpButton.OnButtonClick += b => Scroll(-1);
+            RoommatesDownButton.OnButtonClick += b => Scroll(1);
+            EventsUpButton.OnButtonClick += b => Scroll(-1);
+            EventsDownButton.OnButtonClick += b => Scroll(1);
+            VisitorsPreviousPageButton.OnButtonClick += b => Scroll(-RowCount);
+            VisitorsNextPageButton.OnButtonClick += b => Scroll(RowCount);
+
+            SetLogMode(1); //default to the visitors log
+        }
+
+        public void SetData(GetLotLogResponse data)
+        {
+            Data = data;
+            Offset = 0;
+            RefreshRows();
+        }
+
+        private void SetLogMode(int mode)
+        {
+            Mode = mode;
+            Offset = 0;
+            RoommatesLogButton.Selected = mode == 0;
+            VisitorsLogButton.Selected = mode == 1;
+            EventsLogButtton.Selected = mode == 2;
+            RoommatesTitleText.Visible = mode == 0;
+            VisitorsTitleText.Visible = mode == 1;
+            EventsTitleText.Visible = mode == 2;
+            RoommatesUpButton.Visible = RoommatesDownButton.Visible = mode == 0;
+            VisitorsPreviousPageButton.Visible = VisitorsNextPageButton.Visible = mode == 1;
+            EventsUpButton.Visible = EventsDownButton.Visible = mode == 2;
+            RefreshRows();
+        }
+
+        private void Scroll(int delta)
+        {
+            Offset = Math.Max(0, Math.Min(Math.Max(0, CurrentLines().Count - RowCount), Offset + delta));
+            RefreshRows();
+        }
+
+        private List<string> CurrentLines()
+        {
+            var lines = new List<string>();
+            if (Data == null) return lines;
+            var epoch = new DateTime(1970, 1, 1);
+            switch (Mode)
+            {
+                case 0:
+                    foreach (var entry in Data.Roommates)
+                        lines.Add(entry.Name + " - " + epoch.AddSeconds(entry.Time).ToString("MMM d"));
+                    break;
+                case 1:
+                    foreach (var entry in Data.Visitors)
+                        lines.Add(entry.Name + " - " + epoch.AddSeconds(entry.Time).ToString("MMM d h:mmtt"));
+                    break;
+                case 2:
+                    foreach (var evt in Data.Events)
+                        lines.Add(evt.Title + " - " + epoch.AddSeconds(evt.StartTime).ToString("MMM d"));
+                    break;
+            }
+            return lines;
+        }
+
+        private void RefreshRows()
+        {
+            var lines = CurrentLines();
+            for (int i = 0; i < RowCount; i++)
+            {
+                var idx = Offset + i;
+                Rows[i].Caption = (idx < lines.Count) ? lines[idx] : "";
+            }
         }
     }
 

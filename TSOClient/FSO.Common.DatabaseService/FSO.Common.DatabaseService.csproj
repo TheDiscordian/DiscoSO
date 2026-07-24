@@ -87,6 +87,8 @@
     <Compile Include="Model\LoadAvatarByIDResponse.cs" />
     <Compile Include="Model\GetAvatarBudgetRequest.cs" />
     <Compile Include="Model\GetAvatarBudgetResponse.cs" />
+    <Compile Include="Model\GetLotLogRequest.cs" />
+    <Compile Include="Model\GetLotLogResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
