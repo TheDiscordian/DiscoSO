@@ -123,7 +123,7 @@ namespace FSO.SimAntics.Utils
                     Instr(1, 9, 253, new byte[] { 0xCA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),   //8: generic 202 - query outstanding total
                     Instr(1, 10, 253, new byte[] { 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //9: generic 17 - poll interaction result
                     Instr(2, 11, 12, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x08, 0x07 }),   //10: temp 0 == 0 (still waiting?)
-                    Instr(0, 9, 253, new byte[] { 0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),   //11: sleep 30 ticks, poll again
+                    Instr(280, 9, 253, new byte[] { 0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //11: global Idle(30 ticks), poll again - raw sleep reads its count from an args slot
                     Instr(2, 13, 18, new byte[] { 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x08, 0x07 }),   //12: temp 0 == 2 (value ready? else timeout/reject)
                     Instr(36, 14, 18, new byte[] { 0x00, 0x00, msg, yes, no, 0x01, title, 0x00 }),     //13: yes/no dialog with $MoneyXL:0
                     Instr(2, 15, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x0a, 0x19 }),  //14: stack obj id := local 0 (master)
