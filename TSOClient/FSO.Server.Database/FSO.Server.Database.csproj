@@ -263,6 +263,9 @@
     <Content Include="DatabaseScripts\changes\0040_bills_per_day.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="DatabaseScripts\changes\0041_lot_usage_tv.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="DatabaseScripts\changes\0039_lot_usage_radio.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

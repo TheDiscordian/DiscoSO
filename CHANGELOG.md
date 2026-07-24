@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Changed
+- TV-on hours now join the metered bills, at $1 per game hour. 📺
+
 ## 1.0.18 — July 2026 💡
 
 ### Changed
