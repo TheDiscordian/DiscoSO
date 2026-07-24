@@ -13,6 +13,7 @@ namespace FSO.Server.Database.DA.Lots
         List<DbLot> AllLocations(int shard_id);
         DbLot GetByName(int shard_id, string name);
         DbLot GetByLocation(int shard_id, uint location);
+        System.Collections.Generic.List<DbLotValueSummary> GetLotValueSummaries(int shard_id);
         List<DbLot> GetAdjToLocation(int shard_id, uint location);
         DbLot GetByOwner(uint owner_id);
         DbLot Get(int id);

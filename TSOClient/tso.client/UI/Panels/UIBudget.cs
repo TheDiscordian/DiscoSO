@@ -110,11 +110,11 @@ namespace FSO.Client.UI.Panels
 
             CashTabButton.OnButtonClick += b => SelectTab(0);
             NetWorthTabButton.OnButtonClick += b => SelectTab(1);
+            DebtTabButton.OnButtonClick += b => SelectTab(2);
             IncomeTabButton.OnButtonClick += b => SelectTab(3);
             ExpensesTabButton.OnButtonClick += b => SelectTab(4);
 
             ExpensesTabButton.Disabled = false; //EA's script ships it disabled
-            DebtTabButton.Disabled = true; //bills are not implemented
 
             CloseButton.OnButtonClick += b => FindController<BudgetController>()?.Close();
 
@@ -142,7 +142,7 @@ namespace FSO.Client.UI.Panels
         {
             CashTabValue.Caption = FormatMoney(Data?.Cash ?? 0);
             NetWorthTabValue.Caption = FormatMoney(NetWorthTotal());
-            DebtTabValue.Caption = FormatMoney(0);
+            DebtTabValue.Caption = FormatMoney(TotalBills());
             IncomeTabValue.Caption = FormatMoney(TotalIncome());
             ExpensesTabValue.Caption = FormatMoney(TotalExpenses());
         }
@@ -204,6 +204,13 @@ namespace FSO.Client.UI.Panels
                         }
                     }
                     break;
+                case 2: //bills by day
+                    if (Data != null)
+                    {
+                        foreach (var day in Data.BillsDays)
+                            items.Add(Row(DayLabel(day.Day), FormatMoney(day.Expense)));
+                    }
+                    break;
                 case 1: //net worth breakdown
                     items.Add(Row((string)Script["NetWorthCashValue"], FormatMoney(Data?.Cash ?? 0)));
                     items.Add(Row((string)Script["NetWorthMoneyInObjects"], FormatMoney(Data?.ObjectsMoney ?? 0)));
@@ -248,6 +255,17 @@ namespace FSO.Client.UI.Panels
         {
             if (Data == null) return 0;
             return Data.Categories.Aggregate(0ul, (acc, x) => acc + x.Income);
+        }
+
+        private ulong TotalBills()
+        {
+            if (Data == null) return 0;
+            return Data.BillsDays.Aggregate(0ul, (acc, x) => acc + x.Expense);
+        }
+
+        public void ShowBills()
+        {
+            if (SelectedTab != 2) SelectTab(2);
         }
 
         private ulong TotalExpenses()
@@ -328,6 +346,7 @@ namespace FSO.Client.UI.Panels
                 case 102: return "Building";
                 case 103: return "Upgrades";
                 case 104: return "Lot expansion";
+                case 108: return "Bills";
                 case 105: return "Visitor bonus";
                 case 106: return "Property bonus";
                 case 107: return "Sim bonus";

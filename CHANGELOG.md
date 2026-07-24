@@ -2,6 +2,17 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Added
+- **Property Statistics** — the house panel's Statistics button now works: interior area, bedrooms, bathrooms, floors, and lot size, plus live 0–10 ratings for Size, Furnishings, Yard, Upkeep (object wear), and Layout. 📊
+- **Activity Log** — the house panel's Log button now works, for roommates: recent visitors with times, current roommates with move-in dates, and server events. 📋
+- **Bills** — the Budget Window's Bills tab and the house panel's Bills button are live. Daily property bills (a flat fee plus a share of your lot's object value) appear by day, charged to the lot owner and included in Expenses. Rates start at zero — bills only begin if the server enables them. 💸
+
+### Changed
+- Ambience volume now defaults to 80% for new installations (it was nearly silent). 🔊
+- The Budget Window's selected tab now connects seamlessly into its detail panel.
+
 ## 1.0.14 — July 2026 💰
 
 ### Added

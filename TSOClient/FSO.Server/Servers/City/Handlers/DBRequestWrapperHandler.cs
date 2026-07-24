@@ -163,6 +163,13 @@ namespace FSO.Server.Servers.City.Handlers
                     Expense = (uint)Math.Min(uint.MaxValue, g.Aggregate(0ul, (acc, x) => acc + x.expense))
                 }).OrderByDescending(x => x.Day).ToList();
 
+                var billsDays = summary.Where(x => x.transaction_type == 108).Select(x => new BudgetDaySummary
+                {
+                    Day = x.day,
+                    Income = (uint)Math.Min(uint.MaxValue, x.income),
+                    Expense = (uint)Math.Min(uint.MaxValue, x.expense)
+                }).OrderByDescending(x => x.Day).ToList();
+
                 var categories = summary.GroupBy(x => x.transaction_type).Select(g => new BudgetCategorySummary
                 {
                     TransactionType = (short)g.Key,
@@ -183,7 +190,8 @@ namespace FSO.Server.Servers.City.Handlers
                         ObjectsMoney = (uint)Math.Min(uint.MaxValue, netWorth.money),
                         ObjectsValue = (uint)Math.Min(uint.MaxValue, netWorth.value),
                         Days = days,
-                        Categories = categories
+                        Categories = categories,
+                        BillsDays = billsDays
                     }
                 };
             }

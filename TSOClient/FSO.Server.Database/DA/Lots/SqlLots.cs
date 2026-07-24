@@ -141,6 +141,15 @@ namespace FSO.Server.Database.DA.Lots
             return Context.Connection.Query<DbLot>("SELECT * FROM fso_lots WHERE name = @name AND shard_id = @shard_id", new { name, shard_id = shard_id }).FirstOrDefault();
         }
 
+        public List<DbLotValueSummary> GetLotValueSummaries(int shard_id)
+        {
+            return Context.Connection.Query<DbLotValueSummary>(
+                "SELECT l.lot_id, l.owner_id, COALESCE(SUM(o.value), 0) AS obj_value FROM fso_lots l "
+                + "LEFT JOIN fso_objects o ON o.lot_id = l.lot_id "
+                + "WHERE l.shard_id = @shard_id AND l.owner_id IS NOT NULL GROUP BY l.lot_id, l.owner_id",
+                new { shard_id = shard_id }).ToList();
+        }
+
         public DbLot GetByLocation(int shard_id, uint location)
         {
             return Context.Connection.Query<DbLot>("SELECT * FROM fso_lots WHERE location = @location AND shard_id = @shard_id", new { location = location, shard_id = shard_id }).FirstOrDefault();

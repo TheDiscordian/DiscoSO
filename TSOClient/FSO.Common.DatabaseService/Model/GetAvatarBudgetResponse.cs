@@ -14,6 +14,7 @@ namespace FSO.Common.DatabaseService.Model
         public uint ObjectsValue; //resale value of owned objects
         public List<BudgetDaySummary> Days = new List<BudgetDaySummary>();
         public List<BudgetCategorySummary> Categories = new List<BudgetCategorySummary>();
+        public List<BudgetDaySummary> BillsDays = new List<BudgetDaySummary>(); //per-day bills (code 108), appended last for wire compat
 
         public void Serialize(IoBuffer output, ISerializationContext context)
         {
@@ -36,6 +37,14 @@ namespace FSO.Common.DatabaseService.Model
                 output.PutInt16(cat.TransactionType);
                 output.PutUInt32(cat.Income);
                 output.PutUInt32(cat.Expense);
+            }
+
+            output.PutUInt32((uint)BillsDays.Count);
+            foreach (var day in BillsDays)
+            {
+                output.PutUInt32(day.Day);
+                output.PutUInt32(day.Income);
+                output.PutUInt32(day.Expense);
             }
         }
 
@@ -65,6 +74,18 @@ namespace FSO.Common.DatabaseService.Model
                 Categories.Add(new BudgetCategorySummary
                 {
                     TransactionType = input.GetInt16(),
+                    Income = input.GetUInt32(),
+                    Expense = input.GetUInt32()
+                });
+            }
+
+            var billCount = input.GetUInt32();
+            BillsDays = new List<BudgetDaySummary>((int)billCount);
+            for (var i = 0; i < billCount; i++)
+            {
+                BillsDays.Add(new BudgetDaySummary
+                {
+                    Day = input.GetUInt32(),
                     Income = input.GetUInt32(),
                     Expense = input.GetUInt32()
                 });
