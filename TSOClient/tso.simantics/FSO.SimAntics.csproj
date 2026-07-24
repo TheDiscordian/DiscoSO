@@ -407,6 +407,7 @@
     <Compile Include="Utils\VMArchitectureStats.cs" />
     <Compile Include="Utils\VMArchitectureTools.cs" />
     <Compile Include="Utils\VMCheatContext.cs" />
+    <Compile Include="Utils\VMDiscoSOMailboxPatch.cs" />
     <Compile Include="Utils\VMLotRotate.cs" />
     <Compile Include="Utils\VMLotTerrainRestoreTools.cs" />
     <Compile Include="Utils\VMTS1Activator.cs" />
