@@ -222,6 +222,7 @@ namespace FSO.SimAntics
         /// </summary>
         public void Init()
         {
+            if (!TS1) Utils.VMDiscoSOMailboxPatch.Apply(); //runs once; must precede any mailbox pie menu
             PlatformState = (TS1)?(VMAbstractLotState)new VMTS1LotState():new VMTSOLotState();
             GlobalState = new short[38];
             GlobalState[20] = 255; //Game Edition. Basically, what "expansion packs" are running. Let's just say all of them.
