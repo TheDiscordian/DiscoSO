@@ -191,7 +191,8 @@ namespace FSO.Server.Servers.City.Handlers
                         ObjectsValue = (uint)Math.Min(uint.MaxValue, netWorth.value),
                         Days = days,
                         Categories = categories,
-                        BillsDays = billsDays
+                        BillsDays = billsDays,
+                        BillsEnabled = da.Tuning.AllCategory("discoso_bills", 0).Any(x => x.value > 0)
                     }
                 };
             }

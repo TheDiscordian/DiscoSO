@@ -15,6 +15,7 @@ namespace FSO.Common.DatabaseService.Model
         public List<BudgetDaySummary> Days = new List<BudgetDaySummary>();
         public List<BudgetCategorySummary> Categories = new List<BudgetCategorySummary>();
         public List<BudgetDaySummary> BillsDays = new List<BudgetDaySummary>(); //per-day bills (code 108), appended last for wire compat
+        public bool BillsEnabled; //discoso_bills tuning has a nonzero rate
 
         public void Serialize(IoBuffer output, ISerializationContext context)
         {
@@ -46,6 +47,7 @@ namespace FSO.Common.DatabaseService.Model
                 output.PutUInt32(day.Income);
                 output.PutUInt32(day.Expense);
             }
+            output.PutBool(BillsEnabled);
         }
 
         public void Deserialize(IoBuffer input, ISerializationContext context)
@@ -90,6 +92,7 @@ namespace FSO.Common.DatabaseService.Model
                     Expense = input.GetUInt32()
                 });
             }
+            BillsEnabled = input.HasRemaining && input.GetBool();
         }
     }
 
