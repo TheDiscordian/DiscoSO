@@ -9,17 +9,18 @@ using System.Linq;
 namespace FSO.Server.Servers.Tasks.Domain
 {
     /// <summary>
-    /// DiscoSO daily property bills, metered by actual use. Each bill day a lot is charged
-    /// per day it was actually visited: $rate x (size + 1), multiplied by 1 + mul per extra
-    /// floor, plus a per-hour rate for time the lot was open (lights). Bills are ISSUED as
-    /// outstanding (fso_lot_bills) and paid via the Budget Window; overdue lots escalate.
-    /// Once bills are far enough overdue, accrual pauses until everything is paid off.
-    /// Community lots are never billed.
+    /// DiscoSO daily property bills. Each bill day a lot is charged per day it was actually
+    /// visited: $rate x (size + 1), multiplied by 1 + mul per extra floor. Metered hourly
+    /// charges (lit lamps, open stalls) are NOT billed here - the mail delivery adds them
+    /// to the day's bill while the lot is online (LotContainer). Bills are ISSUED as
+    /// outstanding (fso_lot_bills) and paid at the mailbox or via the Budget Window;
+    /// overdue lots escalate. Once bills are far enough overdue, accrual pauses until
+    /// everything is paid off. Community lots are never billed.
     /// Tuning (discoso_bills table 0): 0 = $/active day per size step, 1 = per-extra-floor
     /// multiplier, 2 = bill period days, 3 = grace days, 4 = extra days to tier 2,
     /// 5 = lights $ per lit-lamp in-game hour, 7 = stalls $ per open-stall in-game hour
     /// (1 game hour = 1 real minute), 6 = overdue days past grace that pause accrual (and cut
-    /// lights, once the VM side lands). Indices 0 and 5 both 0 = dormant.
+    /// lights, once the VM side lands). Index 0 = 0 disables the daily charge.
     /// </summary>
     public class BillsTask : ITask
     {
@@ -45,11 +46,9 @@ namespace FSO.Server.Servers.Tasks.Domain
                 var period = Math.Max(1, (int)tune(2, 1));
                 var grace = Math.Max(0, (int)tune(3, 3));
                 var pauseDays = Math.Max(1, (int)tune(6, 6));
-                var lightsRate = tune(5, 0);
-                var stallRate = tune(7, 2);
-                if (perDayPerSize <= 0 && lightsRate <= 0 && stallRate <= 0)
+                if (perDayPerSize <= 0)
                 {
-                    LOG.Info("Bills tuning not set (discoso_bills 0:0 per-day, 0:5 lights) - no bills issued.");
+                    LOG.Info("Bills tuning not set (discoso_bills 0:0 per-day) - no daily bills issued.");
                     return;
                 }
 
@@ -71,7 +70,7 @@ namespace FSO.Server.Servers.Tasks.Domain
                     var windowEnd = epoch.AddDays(today);
                     var visits = db.LotVisits.GetVisitsBetween(lot.lot_id, windowStart, windowEnd);
 
-                    //merge visit intervals (clamped to the window) for open-hours and active days
+                    //merge visit intervals (clamped to the window) for active days
                     var merged = new List<Interval>();
                     foreach (var visit in visits.OrderBy(x => x.time_created))
                     {
@@ -86,21 +85,17 @@ namespace FSO.Server.Servers.Tasks.Domain
                     }
 
                     var activeDays = new HashSet<int>();
-                    double openHours = 0;
                     foreach (var iv in merged)
                     {
-                        openHours += (iv.End - iv.Start).TotalHours;
                         for (var d = (int)(iv.Start - epoch).TotalDays; d <= (int)(iv.End.AddTicks(-1) - epoch).TotalDays; d++)
                             activeDays.Add(d);
                     }
-                    var usage = db.LotUsage.GetUsageBetween(lot.lot_id, last, today);
-                    if (activeDays.Count == 0 && usage.light_hours <= 0 && usage.stall_hours <= 0) continue; //unused lots owe nothing
+                    if (activeDays.Count == 0) continue; //unused lots owe nothing
 
                     var size = lot.size & 255;
                     var extraFloors = (lot.size >> 8) & 255;
                     var perDay = perDayPerSize * (size + 1) * (1f + floorMul * extraFloors);
-                    //light and stall hours are metered in-game hours per lit lamp / open stall (sampled hourly on the lot)
-                    var bill = (int)Math.Round(activeDays.Count * perDay + usage.light_hours * lightsRate + usage.stall_hours * stallRate);
+                    var bill = (int)Math.Round(activeDays.Count * perDay);
                     if (bill <= 0) continue;
 
                     db.LotBills.Create(new DbLotBill { lot_id = lot.lot_id, amount = bill, billed_day = today });
