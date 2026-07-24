@@ -18,6 +18,27 @@ namespace FSO.Server.Database.DA.LotBills
                 new { bill.lot_id, bill.amount, bill.billed_day });
         }
 
+        public bool AddToDay(int lot_id, int day, int amount)
+        {
+            //extend the day's unpaid bill; only insert if the day has no bill at all (never touch a paid one)
+            var updated = Context.Connection.Execute(
+                "UPDATE fso_lot_bills SET amount = amount + @amount WHERE lot_id = @lot_id AND billed_day = @day AND paid_day IS NULL",
+                new { lot_id, day, amount });
+            if (updated > 0) return true;
+            return Context.Connection.Execute(
+                "INSERT INTO fso_lot_bills (lot_id, amount, billed_day) "
+                + "SELECT @lot_id, @amount, @day FROM DUAL "
+                + "WHERE NOT EXISTS (SELECT 1 FROM fso_lot_bills WHERE lot_id = @lot_id AND billed_day = @day)",
+                new { lot_id, day, amount }) > 0;
+        }
+
+        public bool HasPaidBillOnDay(int lot_id, int day)
+        {
+            return Context.Connection.Query<int>(
+                "SELECT COUNT(*) FROM fso_lot_bills WHERE lot_id = @lot_id AND billed_day = @day AND paid_day IS NOT NULL",
+                new { lot_id, day }).FirstOrDefault() > 0;
+        }
+
         public List<DbLotBill> GetOutstanding(int lot_id)
         {
             return Context.Connection.Query<DbLotBill>(
