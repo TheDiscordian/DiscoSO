@@ -13,7 +13,7 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 - **Property Statistics** — the house panel's Statistics button now works: interior area, bedrooms, bathrooms, floors, and lot size, plus live 0–10 ratings for Size, Furnishings, Yard, Upkeep (object wear), and Layout. 📊
 - **Activity Log** — the house panel's Log button now works, for roommates: recent visitors with times, current roommates with move-in dates, and server events. 📋
 - **Bills** — daily property bills, replicating original TSO. Bills charge the lot owner only for days the lot is actually used, scale with lot size and floors, and meter lamp-on, open-stall, and stereo-on hours. Metered charges land on the bill the moment the paper carrier tucks the bills into your mailbox on her morning rounds (using the original mail-NPC animation), with a final settle-up when the lot closes. Pay at your mailbox (owners and roommates) or in the Budget Window's Bills tab, where outstanding bills appear by day and paid bills show in Expenses. Overdue bills escalate: first visitors are locked out, then build and buy are disabled (selling back is still allowed), and eventually billing pauses until the balance is paid. Rates start at zero — bills only begin if the server enables them. 💸
-- Food stalls (the hot dog cart, the ice cream cart, and friends) start open on community lots, with a vendor ready to serve. 🌭
+- Food stalls (the hot dog cart, the ice cream cart, and friends) start open and stocked on community lots. 🌭
 
 ### Changed
 - Ambience volume now defaults to 80% for new installations (it was nearly silent). 🔊
