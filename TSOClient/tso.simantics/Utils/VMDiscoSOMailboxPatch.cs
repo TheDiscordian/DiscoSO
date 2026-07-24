@@ -95,9 +95,10 @@ namespace FSO.SimAntics.Utils
 
             var template = mailbox.Resource.MainIff?.List<BHAV>()?.FirstOrDefault();
 
-            //action: route to the mailbox, open it (graphic 1 on the visible box tile), fetch the
-            //total, confirm, pay, clear the flag, close the mailbox (graphic 0).
-            //generic call 17 polls the interaction result: temp 0 = 0 waiting, 2 = value ready.
+            //action: route to the mailbox, open it for the getbills animation, close it, then
+            //fetch the total (value-gated: the client's queue auto-accept races the server's
+            //response, so the dialog waits for TempXL 0 to hold the amount), confirm, pay.
+            //generic call 17 polls the interaction result; temp 0 = 3 means timeout.
             byte msg = (byte)(dialogBase + 2), yes = (byte)(dialogBase + 3), no = (byte)(dialogBase + 4), title = (byte)(dialogBase + 1);
             var action = new BHAV
             {
@@ -113,30 +114,27 @@ namespace FSO.SimAntics.Utils
                 Instructions = new BHAVInstruction[]
                 {
                     Instr(27, 1, 255, new byte[] { 0x00, 0x00, 0x00, 0xFE, 0x00, 0x00, 0x06, 0x00 }),  //0: route in front of + facing the mailbox
-                    Instr(2, 2, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x19, 0x0a }),   //1: local 0 := stack obj id (the master)
+                    Instr(2, 2, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x19, 0x0a }),   //1: local 0 := stack obj id (the pie callee)
                     Instr(2, 3, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x0a, 0x07 }),   //2: stack obj id := 0 (scan start)
-                    Instr(31, 4, 22, new byte[] { 0x74, 0x19, 0x12, 0xEF, 0x84, 0x0A, 0x00, 0x00 }),   //3: set to next visible box tile (0xEF121974)
+                    Instr(31, 4, 21, new byte[] { 0x74, 0x19, 0x12, 0xEF, 0x84, 0x0A, 0x00, 0x00 }),   //3: set to next visible box tile (0xEF121974)
                     Instr(2, 5, 253, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x05, 0x19, 0x0a }),   //4: local 1 := stack obj id (the box)
                     Instr(2, 6, 253, new byte[] { 0x00, 0x00, 0x01, 0x00, 0x00, 0x05, 0x04, 0x07 }),   //5: graphic := 1 (open)
                     Instr(7, 7, 253, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),   //6: refresh stack object graphic
                     Instr(44, 8, 7, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),    //7: animate a2o-mailbox-getbills
-                    Instr(1, 9, 253, new byte[] { 0xCA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),   //8: generic 202 - query outstanding total
-                    Instr(1, 10, 253, new byte[] { 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //9: generic 17 - poll interaction result
-                    Instr(2, 11, 12, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x08, 0x07 }),   //10: temp 0 == 0 (still waiting?)
-                    Instr(280, 9, 253, new byte[] { 0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //11: global Idle(30 ticks), poll again - raw sleep reads its count from an args slot
-                    Instr(2, 13, 18, new byte[] { 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x08, 0x07 }),   //12: temp 0 == 2 (value ready? else timeout/reject)
-                    Instr(36, 14, 18, new byte[] { 0x00, 0x00, msg, yes, no, 0x01, title, 0x00 }),     //13: yes/no dialog with $MoneyXL:0
-                    Instr(2, 15, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x0a, 0x19 }),  //14: stack obj id := local 0 (master)
-                    Instr(1, 16, 253, new byte[] { 0xC8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //15: generic 200 - server pays all bills
-                    Instr(2, 17, 253, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x05, 0x01, 0x07 }),  //16: attr 1 ("Number of Bills Inside") := 0
-                    Instr(2, 20, 253, new byte[] { 0x00, 0x00, 0x01, 0x00, 0x00, 0x05, 0x0a, 0x19 }),  //17: stack obj id := local 1 (paid path)
-                    Instr(2, 19, 253, new byte[] { 0x00, 0x00, 0x01, 0x00, 0x00, 0x05, 0x0a, 0x19 }),  //18: stack obj id := local 1 (declined path)
-                    Instr(2, 21, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x04, 0x07 }),  //19: graphic := 0 (closed), declined
-                    Instr(2, 23, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x04, 0x07 }),  //20: graphic := 0 (closed), paid
-                    Instr(7, 22, 253, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //21: refresh, declined
-                    Instr(44, 255, 22, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 }), //22: animation reset, declined/fallback (false)
-                    Instr(7, 24, 253, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //23: refresh, paid
-                    Instr(44, 254, 24, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 })  //24: animation reset, paid (true)
+                    Instr(2, 9, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x04, 0x07 }),   //8: graphic := 0 (closed - the box shuts with the animation)
+                    Instr(7, 10, 253, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //9: refresh
+                    Instr(2, 11, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x2a, 0x07 }),  //10: temp xl 0 := 0 (clear any stale amount)
+                    Instr(1, 12, 253, new byte[] { 0xCA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //11: generic 202 - query outstanding total
+                    Instr(1, 13, 253, new byte[] { 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //12: generic 17 - poll interaction result
+                    Instr(2, 21, 14, new byte[] { 0x00, 0x00, 0x03, 0x00, 0x00, 0x02, 0x08, 0x07 }),   //13: temp 0 == 3 (timeout? bail)
+                    Instr(2, 16, 15, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2a, 0x07 }),   //14: temp xl 0 > 0 (the amount arrived?)
+                    Instr(280, 12, 253, new byte[] { 0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),//15: global Idle(30 ticks), poll again
+                    Instr(36, 17, 21, new byte[] { 0x00, 0x00, msg, yes, no, 0x01, title, 0x00 }),     //16: yes/no dialog with $MoneyXL:0
+                    Instr(2, 18, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x0a, 0x19 }),  //17: stack obj id := local 0 (pie callee)
+                    Instr(1, 19, 253, new byte[] { 0xC8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //18: generic 200 - server pays all bills
+                    Instr(2, 20, 253, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x05, 0x01, 0x07 }),  //19: attr 1 ("Number of Bills Inside") := 0
+                    Instr(44, 254, 20, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 }), //20: animation reset, paid (true)
+                    Instr(44, 255, 21, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 })  //21: animation reset, declined/timeout/fallback (false)
                 }
             };
             mailbox.Resource.MainIff.AddChunk(action);
