@@ -69,6 +69,9 @@ namespace FSO.Client.UI.Panels
 
             TabBackground = Script.Create<UIImage>("TabBackground");
             Add(TabBackground);
+            //popout sits under the tab overlays - the selected tab's art bridges over its left edge
+            PopOutBackground = Script.Create<UIImage>("PopOutBackground");
+            Add(PopOutBackground);
             CashTabImage = Script.Create<UIImage>("CashTabImage");
             Add(CashTabImage);
             NetWorthTabImage = Script.Create<UIImage>("NetWorthTabImage");
@@ -79,8 +82,6 @@ namespace FSO.Client.UI.Panels
             Add(IncomeTabImage);
             ExpensesTabImage = Script.Create<UIImage>("ExpensesTabImage");
             Add(ExpensesTabImage);
-            PopOutBackground = Script.Create<UIImage>("PopOutBackground");
-            Add(PopOutBackground);
             ListBoxBackground = Script.Create<UIImage>("ListBoxBackground");
             Add(ListBoxBackground);
 
