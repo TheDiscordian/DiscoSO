@@ -7,6 +7,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
     {
         public ushort ActionUID;
         public bool Accepted;
+        public int Value; //optional payload for the accepting tree (DiscoSO: outstanding bill total into TempXL 0)
         public override bool Execute(VM vm, VMAvatar caller)
         {
             if (caller == null) return false;
@@ -14,6 +15,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
             if (interaction != null)
             {
                 interaction.InteractionResult = (sbyte)(Accepted ? 2 : 1);
+                if (Accepted) caller.Thread.TempXL[0] = Value;
             }
             return true;
         }
@@ -25,6 +27,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
             base.SerializeInto(writer);
             writer.Write(ActionUID);
             writer.Write(Accepted);
+            writer.Write(Value);
         }
 
         public override void Deserialize(BinaryReader reader)
@@ -32,6 +35,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
             base.Deserialize(reader);
             ActionUID = reader.ReadUInt16();
             Accepted = reader.ReadBoolean();
+            Value = reader.ReadInt32();
         }
 
         #endregion

@@ -478,6 +478,12 @@ namespace FSO.SimAntics.Primitives
                     //the mail carrier is at the mailbox - server folds unbilled metered usage into today's bill
                     context.VM.GlobalLink?.DeliverLotBills(context.VM);
                     return VMPrimitiveExitCode.GOTO_TRUE;
+                case VMGenericTSOCallMode.DiscoSOQueryBills: //202
+                    //ask the server for the lot's outstanding bill total; it responds through the
+                    //interaction result, and the amount lands in TempXL 0 for the pay dialog
+                    if (context.ActionTree && context.Thread.ActiveAction != null)
+                        context.VM.GlobalLink?.QueryLotBills(context.VM, context.Caller.PersistID, context.Thread.ActiveAction.UID);
+                    return VMPrimitiveExitCode.GOTO_TRUE;
                 default:
                     return VMPrimitiveExitCode.GOTO_TRUE;
             }

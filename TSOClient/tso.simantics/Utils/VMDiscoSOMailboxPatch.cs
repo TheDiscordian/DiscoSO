@@ -8,13 +8,19 @@ namespace FSO.SimAntics.Utils
     /// content piffs have applied. This cannot ship as a piff: Content/Patch/Event already
     /// patches mailbox TTAB 129 (and adds BHAV 4111), so a second piff diffing the same
     /// chunks corrupts them. Runs on both client and server so the VMs stay in lockstep.
-    /// The tree is a single generic TSO call, mode 200 (DiscoSOPayBills) - the lot server
-    /// pays all outstanding bills for the lot; clients no-op.
+    ///
+    /// The interaction only shows while the mailbox holds bills (test tree: attribute 1,
+    /// "Number of Bills Inside" - set at lot init, bumped by the paper carrier's delivery,
+    /// zeroed on payment). The action tree routes the sim to the mailbox, plays the
+    /// mailbox-open animation, asks the server for the outstanding total (interaction
+    /// result -> TempXL 0), then confirms with a Yes/No dialog showing the amount before
+    /// paying via generic TSO call 200.
     /// </summary>
     public static class VMDiscoSOMailboxPatch
     {
         public const uint MAILBOX_GUID = 0x39CCF441; //multi-tile master
         public const ushort PAY_BILLS_TREE = 4150; //clear of the mailbox's own trees and the Event piff's additions
+        public const ushort PAY_BILLS_TEST_TREE = 4151;
 
         private static bool Applied;
 
@@ -41,6 +47,26 @@ namespace FSO.SimAntics.Utils
             if (mailbox.Resource.Get<BHAV>(PAY_BILLS_TREE) != null) { Log("tree " + PAY_BILLS_TREE + " already taken - stand down"); return; }
             if (ttab.Interactions.Any(x => x.ActionFunction == PAY_BILLS_TREE)) { Log("interaction already present"); return; }
 
+            //dialog strings live in the private dialog set (STR 301); create or extend it
+            var dialogs = mailbox.Resource.Get<STR>(301);
+            if (dialogs == null)
+            {
+                dialogs = new STR
+                {
+                    ChunkID = 301,
+                    ChunkLabel = "Dialog prim string set",
+                    ChunkType = "STR#",
+                    ChunkProcessed = true,
+                    AddedByPatch = true
+                };
+                mailbox.Resource.MainIff.AddChunk(dialogs);
+            }
+            var dialogBase = dialogs.Length; //string ids in the operand are 1-based
+            dialogs.InsertString(dialogBase, new STRItem { Value = "Pay Bills", Comment = "" });
+            dialogs.InsertString(dialogBase + 1, new STRItem { Value = "Pay your outstanding bills for $MoneyXL:0?", Comment = "" });
+            dialogs.InsertString(dialogBase + 2, new STRItem { Value = "Pay", Comment = "" });
+            dialogs.InsertString(dialogBase + 3, new STRItem { Value = "Not Now", Comment = "" });
+
             //interactions resolve through InteractionByIndex, keyed by TTAIndex - the index must be
             //unique across ALL entries, including hidden ones pointing past the string table (the
             //Event patch parks one at index 8). claim the first index above everything, padding the
@@ -52,10 +78,11 @@ namespace FSO.SimAntics.Utils
             }
             while (ttas.Length < stringIndex) ttas.InsertString(ttas.Length, new STRItem { Value = "", Comment = "" });
             ttas.InsertString((int)stringIndex, new STRItem { Value = "Pay Bills", Comment = "" });
+
             ttab.InsertInteraction(new TTABInteraction
             {
                 ActionFunction = PAY_BILLS_TREE,
-                TestFunction = 0,
+                TestFunction = PAY_BILLS_TEST_TREE,
                 MotiveEntries = new TTABMotiveEntry[0],
                 Flags = 0,
                 TTAIndex = stringIndex,
@@ -67,7 +94,11 @@ namespace FSO.SimAntics.Utils
             }, ttab.Interactions.Length);
 
             var template = mailbox.Resource.MainIff?.List<BHAV>()?.FirstOrDefault();
-            var bhav = new BHAV
+
+            //action: route to the mailbox, open it, fetch the total, confirm, pay, clear the flag.
+            //generic call 17 polls the interaction result: temp 0 = 0 waiting, 2 = value ready.
+            byte msg = (byte)(dialogBase + 2), yes = (byte)(dialogBase + 3), no = (byte)(dialogBase + 4), title = (byte)(dialogBase + 1);
+            var action = new BHAV
             {
                 ChunkID = PAY_BILLS_TREE,
                 ChunkLabel = "DiscoSO - Pay Bills",
@@ -80,20 +111,50 @@ namespace FSO.SimAntics.Utils
                 Locals = 0,
                 Instructions = new BHAVInstruction[]
                 {
-                    new BHAVInstruction
-                    {
-                        Opcode = 1, //generic tso call
-                        TruePointer = 254,
-                        FalsePointer = 253,
-                        Operand = new byte[] { 200, 0, 0, 0, 0, 0, 0, 0 } //DiscoSOPayBills
-                    }
+                    Instr(27, 1, 255, new byte[] { 0x00, 0x00, 0x00, 0xff, 0x00, 0x00, 0x06, 0x00 }),  //0: route in front of the mailbox
+                    Instr(44, 2, 1, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),    //1: animate a2o-mailbox-getbills
+                    Instr(1, 3, 253, new byte[] { 0xCA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),   //2: generic 202 - query outstanding total
+                    Instr(1, 4, 253, new byte[] { 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),   //3: generic 17 - poll interaction result
+                    Instr(2, 5, 6, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x08, 0x07 }),     //4: temp 0 == 0 (still waiting?)
+                    Instr(0, 3, 253, new byte[] { 0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),   //5: sleep 30 ticks, poll again
+                    Instr(2, 7, 10, new byte[] { 0x00, 0x00, 0x02, 0x00, 0x00, 0x02, 0x08, 0x07 }),    //6: temp 0 == 2 (value ready? else timeout/reject)
+                    Instr(36, 8, 10, new byte[] { 0x00, 0x00, msg, yes, no, 0x01, title, 0x00 }),      //7: yes/no dialog with $MoneyXL:0
+                    Instr(1, 9, 253, new byte[] { 0xC8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),   //8: generic 200 - server pays all bills
+                    Instr(2, 11, 253, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x05, 0x01, 0x07 }),  //9: attr 1 ("Number of Bills Inside") := 0
+                    Instr(44, 255, 10, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 }), //10: animation reset, declined path
+                    Instr(44, 254, 11, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 })  //11: animation reset, paid path
                 }
             };
-            mailbox.Resource.MainIff.AddChunk(bhav);
-            //the routine cache was built at content load; rebuild it so the new tree resolves
+            mailbox.Resource.MainIff.AddChunk(action);
+
+            //test: only offer the interaction while the mailbox holds bills
+            var test = new BHAV
+            {
+                ChunkID = PAY_BILLS_TEST_TREE,
+                ChunkLabel = "DiscoSO - Pay Bills TEST",
+                ChunkType = "BHAV",
+                ChunkProcessed = true,
+                AddedByPatch = true,
+                Type = template?.Type ?? 0,
+                Version = template?.Version ?? 0,
+                Args = 0,
+                Locals = 0,
+                Instructions = new BHAVInstruction[]
+                {
+                    Instr(2, 254, 255, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x07 }) //attr 1 > 0
+                }
+            };
+            mailbox.Resource.MainIff.AddChunk(test);
+
+            //the routine cache was built at content load; rebuild it so the new trees resolve
             //(GetRoutine misses -> GetAction null -> the pie silently drops the entry)
             mailbox.Resource.Recache();
-            Log("installed Pay Bills at index " + stringIndex + " (" + ttab.Interactions.Length + " interactions, " + ttas.Length + " strings, routine=" + (mailbox.Resource.GetRoutine(PAY_BILLS_TREE) != null) + ")");
+            Log("installed Pay Bills at index " + stringIndex + " (" + ttab.Interactions.Length + " interactions, " + ttas.Length + " strings, routine=" + (mailbox.Resource.GetRoutine(PAY_BILLS_TREE) != null) + ", test=" + (mailbox.Resource.GetRoutine(PAY_BILLS_TEST_TREE) != null) + ")");
+        }
+
+        private static BHAVInstruction Instr(ushort opcode, byte t, byte f, byte[] operand)
+        {
+            return new BHAVInstruction { Opcode = opcode, TruePointer = t, FalsePointer = f, Operand = operand };
         }
 
         private static void Log(string msg)

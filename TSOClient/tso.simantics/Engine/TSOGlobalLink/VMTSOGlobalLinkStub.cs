@@ -83,6 +83,11 @@ namespace FSO.SimAntics.Engine.TSOTransaction
             //stub: no server
         }
 
+        public void QueryLotBills(VM vm, uint callerId, ushort actionUID)
+        {
+            //stub: no server
+        }
+
         public void PerformTransaction(VM vm, bool testOnly, uint uid1, uint uid2, int amount, short type, VMAsyncTransactionCallback callback)
         {
             PerformTransaction(vm, testOnly, uid1, uid2, amount, type, 0, callback);
