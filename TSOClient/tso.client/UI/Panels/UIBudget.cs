@@ -91,7 +91,7 @@ namespace FSO.Client.UI.Panels
             Add(CashTabButton); Add(NetWorthTabButton); Add(DebtTabButton); Add(IncomeTabButton); Add(ExpensesTabButton);
             Add(ListBox); Add(ListBoxSlider); Add(ListBoxScrollUpButton); Add(ListBoxScrollDownButton);
 
-            ListBox.OnDoubleClick += ListBox_OnDoubleClick;
+            ListBox.OnChange += ListBox_OnBillClick;
             ListBox.AttachSlider(ListBoxSlider);
             ListBoxSlider.AttachButtons(ListBoxScrollUpButton, ListBoxScrollDownButton, 1);
             var listStyle = Script.Create<UIListBoxTextStyle>("ListBoxLeftColumnColors", ListBox.FontStyle);
@@ -208,7 +208,7 @@ namespace FSO.Client.UI.Panels
                         }
                     }
                     break;
-                case 2: //bills: outstanding first (double-click to pay), then paid history
+                case 2: //bills: outstanding first (click to pay), then paid history
                     if (Data != null)
                     {
                         if (Data.OutstandingBills > 0)
@@ -277,7 +277,7 @@ namespace FSO.Client.UI.Panels
             if (SelectedTab != 2) SelectTab(2);
         }
 
-        private void ListBox_OnDoubleClick(UIElement element)
+        private void ListBox_OnBillClick(UIElement element)
         {
             if (SelectedTab != 2 || !"PAY".Equals(ListBox.SelectedItem?.Data) || (Data?.OutstandingBills ?? 0) == 0) return;
             var amount = Data.OutstandingBills;
