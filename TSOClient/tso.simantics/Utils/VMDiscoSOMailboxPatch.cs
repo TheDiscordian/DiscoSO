@@ -22,13 +22,24 @@ namespace FSO.SimAntics.Utils
         {
             if (Applied) return;
             Applied = true;
+            try
+            {
+                ApplyInternal();
+            }
+            catch (System.Exception e)
+            {
+                Log("FAILED: " + e);
+            }
+        }
 
+        private static void ApplyInternal()
+        {
             var mailbox = FSO.Content.Content.Get()?.WorldObjects?.Get(MAILBOX_GUID);
             var ttas = mailbox?.Resource?.Get<TTAs>(129);
             var ttab = mailbox?.Resource?.Get<TTAB>(129);
-            if (ttas == null || ttab == null) return;
-            if (mailbox.Resource.Get<BHAV>(PAY_BILLS_TREE) != null) return; //id taken - stand down
-            if (ttab.Interactions.Any(x => x.ActionFunction == PAY_BILLS_TREE)) return;
+            if (ttas == null || ttab == null) { Log("mailbox chunks missing (object=" + (mailbox != null) + " ttas=" + (ttas != null) + " ttab=" + (ttab != null) + ")"); return; }
+            if (mailbox.Resource.Get<BHAV>(PAY_BILLS_TREE) != null) { Log("tree " + PAY_BILLS_TREE + " already taken - stand down"); return; }
+            if (ttab.Interactions.Any(x => x.ActionFunction == PAY_BILLS_TREE)) { Log("interaction already present"); return; }
 
             //interactions resolve through InteractionByIndex, keyed by TTAIndex - the index must be
             //unique across ALL entries, including hidden ones pointing past the string table (the
@@ -79,6 +90,17 @@ namespace FSO.SimAntics.Utils
                 }
             };
             mailbox.Resource.MainIff.AddChunk(bhav);
+            Log("installed Pay Bills at index " + stringIndex + " (" + ttab.Interactions.Length + " interactions, " + ttas.Length + " strings)");
+        }
+
+        private static void Log(string msg)
+        {
+            try
+            {
+                var path = System.IO.Path.Combine(FSO.Common.FSOEnvironment.UserDir ?? ".", "mailbox-patch.log");
+                System.IO.File.AppendAllText(path, System.DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") + " " + msg + "\n");
+            }
+            catch { }
         }
     }
 }
