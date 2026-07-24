@@ -1122,7 +1122,15 @@ namespace FSO.Server.Servers.Lot.Domain
                             int litLamps = 0, openStalls = 0, playingStereos = 0;
                             foreach (var group in groups)
                             {
-                                if (group.Objects.Any(o => o.GetValue(VMStackObjectVariable.LightingContribution) > 0)) litLamps++;
+                                //the engine's real-light test: windows and doors carry a daylight contribution
+                                //but aren't lamps, and an auto-off lamp contributes 0
+                                if (group.Objects.Any(o =>
+                                {
+                                    var lightFlags = (VMEntityFlags2)o.GetValue(VMStackObjectVariable.FlagField2);
+                                    return (lightFlags & VMEntityFlags2.GeneratesLight) > 0
+                                        && (lightFlags & (VMEntityFlags2.ArchitectualWindow | VMEntityFlags2.ArchitectualDoor)) == 0
+                                        && o.GetValue(VMStackObjectVariable.LightingContribution) > 0;
+                                })) litLamps++;
                                 if (IsStall(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(1) > 0)) openStalls++; //"Is open?" lives on the control segment, not the base tile
                                 if (IsStereo(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(0) > 0)) playingStereos++; //attribute 0 = "Power (Off/On)" on every stereo family
                             }
