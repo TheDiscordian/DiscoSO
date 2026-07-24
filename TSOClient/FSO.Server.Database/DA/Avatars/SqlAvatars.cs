@@ -273,7 +273,12 @@ namespace FSO.Server.Database.DA.Avatars
                 t.Rollback();
             }
 
-            if (success && ((reason > 7 && reason != 9) || (source_id != uint.MaxValue && dest_id != uint.MaxValue))) {
+            var srcReal = source_id != uint.MaxValue;
+            var dstReal = dest_id != uint.MaxValue;
+            //log categorized flows (9 = the player leg of group skill payouts, already logged object-side),
+            //anything between two real parties, and uncategorized single-sided flows (purchases, build,
+            //upgrades, sell-backs). void-to-void flows carry no ledger meaning.
+            if (success && (srcReal || dstReal) && ((reason > 7 && reason != 9) || (srcReal && dstReal) || reason == 0)) {
                 var days = (DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
                 Context.Connection.Execute("INSERT INTO fso_transactions (from_id, to_id, transaction_type, day, value, count) "+
                     "VALUES (@from_id, @to_id, @transaction_type, @day, @value, @count) " +

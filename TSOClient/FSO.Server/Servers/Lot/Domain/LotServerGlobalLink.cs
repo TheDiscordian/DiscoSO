@@ -279,7 +279,8 @@ namespace FSO.Server.Servers.Lot.Domain
                         if (cost > 0) { source = cmd.ActorUID; target = uint.MaxValue; }
                         else { source = uint.MaxValue; target = cmd.ActorUID; }
                         WaitingOnArch = true;
-                        PerformTransaction(vm, false, source, target, Math.Abs(cost),
+                        //102 = DiscoSO ledger code for build-mode architecture costs
+                        PerformTransaction(vm, false, source, target, Math.Abs(cost), (short)102,
                             (bool success, int transferAmount, uint uid1, uint budget1, uint uid2, uint budget2) =>
                             {
                                 lock (ArchBuffer) WaitingOnArch = false;
