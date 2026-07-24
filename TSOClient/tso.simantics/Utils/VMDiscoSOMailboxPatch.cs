@@ -30,15 +30,24 @@ namespace FSO.SimAntics.Utils
             if (mailbox.Resource.Get<BHAV>(PAY_BILLS_TREE) != null) return; //id taken - stand down
             if (ttab.Interactions.Any(x => x.ActionFunction == PAY_BILLS_TREE)) return;
 
-            var stringIndex = ttas.Length;
-            ttas.InsertString(stringIndex, new STRItem { Value = "Pay Bills", Comment = "" });
+            //interactions resolve through InteractionByIndex, keyed by TTAIndex - the index must be
+            //unique across ALL entries, including hidden ones pointing past the string table (the
+            //Event patch parks one at index 8). claim the first index above everything, padding the
+            //string table to reach it.
+            var stringIndex = (uint)ttas.Length;
+            foreach (var existing in ttab.Interactions)
+            {
+                if (existing.TTAIndex >= stringIndex) stringIndex = existing.TTAIndex + 1;
+            }
+            while (ttas.Length < stringIndex) ttas.InsertString(ttas.Length, new STRItem { Value = "", Comment = "" });
+            ttas.InsertString((int)stringIndex, new STRItem { Value = "Pay Bills", Comment = "" });
             ttab.InsertInteraction(new TTABInteraction
             {
                 ActionFunction = PAY_BILLS_TREE,
                 TestFunction = 0,
                 MotiveEntries = new TTABMotiveEntry[0],
                 Flags = 0,
-                TTAIndex = (uint)stringIndex,
+                TTAIndex = stringIndex,
                 AttenuationCode = 0,
                 AttenuationValue = 0,
                 AutonomyThreshold = 0,
