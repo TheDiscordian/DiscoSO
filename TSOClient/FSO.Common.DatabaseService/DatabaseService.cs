@@ -45,7 +45,12 @@ namespace FSO.Common.DatabaseService
             var responseType = exact ? DBResponseType.SearchExactMatch : DBResponseType.Search;
             return Request<SearchResponse>(requestType, responseType, null, request);
         }
-        
+
+        public Task<GetAvatarBudgetResponse> GetAvatarBudget(GetAvatarBudgetRequest request)
+        {
+            return Request<GetAvatarBudgetResponse>(DBRequestType.GetDataServiceAvatarBudgetByID, DBResponseType.GetDataServiceAvatarBudgetByID, null, request);
+        }
+
 
         //[MethodImpl(MethodImplOptions.Synchronized)]
         private Task<T> Request<T>(DBRequestType type, DBResponseType responseType, uint? parameter, object complexParameter)

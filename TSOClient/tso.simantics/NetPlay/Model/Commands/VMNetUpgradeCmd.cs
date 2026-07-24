@@ -1,4 +1,5 @@
 ﻿using FSO.SimAntics.Model.TSOPlatform;
+using FSO.SimAntics.Primitives;
 using System;
 using System.IO;
 
@@ -70,6 +71,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
 
             //perform the transaction. If it succeeds, requeue the command
             vm.GlobalLink.PerformTransaction(vm, false, caller?.PersistID ?? uint.MaxValue, uint.MaxValue, price.Value,
+                (short)VMTransferFundsExpenseType.ExpenseObjectUpgrade,
                 (bool success, int transferAmount, uint uid1, uint budget1, uint uid2, uint budget2) =>
                 {
                     if (success)

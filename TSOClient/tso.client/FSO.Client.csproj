@@ -112,6 +112,7 @@
     <Compile Include="Controllers\LoadingScreenController.cs" />
     <Compile Include="Controllers\NeighborhoodActionController.cs" />
     <Compile Include="Controllers\Panels\BookmarksController.cs" />
+    <Compile Include="Controllers\Panels\BudgetController.cs" />
     <Compile Include="Controllers\Panels\BulletinDialogController.cs" />
     <Compile Include="Controllers\Panels\GenericSearchController.cs" />
     <Compile Include="Controllers\Panels\LotAdmitController.cs" />
@@ -258,6 +259,7 @@
     <Compile Include="UI\Panels\UIAsyncPriceDialog.cs" />
     <Compile Include="UI\Panels\UIBonusDialog.cs" />
     <Compile Include="UI\Panels\UIBookmarks.cs" />
+    <Compile Include="UI\Panels\UIBudget.cs" />
     <Compile Include="UI\Panels\UIModMenu.cs" />
     <Compile Include="UI\Panels\UIDebugMenu.cs" />
     <Compile Include="UI\Panels\UIEnvPanel.cs" />

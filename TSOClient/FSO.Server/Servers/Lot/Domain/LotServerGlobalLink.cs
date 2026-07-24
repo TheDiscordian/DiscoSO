@@ -279,7 +279,7 @@ namespace FSO.Server.Servers.Lot.Domain
                         if (cost > 0) { source = cmd.ActorUID; target = uint.MaxValue; }
                         else { source = uint.MaxValue; target = cmd.ActorUID; }
                         WaitingOnArch = true;
-                        PerformTransaction(vm, false, source, target, Math.Abs(cost),
+                        PerformTransaction(vm, false, source, target, Math.Abs(cost), (short)VMTransferFundsExpenseType.ExpenseArchitecture,
                             (bool success, int transferAmount, uint uid1, uint budget1, uint uid2, uint budget2) =>
                             {
                                 lock (ArchBuffer) WaitingOnArch = false;

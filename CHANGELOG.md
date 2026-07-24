@@ -2,6 +2,12 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.14 — July 2026 💰
+
+### Added
+- **Budget Window** — the budget button in the UCP now opens a working window. 💰 Tabs cover your Cash (day-by-day money flow), Net Worth (cash, money in objects, and object value), Income, and Expenses, with income and expenses broken down by category over the last 30 days. The Bills tab is not implemented yet.
+- The ledger behind the Budget Window now records catalogue purchases, sell-backs, object upgrades, build-mode spending, and lot expansions (from this update onward), each under its own category — purchases, upgrades, building, and lot expansion as expenses, and sell-backs as income.
+
 ## 1.0.13 — July 2026 🖱️
 
 ### Fixed

@@ -267,6 +267,11 @@ namespace FSO.Client.Controllers
             ((BookmarksController)Screen.Bookmarks.Controller).Show();
         }
 
+        public void ToggleBudget()
+        {
+            ((BudgetController)Screen.Budget.Controller).Toggle();
+        }
+
         public void ShowPersonPage(uint avatarId){
             ((PersonPageController)Screen.PersonPage.Controller).Show(avatarId);
         }

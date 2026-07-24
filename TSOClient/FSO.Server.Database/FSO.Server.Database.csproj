@@ -176,6 +176,7 @@
     <Compile Include="DA\Neighborhoods\SqlNeighborhoods.cs" />
     <Compile Include="DA\Objects\DbObject.cs" />
     <Compile Include="DA\Objects\DbObjectAttribute.cs" />
+    <Compile Include="DA\Objects\DbObjectNetWorth.cs" />
     <Compile Include="DA\Objects\IObjects.cs" />
     <Compile Include="DA\Objects\SqlObjects.cs" />
     <Compile Include="DA\Outfits\DbOutfit.cs" />

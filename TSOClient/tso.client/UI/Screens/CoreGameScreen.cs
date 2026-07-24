@@ -43,6 +43,7 @@ namespace FSO.Client.UI.Screens
         public UILotPage LotPage;
         public UINeighPage NeighPage;
         public UIBookmarks Bookmarks;
+        public UIBudget Budget;
         public UIRelationshipDialog Relationships;
         public UIMapWaypoint YouAreHere, YourHouseHere;
 
@@ -289,6 +290,11 @@ namespace FSO.Client.UI.Screens
             Bookmarks.Visible = false;
             ControllerUtils.BindController<BookmarksController>(Bookmarks);
             WindowContainer.Add(Bookmarks);
+
+            Budget = new UIBudget();
+            Budget.Visible = false;
+            ControllerUtils.BindController<BudgetController>(Budget);
+            WindowContainer.Add(Budget);
 
             Relationships = new UIRelationshipDialog();
             Relationships.Visible = false;

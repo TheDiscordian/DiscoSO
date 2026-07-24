@@ -87,6 +87,7 @@ namespace FSO.Client.UI.Panels
         /// </summary>
         public UIButton BookmarkButton { get; set; }
         public UIButton FriendshipWebButton { get; set; }
+        public UIButton BudgetButton { get; set; }
 
         /// <summary>
         /// Labels
@@ -168,6 +169,7 @@ namespace FSO.Client.UI.Panels
 
             BookmarkButton.OnButtonClick += BookmarkButton_OnButtonClick;
             FriendshipWebButton.OnButtonClick += FriendshipWebButton_OnButtonClick;
+            BudgetButton.OnButtonClick += b => FindController<CoreGameScreenController>()?.ToggleBudget();
 
             SecondFloorButton.Selected = (Game.Level == Game.Stories);
             FirstFloorButton.Selected = (Game.Level == 1);

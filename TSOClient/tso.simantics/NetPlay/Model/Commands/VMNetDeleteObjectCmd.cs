@@ -2,6 +2,7 @@
 using FSO.SimAntics.Model;
 using FSO.SimAntics.Model.TSOPlatform;
 using FSO.SimAntics.Model.Platform;
+using FSO.SimAntics.Primitives;
 
 namespace FSO.SimAntics.NetPlay.Model.Commands
 {
@@ -30,7 +31,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
                 if (vm.GlobalLink != null)
                 {
                     vm.GlobalLink.PerformTransaction(vm, false, uint.MaxValue, caller?.PersistID ?? uint.MaxValue,
-                        value,
+                        value, (short)VMTransferFundsExpenseType.IncomeObjectSellback,
                     (bool success, int transferAmount, uint uid1, uint budget1, uint uid2, uint budget2) =>
                     {
 
