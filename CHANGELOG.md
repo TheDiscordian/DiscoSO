@@ -7,6 +7,9 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 ### Changed
 - The Budget Window's Bills tab now shows your outstanding balance — $0 once everything is paid — instead of falling back to your bill history total. 💸
 
+### Fixed
+- Lamps no longer get permanently stuck ignoring their auto setting after being switched on or off by hand — toggling auto now fully resets the manual override. 💡
+
 ## 1.0.17 — July 2026 🔄
 
 ### Changed
