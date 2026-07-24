@@ -378,7 +378,8 @@ namespace FSO.SimAntics.Engine.Utils
 
             var replacement = entity.TuningReplacement?.TryGetEntry(tableID, keyID);
             if (replacement.HasValue) return replacement.Value;
-            /*
+
+            //dynamic tuning overrides object/semiglobal/global constants (type = iff filename, table = offset id e.g. 4096)
             var dyn = context.VM.Tuning;
             if (dyn != null) {
                 string name = "object";
@@ -391,10 +392,9 @@ namespace FSO.SimAntics.Engine.Utils
                     case 2: //semi globals
                         name = "global.iff"; break;
                 }
-                var replacement = dyn.GetTuning(name, tableID, keyID);
-                if (replacement != null) return (short)replacement;
+                var dynValue = dyn.GetTuning(name, tableID, keyID);
+                if (dynValue != null) return (short)dynValue;
             }
-            */
 
             uint targID = ((uint)tableID << 16) | keyID;
             Dictionary<uint, short> tuningCache = null;
