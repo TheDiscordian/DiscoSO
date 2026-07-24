@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Changed
+- The Budget Window's Bills tab now shows your outstanding balance — $0 once everything is paid — instead of falling back to your bill history total. 💸
+
 ## 1.0.17 — July 2026 🔄
 
 ### Changed
