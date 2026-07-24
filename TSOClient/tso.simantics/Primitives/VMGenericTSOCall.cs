@@ -474,6 +474,10 @@ namespace FSO.SimAntics.Primitives
                     //the budget change syncs back through the normal transaction response
                     context.VM.GlobalLink?.PayLotBills(context.VM, context.Caller.PersistID);
                     return VMPrimitiveExitCode.GOTO_TRUE;
+                case VMGenericTSOCallMode.DiscoSODeliverBills: //201
+                    //the mail carrier is at the mailbox - server folds unbilled metered usage into today's bill
+                    context.VM.GlobalLink?.DeliverLotBills(context.VM);
+                    return VMPrimitiveExitCode.GOTO_TRUE;
                 default:
                     return VMPrimitiveExitCode.GOTO_TRUE;
             }

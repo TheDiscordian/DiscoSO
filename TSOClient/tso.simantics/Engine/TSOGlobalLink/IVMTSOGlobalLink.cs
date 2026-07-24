@@ -11,6 +11,7 @@ namespace FSO.SimAntics.Engine.TSOTransaction
     public interface IVMTSOGlobalLink
     {
         void PayLotBills(VM vm, uint payerId);
+        void DeliverLotBills(VM vm);
         void LeaveLot(VM vm, VMAvatar avatar);
         void PerformTransaction(VM vm, bool testOnly, uint uid1, uint uid2, int amount, short type, short thread, VMAsyncTransactionCallback callback);
         void PerformTransaction(VM vm, bool testOnly, uint uid1, uint uid2, int amount, short type, VMAsyncTransactionCallback callback);
