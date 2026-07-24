@@ -41,6 +41,15 @@ namespace FSO.Client.Controllers.Panels
                 });
         }
 
+        public void PayBills()
+        {
+            DatabaseService.PayBills(new PayBillsRequest { AvatarId = Network.MyCharacter })
+                .ContinueWith(x =>
+                {
+                    GameThread.NextUpdate(y => Refresh()); //refresh regardless; failure leaves bills outstanding
+                });
+        }
+
         public void ShowBills()
         {
             View.ShowBills();

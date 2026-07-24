@@ -1,4 +1,5 @@
-﻿using FSO.Common.Enum;
+﻿using System.Linq;
+using FSO.Common.Enum;
 using FSO.Common.Security;
 using FSO.Server.Database.DA;
 using FSO.Server.Database.DA.Lots;
@@ -284,6 +285,21 @@ namespace FSO.Server.Servers.City.Domain
                                 var lot = db.Lots.GetByLocation(Context.ShardId, lotId);
                                 if (lot != null)
                                 {
+                                    //overdue bills: past the grace period the lot stops admitting non-roommates
+                                    if (FSO.Server.Database.DA.LotBills.LotBillsUtils.GetOverdueTier(db, lot.lot_id) >= FSO.Server.Database.DA.LotBills.LotBillsUtils.TIER_NO_VISITORS
+                                        && lot.category != FSO.Common.Enum.LotCategory.community)
+                                    {
+                                        var billRoomies = db.Roommates.GetLotRoommates(lot.lot_id);
+                                        var billMod = db.Avatars.GetModerationLevel(avatarId);
+                                        if (billMod == 0 && !billRoomies.Any(r => r.avatar_id == avatarId && r.is_pending == 0))
+                                        {
+                                            return Immediate(new TryFindLotResult
+                                            {
+                                                Status = FindLotResponseStatus.NO_ADMIT
+                                            });
+                                        }
+                                    }
+
                                     if (lot.admit_mode > 0 && lot.admit_mode < 4)
                                     {
                                         //special admit mode

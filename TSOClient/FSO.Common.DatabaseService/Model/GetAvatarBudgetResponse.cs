@@ -15,7 +15,9 @@ namespace FSO.Common.DatabaseService.Model
         public List<BudgetDaySummary> Days = new List<BudgetDaySummary>();
         public List<BudgetCategorySummary> Categories = new List<BudgetCategorySummary>();
         public List<BudgetDaySummary> BillsDays = new List<BudgetDaySummary>(); //per-day bills (code 108), appended last for wire compat
-        public bool BillsEnabled; //discoso_bills tuning has a nonzero rate
+        public bool BillsEnabled; //discoso_bills tuning has a nonzero rate, or bills are outstanding
+        public uint OutstandingBills; //total unpaid bills across the avatar's roommate lots
+        public uint OldestBilledDay; //epoch day of the oldest unpaid bill (0 = none)
 
         public void Serialize(IoBuffer output, ISerializationContext context)
         {
@@ -48,6 +50,8 @@ namespace FSO.Common.DatabaseService.Model
                 output.PutUInt32(day.Expense);
             }
             output.PutBool(BillsEnabled);
+            output.PutUInt32(OutstandingBills);
+            output.PutUInt32(OldestBilledDay);
         }
 
         public void Deserialize(IoBuffer input, ISerializationContext context)
@@ -93,6 +97,8 @@ namespace FSO.Common.DatabaseService.Model
                 });
             }
             BillsEnabled = input.HasRemaining && input.GetBool();
+            OutstandingBills = input.HasRemaining ? input.GetUInt32() : 0;
+            OldestBilledDay = input.HasRemaining ? input.GetUInt32() : 0;
         }
     }
 

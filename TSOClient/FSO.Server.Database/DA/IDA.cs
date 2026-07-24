@@ -54,6 +54,7 @@ namespace FSO.Server.Database.DA
         IOutfits Outfits { get; }
         ILotVisits LotVisits { get; }
         FSO.Server.Database.DA.LotEvents.ILotEvents LotEvents { get; }
+        FSO.Server.Database.DA.LotBills.ILotBills LotBills { get; }
         ILotVisitTotals LotVisitTotals { get; }
         ILotTop100 LotTop100 { get; }
         IBonus Bonus { get; }

@@ -162,6 +162,10 @@
     <Compile Include="DA\LotTop100\ILotTop100.cs" />
     <Compile Include="DA\LotTop100\DbLotTop100.cs" />
     <Compile Include="DA\LotTop100\SqlLotTop100.cs" />
+    <Compile Include="DA\LotBills\DbLotBill.cs" />
+    <Compile Include="DA\LotBills\LotBillsUtils.cs" />
+    <Compile Include="DA\LotBills\ILotBills.cs" />
+    <Compile Include="DA\LotBills\SqlLotBills.cs" />
     <Compile Include="DA\LotEvents\DbLotEvent.cs" />
     <Compile Include="DA\LotEvents\ILotEvents.cs" />
     <Compile Include="DA\LotEvents\SqlLotEvents.cs" />
@@ -252,6 +256,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="DatabaseScripts\changes\0028_upgradelevel.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DatabaseScripts\changes\0035_lot_bills.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="DatabaseScripts\changes\0034_lot_events.sql">
