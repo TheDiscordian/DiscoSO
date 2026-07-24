@@ -184,6 +184,35 @@ namespace FSO.Server.Servers.Lot.Domain
             });
         }
 
+        public void QueryLotBills(VM vm, uint callerId, ushort actionUID)
+        {
+            //respond with the outstanding total through the interaction result; the pay dialog
+            //reads the amount from TempXL 0
+            var lotId = Context.DbId;
+            Host.InBackground(() =>
+            {
+                try
+                {
+                    long total;
+                    using (var db = DAFactory.Get())
+                    {
+                        total = db.LotBills.GetOutstanding(lotId).Sum(x => (long)x.amount);
+                    }
+                    vm.SendCommand(new VMNetInteractionResultCmd
+                    {
+                        ActorUID = callerId,
+                        ActionUID = actionUID,
+                        Accepted = true,
+                        Value = (int)Math.Min(int.MaxValue, total)
+                    });
+                }
+                catch (Exception e)
+                {
+                    LOG.Warn(e, "bill query failed for lot " + lotId);
+                }
+            });
+        }
+
         public void RequestRoommate(VM vm, uint avatarID, int mode, byte permissions)
         {
             //0 = initiate. 1 = accept. 2 = reject.
