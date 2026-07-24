@@ -17,7 +17,8 @@ namespace FSO.Server.Servers.Tasks.Domain
     /// Community lots are never billed.
     /// Tuning (discoso_bills table 0): 0 = $/active day per size step, 1 = per-extra-floor
     /// multiplier, 2 = bill period days, 3 = grace days, 4 = extra days to tier 2,
-    /// 5 = lights $ per in-game hour open (1 game hour = 1 real minute), 6 = overdue days past grace that pause accrual (and cut
+    /// 5 = lights $ per lit-lamp in-game hour, 7 = stalls $ per open-stall in-game hour
+    /// (1 game hour = 1 real minute), 6 = overdue days past grace that pause accrual (and cut
     /// lights, once the VM side lands). Indices 0 and 5 both 0 = dormant.
     /// </summary>
     public class BillsTask : ITask
@@ -45,7 +46,8 @@ namespace FSO.Server.Servers.Tasks.Domain
                 var grace = Math.Max(0, (int)tune(3, 3));
                 var pauseDays = Math.Max(1, (int)tune(6, 6));
                 var lightsRate = tune(5, 0);
-                if (perDayPerSize <= 0 && lightsRate <= 0)
+                var stallRate = tune(7, 2);
+                if (perDayPerSize <= 0 && lightsRate <= 0 && stallRate <= 0)
                 {
                     LOG.Info("Bills tuning not set (discoso_bills 0:0 per-day, 0:5 lights) - no bills issued.");
                     return;
@@ -91,14 +93,14 @@ namespace FSO.Server.Servers.Tasks.Domain
                         for (var d = (int)(iv.Start - epoch).TotalDays; d <= (int)(iv.End.AddTicks(-1) - epoch).TotalDays; d++)
                             activeDays.Add(d);
                     }
-                    if (activeDays.Count == 0 && openHours <= 0) continue; //unused lots owe nothing
+                    var usage = db.LotUsage.GetUsageBetween(lot.lot_id, last, today);
+                    if (activeDays.Count == 0 && usage.light_hours <= 0 && usage.stall_hours <= 0) continue; //unused lots owe nothing
 
                     var size = lot.size & 255;
                     var extraFloors = (lot.size >> 8) & 255;
                     var perDay = perDayPerSize * (size + 1) * (1f + floorMul * extraFloors);
-                    //lights bill per IN-GAME hour: TSO runs 1 game minute per real second, so 1 real hour = 60 game hours
-                    var lightsGameHours = openHours * 60.0;
-                    var bill = (int)Math.Round(activeDays.Count * perDay + lightsGameHours * lightsRate);
+                    //light and stall hours are metered in-game hours per lit lamp / open stall (sampled hourly on the lot)
+                    var bill = (int)Math.Round(activeDays.Count * perDay + usage.light_hours * lightsRate + usage.stall_hours * stallRate);
                     if (bill <= 0) continue;
 
                     db.LotBills.Create(new DbLotBill { lot_id = lot.lot_id, amount = bill, billed_day = today });
