@@ -18,7 +18,8 @@ namespace FSO.Server.Servers.Tasks.Domain
     /// everything is paid off. Community lots are never billed.
     /// Tuning (discoso_bills table 0): 0 = $/active day per size step, 1 = per-extra-floor
     /// multiplier, 2 = bill period days, 3 = grace days, 4 = extra days to tier 2,
-    /// 5 = lights $ per lit-lamp in-game hour, 7 = stalls $ per open-stall in-game hour
+    /// 5 = lights $ per lit-lamp in-game hour, 7 = stalls $ per open-stall in-game hour,
+    /// 8 = stereos $ per powered-on in-game hour
     /// (on TSO lots 1 game minute = 5 real seconds, so 1 game hour = 5 real minutes),
     /// 6 = overdue days past grace that pause accrual (and cut
     /// lights, once the VM side lands). Index 0 = 0 disables the daily charge.

@@ -20,7 +20,8 @@ namespace FSO.Server.Database.DA.LotBills
             Func<int, float, float> tune = (i, def) => tuning.ContainsKey(i) ? tuning[i].value : def;
             var lightsRate = tune(5, 0);
             var stallRate = tune(7, 0);
-            if (lightsRate <= 0 && stallRate <= 0) return 0;
+            var radioRate = tune(8, 0);
+            if (lightsRate <= 0 && stallRate <= 0 && radioRate <= 0) return 0;
 
             var today = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
             var grace = Math.Max(0, (int)tune(3, 3));
@@ -31,10 +32,10 @@ namespace FSO.Server.Database.DA.LotBills
             if (db.LotBills.HasPaidBillOnDay(lot_id, today)) return 0; //today's bill is settled; usage waits
 
             var projected = db.LotUsage.GetUnbilled(lot_id);
-            if ((int)Math.Round(projected.light_hours * lightsRate + projected.stall_hours * stallRate) < 1) return 0;
+            if ((int)Math.Round(projected.light_hours * lightsRate + projected.stall_hours * stallRate + projected.radio_hours * radioRate) < 1) return 0;
 
             var actual = db.LotUsage.CollectUnbilled(lot_id);
-            var charge = (int)Math.Round(actual.light_hours * lightsRate + actual.stall_hours * stallRate);
+            var charge = (int)Math.Round(actual.light_hours * lightsRate + actual.stall_hours * stallRate + actual.radio_hours * radioRate);
             if (charge < 1) return 0;
             return db.LotBills.AddToDay(lot_id, today, charge) ? charge : 0;
         }

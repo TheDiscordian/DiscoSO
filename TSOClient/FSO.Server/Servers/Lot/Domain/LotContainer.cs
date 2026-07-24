@@ -916,12 +916,19 @@ namespace FSO.Server.Servers.Lot.Domain
         private static uint NHOOD_BULLETIN_SMART_GUID = 0x792617D7;
 
         private static readonly HashSet<string> StallIffs = new HashSet<string> { "foodcounter.iff", "foodcounterunleashed.iff" };
+        private static readonly HashSet<string> StereoIffs = new HashSet<string> { "stereos.iff", "stereos2.iff", "jukebox.iff", "stereowallunleashed.iff", "stereospeakers.iff" };
         private int UsageSampleTicker;
 
         private static bool IsStall(VMEntity obj)
         {
             var iff = (obj as VMGameObject)?.Object?.Resource?.MainIff?.Filename;
             return iff != null && StallIffs.Contains(iff);
+        }
+
+        private static bool IsStereo(VMEntity obj)
+        {
+            var iff = (obj as VMGameObject)?.Object?.Resource?.MainIff?.Filename;
+            return iff != null && StereoIffs.Contains(iff);
         }
 
         //fold unbilled metered usage (lights, stalls) into today's bill.
@@ -1104,13 +1111,14 @@ namespace FSO.Server.Servers.Lot.Domain
                             {
                                 if (ent is VMGameObject && ent.MultitileGroup != null) groups.Add(ent.MultitileGroup);
                             }
-                            int litLamps = 0, openStalls = 0;
+                            int litLamps = 0, openStalls = 0, playingStereos = 0;
                             foreach (var group in groups)
                             {
                                 if (group.Objects.Any(o => o.GetValue(VMStackObjectVariable.LightingContribution) > 0)) litLamps++;
                                 if (IsStall(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(1) > 0)) openStalls++; //"Is open?" lives on the control segment, not the base tile
+                                if (IsStereo(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(0) > 0)) playingStereos++; //attribute 0 = "Power (Off/On)" on every stereo family
                             }
-                            if (litLamps > 0 || openStalls > 0)
+                            if (litLamps > 0 || openStalls > 0 || playingStereos > 0)
                             {
                                 var day = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
                                 var lotId = Context.DbId;
@@ -1120,7 +1128,7 @@ namespace FSO.Server.Servers.Lot.Domain
                                     {
                                         using (var db = DAFactory.Get())
                                         {
-                                            db.LotUsage.AddUsage(lotId, day, litLamps, openStalls);
+                                            db.LotUsage.AddUsage(lotId, day, litLamps, openStalls, playingStereos);
                                         }
                                     }
                                     catch (Exception) { }
