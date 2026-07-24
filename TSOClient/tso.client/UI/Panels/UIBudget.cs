@@ -160,7 +160,7 @@ namespace FSO.Client.UI.Panels
         {
             CashTabValue.Caption = FormatMoney(Data?.Cash ?? 0);
             NetWorthTabValue.Caption = FormatMoney(NetWorthTotal());
-            DebtTabValue.Caption = FormatMoney((Data?.OutstandingBills ?? 0) > 0 ? Data.OutstandingBills : TotalBills());
+            DebtTabValue.Caption = FormatMoney(Data?.OutstandingBills ?? 0);
             IncomeTabValue.Caption = FormatMoney(TotalIncome());
             ExpensesTabValue.Caption = FormatMoney(TotalExpenses());
         }
