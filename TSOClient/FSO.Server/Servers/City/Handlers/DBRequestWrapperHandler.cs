@@ -227,7 +227,7 @@ namespace FSO.Server.Servers.City.Handlers
                 var roomies = da.Roommates.GetLotRoommatesWithInfo(lot.lot_id).Select(x => new LotLogEntry
                 {
                     Name = x.name,
-                    Time = x.move_date,
+                    Time = x.last_active,
                     Type = x.permissions_level
                 }).ToList();
 

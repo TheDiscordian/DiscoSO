@@ -76,10 +76,15 @@ namespace FSO.Server.Database.DA.Roommates
     
         public List<DbRoommateInfo> GetLotRoommatesWithInfo(int lot_id)
         {
+            //"recent activity": the roommate's latest visit to this lot, falling back to their move date
             return Context.Connection.Query<DbRoommateInfo>(
-                "SELECT a.name, a.move_date, r.permissions_level FROM fso_roommates r "
+                "SELECT a.name, COALESCE(UNIX_TIMESTAMP(MAX(v.time_created)), a.move_date) AS last_active, r.permissions_level "
+                + "FROM fso_roommates r "
                 + "JOIN fso_avatars a ON a.avatar_id = r.avatar_id "
-                + "WHERE r.lot_id = @lot_id AND r.is_pending = 0 ORDER BY r.permissions_level DESC",
+                + "LEFT JOIN fso_lot_visits v ON v.avatar_id = r.avatar_id AND v.lot_id = r.lot_id "
+                + "WHERE r.lot_id = @lot_id AND r.is_pending = 0 "
+                + "GROUP BY r.avatar_id, a.name, a.move_date, r.permissions_level "
+                + "ORDER BY last_active DESC",
                 new { lot_id = lot_id }).ToList();
         }
     }
@@ -87,7 +92,7 @@ namespace FSO.Server.Database.DA.Roommates
     public class DbRoommateInfo
     {
         public string name { get; set; }
-        public uint move_date { get; set; }
+        public uint last_active { get; set; }
         public byte permissions_level { get; set; }
     }
 }

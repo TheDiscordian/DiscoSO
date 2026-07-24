@@ -224,6 +224,7 @@ namespace FSO.Client.UI.Panels
         private UILotControl LotControl;
         private UIScript Script;
         private int RefreshTicks;
+        private UIStatsBar[] Bars;
 
         public UIStatsPanel(UILotControl lotController)
         {
@@ -238,12 +239,16 @@ namespace FSO.Client.UI.Panels
                 val.Alignment = TextAlignment.Left | TextAlignment.Middle;
             TitleLabel.Alignment = TextAlignment.Left | TextAlignment.Middle;
 
-            //fill like skill bars: 0-10 scale, no percentage caption
-            foreach (var bar in new[] { SizeProgress, FurnishingsProgress, YardProgress, UpkeepProgress, LayoutProgress })
+            //the script-made progress bars nine-slice EA's tiny bar art into a mess - swap in
+            //plain clipped-fill bars using the same textures
+            Bars = new UIStatsBar[5];
+            var scriptBars = new[] { SizeProgress, FurnishingsProgress, YardProgress, UpkeepProgress, LayoutProgress };
+            for (int i = 0; i < 5; i++)
             {
-                bar.MinValue = 0;
-                bar.MaxValue = 10;
-                bar.Caption = "";
+                scriptBars[i].Visible = false;
+                Bars[i] = new UIStatsBar(scriptBars[i].Background, scriptBars[i].Bar);
+                Bars[i].Position = scriptBars[i].Position;
+                Add(Bars[i]);
             }
 
             Refresh();
@@ -315,15 +320,49 @@ namespace FSO.Client.UI.Panels
             FloorsValue.Caption = lotFloors.ToString();
             LotSizeValue.Caption = (string)Script[(lotSize <= 1) ? "SmallLotSizeText" : ((lotSize <= 3) ? "MediumLotSizeText" : "LargeLotSizeText")];
 
-            //DiscoSO evaluators, 0-10
-            SizeProgress.Value = Math.Min(10f, (interiorArea * 10f) / buildableTiles);
-            FurnishingsProgress.Value = Math.Min(10f, objValue / (interiorArea > 0 ? interiorArea * 50f : 5000f));
-            YardProgress.Value = Math.Min(10f, outdoorValue / (buildableTiles * 5f));
-            UpkeepProgress.Value = (initialValue > 0) ? (currentOfInitial * 10f) / initialValue : 10f;
-            LayoutProgress.Value = (insideRooms > 0) ? (reasonableRooms * 10f) / insideRooms : 0f;
+            //DiscoSO evaluators, 0-10, absolute scales so small properties read low
+            Bars[0].Value = Math.Min(10f, interiorArea / 40f); //Size: 400 interior tiles = max
+            Bars[1].Value = Math.Min(10f, objValue / (interiorArea > 0 ? interiorArea * 50f : 5000f)); //Furnishings
+            Bars[2].Value = Math.Min(10f, outdoorValue / (buildableTiles * 5f)); //Yard
+            Bars[3].Value = (initialValue > 0) ? (currentOfInitial * 10f) / initialValue : 10f; //Upkeep (wear)
+            Bars[4].Value = Math.Min(10f, reasonableRooms * 2f); //Layout: five well-sized rooms = max
         }
     }
     
+    /// <summary>
+    /// A stats rating bar: EA's background drawn whole, the fill texture clipped to the value fraction.
+    /// </summary>
+    public class UIStatsBar : UIElement
+    {
+        private Texture2D Background;
+        private Texture2D Fill;
+        public float Value; //0-10
+
+        public UIStatsBar(Texture2D background, Texture2D fill)
+        {
+            Background = background;
+            Fill = fill;
+        }
+
+        public override void Draw(UISpriteBatch batch)
+        {
+            if (!Visible) return;
+            if (Background != null)
+                DrawLocalTexture(batch, Background, Vector2.Zero);
+            if (Fill != null && Value > 0)
+            {
+                var frac = Math.Min(1f, Value / 10f);
+                var src = new Rectangle(0, 0, (int)(Fill.Width * frac), Fill.Height);
+                if (src.Width > 0) DrawLocalTexture(batch, Fill, src, Vector2.Zero);
+            }
+        }
+
+        public override Rectangle GetBounds()
+        {
+            return new Rectangle(0, 0, Background?.Width ?? 0, Background?.Height ?? 0);
+        }
+    }
+
     /// <summary>
     /// Set roommate build permissions. Check buttons disabled as anything but owner.
     /// </summary>
@@ -473,8 +512,8 @@ namespace FSO.Client.UI.Panels
             for (int i = 0; i < RowCount; i++)
             {
                 var row = new UILabel();
-                row.Position = new Vector2(88, 20 + i * 17);
-                row.Size = new Vector2(266, 16);
+                row.Position = new Vector2(126, 20 + i * 17);
+                row.Size = new Vector2(228, 16);
                 row.Alignment = TextAlignment.Left | TextAlignment.Middle;
                 row.CaptionStyle = RoommatesTitleText.CaptionStyle.Clone();
                 row.CaptionStyle.Shadow = true;
