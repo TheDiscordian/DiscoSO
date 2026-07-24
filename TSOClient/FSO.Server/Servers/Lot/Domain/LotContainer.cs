@@ -18,6 +18,7 @@ using FSO.Server.Protocol.Electron.Packets;
 using FSO.Server.Protocol.Gluon.Model;
 using FSO.Server.Servers.City.Domain;
 using FSO.SimAntics;
+using FSO.SimAntics.Entities;
 using FSO.SimAntics.Engine;
 using FSO.SimAntics.Marshals;
 using FSO.SimAntics.Model;
@@ -890,6 +891,15 @@ namespace FSO.Server.Servers.Lot.Domain
         private static uint NHOOD_BULLETIN_GUID = 0x4B489F30;
         private static uint NHOOD_BULLETIN_SMART_GUID = 0x792617D7;
 
+        private static readonly HashSet<string> StallIffs = new HashSet<string> { "foodcounter.iff", "foodcounterunleashed.iff" };
+        private int UsageSampleTicker;
+
+        private static bool IsStall(VMEntity obj)
+        {
+            var iff = (obj as VMGameObject)?.Object?.Resource?.MainIff?.Filename;
+            return iff != null && StallIffs.Contains(iff);
+        }
+
         private void EnsureCommunityObjects()
         {
             var payphones = Lot.Context.ObjectQueries.GetObjectsByGUID(PAYPHONE_GUID)?.ToList(); //clone as we will be removing them
@@ -913,6 +923,14 @@ namespace FSO.Server.Servers.Lot.Domain
                 SimAntics.Primitives.VMFindLocationFor.FindLocationFor(bulletin, mailbox, Lot.Context, VMPlaceRequestFlags.UserPlacement);
             }
 
+            //stalls start open on community lots
+            foreach (var ent in Lot.Entities)
+            {
+                if (ent.MultitileGroup?.BaseObject == ent && IsStall(ent) && ent.GetAttribute(1) == 0)
+                {
+                    ent.SetAttribute(1, 1); //attribute 1 = "Is open?"
+                }
+            }
         }
 
         private void Lot_OnChatEvent(VMChatEvent evt)
@@ -1015,6 +1033,47 @@ namespace FSO.Server.Servers.Lot.Domain
                         Host.Shutdown();
                         DereferenceLot();
                         return;
+                    }
+
+                    //usage metering: sample once per in-game hour (60 real seconds).
+                    //each sample adds 1 game hour per lit lamp and per open stall.
+                    if (!JobLot && ++UsageSampleTicker >= TICKRATE * 60)
+                    {
+                        UsageSampleTicker = 0;
+                        try
+                        {
+                            var groups = new HashSet<VMMultitileGroup>();
+                            foreach (var ent in Lot.Entities)
+                            {
+                                if (ent is VMGameObject && ent.MultitileGroup != null) groups.Add(ent.MultitileGroup);
+                            }
+                            int litLamps = 0, openStalls = 0;
+                            foreach (var group in groups)
+                            {
+                                if (group.Objects.Any(o => o.GetValue(VMStackObjectVariable.LightingContribution) > 0)) litLamps++;
+                                if (IsStall(group.BaseObject) && group.BaseObject.GetAttribute(1) > 0) openStalls++; //attribute 1 = "Is open?"
+                            }
+                            if (litLamps > 0 || openStalls > 0)
+                            {
+                                var day = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
+                                var lotId = Context.DbId;
+                                Host.InBackground(() =>
+                                {
+                                    try
+                                    {
+                                        using (var db = DAFactory.Get())
+                                        {
+                                            db.LotUsage.AddUsage(lotId, day, litLamps, openStalls);
+                                        }
+                                    }
+                                    catch (Exception) { }
+                                });
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            LOG.Warn(e, "usage metering failed for lot " + Context.DbId);
+                        }
                     }
 
                     if (Lot.Aborting)

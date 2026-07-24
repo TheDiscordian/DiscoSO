@@ -272,6 +272,19 @@ namespace FSO.Server.Database.DA
             }
         }
 
+        private FSO.Server.Database.DA.LotUsage.ILotUsage _LotUsage;
+        public FSO.Server.Database.DA.LotUsage.ILotUsage LotUsage
+        {
+            get
+            {
+                if (_LotUsage == null)
+                {
+                    _LotUsage = new FSO.Server.Database.DA.LotUsage.SqlLotUsage(Context);
+                }
+                return _LotUsage;
+            }
+        }
+
         private FSO.Server.Database.DA.LotBills.ILotBills _LotBills;
         public FSO.Server.Database.DA.LotBills.ILotBills LotBills
         {
