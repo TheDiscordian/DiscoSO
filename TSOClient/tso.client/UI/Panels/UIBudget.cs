@@ -4,6 +4,7 @@ using FSO.Client.UI.Controls;
 using FSO.Client.UI.Framework;
 using FSO.Client.UI.Framework.Parser;
 using FSO.Common.DatabaseService.Model;
+using FSO.Common.Rendering.Framework.Model;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -94,6 +95,18 @@ namespace FSO.Client.UI.Panels
             var listStyle = Script.Create<UIListBoxTextStyle>("ListBoxLeftColumnColors", ListBox.FontStyle);
             ListBox.TextStyle = listStyle;
 
+            //the uis asks for label alignment 1 (left) and value alignment 5 (right), but the parser
+            //only maps alignment 3 - both fall back to centered and overlap. set them directly,
+            //and put each value on its label's row.
+            var labels = new[] { CashTabLabel, NetWorthTabLabel, DebtTabLabel, IncomeTabLabel, ExpensesTabLabel };
+            var values = new[] { CashTabValue, NetWorthTabValue, DebtTabValue, IncomeTabValue, ExpensesTabValue };
+            for (int i = 0; i < labels.Length; i++)
+            {
+                labels[i].Alignment = TextAlignment.Left | TextAlignment.Middle;
+                values[i].Alignment = TextAlignment.Right | TextAlignment.Middle;
+                values[i].Y = labels[i].Y;
+            }
+
             CashTabButton.OnButtonClick += b => SelectTab(0);
             NetWorthTabButton.OnButtonClick += b => SelectTab(1);
             IncomeTabButton.OnButtonClick += b => SelectTab(3);
@@ -106,6 +119,14 @@ namespace FSO.Client.UI.Panels
 
             SetExpanded(false);
             SetTabValues();
+        }
+
+        public override void Update(UpdateState state)
+        {
+            base.Update(state);
+            //UIDialog's render cache is only regenerated when Invalidated is set; resizing after
+            //display (our expand/collapse) leaves stale fragments behind. re-render while open.
+            if (Visible) Invalidated = true;
         }
 
         public void SetData(GetAvatarBudgetResponse data)
