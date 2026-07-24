@@ -55,6 +55,10 @@ namespace FSO.Server.Servers.City.Handlers
                 case DBRequestType.GetTopResultSetByID:
                     response = HandleGetTop100(session, msg);
                     break;
+
+                case DBRequestType.GetDataServiceAvatarBudgetByID:
+                    response = HandleGetBudget(session, msg);
+                    break;
             }
 
             if(response != null){
@@ -128,6 +132,58 @@ namespace FSO.Server.Servers.City.Handlers
             };
         }
 
+
+        private object HandleGetBudget(IVoltronSession session, cTSONetMessageStandard msg)
+        {
+            var request = msg.ComplexParameter as GetAvatarBudgetRequest;
+            if (request == null) { return null; }
+
+            if (request.AvatarId != session.AvatarId)
+            {
+                throw new Exception("Permission denied, you cannot view the budget of an avatar you do not own");
+            }
+
+            using (var da = DAFactory.Get())
+            {
+                var avatar = da.Avatars.Get(session.AvatarId);
+                if (avatar == null) return null;
+
+                var netWorth = da.Objects.GetNetWorth(session.AvatarId);
+                var today = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
+                var summary = da.Transactions.GetSummary(session.AvatarId, today - 30);
+
+                var days = summary.GroupBy(x => x.day).Select(g => new BudgetDaySummary
+                {
+                    Day = g.Key,
+                    Income = (uint)Math.Min(uint.MaxValue, g.Aggregate(0ul, (acc, x) => acc + x.income)),
+                    Expense = (uint)Math.Min(uint.MaxValue, g.Aggregate(0ul, (acc, x) => acc + x.expense))
+                }).OrderByDescending(x => x.Day).ToList();
+
+                var categories = summary.GroupBy(x => x.transaction_type).Select(g => new BudgetCategorySummary
+                {
+                    TransactionType = (short)g.Key,
+                    Income = (uint)Math.Min(uint.MaxValue, g.Aggregate(0ul, (acc, x) => acc + x.income)),
+                    Expense = (uint)Math.Min(uint.MaxValue, g.Aggregate(0ul, (acc, x) => acc + x.expense))
+                }).OrderByDescending(x => x.Income + x.Expense).ToList();
+
+                return new cTSONetMessageStandard()
+                {
+                    MessageID = 0x4AA84819,
+                    DatabaseType = DBResponseType.GetDataServiceAvatarBudgetByID.GetResponseID(),
+                    Parameter = msg.Parameter,
+
+                    ComplexParameter = new GetAvatarBudgetResponse()
+                    {
+                        AvatarId = session.AvatarId,
+                        Cash = (uint)avatar.budget,
+                        ObjectsMoney = (uint)Math.Min(uint.MaxValue, netWorth.money),
+                        ObjectsValue = (uint)Math.Min(uint.MaxValue, netWorth.value),
+                        Days = days,
+                        Categories = categories
+                    }
+                };
+            }
+        }
 
         private object HandleSearchExact(IVoltronSession session, cTSONetMessageStandard msg)
         {

@@ -85,6 +85,8 @@
     <Compile Include="Model\SearchResponse.cs" />
     <Compile Include="Model\LoadAvatarByIDRequest.cs" />
     <Compile Include="Model\LoadAvatarByIDResponse.cs" />
+    <Compile Include="Model\GetAvatarBudgetRequest.cs" />
+    <Compile Include="Model\GetAvatarBudgetResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

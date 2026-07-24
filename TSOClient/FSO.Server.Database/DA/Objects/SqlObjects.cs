@@ -221,5 +221,13 @@ namespace FSO.Server.Database.DA.Objects
                 "FROM fso_object_attributes a JOIN fso_objects o ON a.object_id = o.object_id " +
                 "WHERE `type` = @guid AND `index` = @index", new { guid, index }).FirstOrDefault();
         }
+
+        public DbObjectNetWorth GetNetWorth(uint owner_id)
+        {
+            return Context.Connection.Query<DbObjectNetWorth>(
+                "SELECT COALESCE(SUM(GREATEST(budget, 0)), 0) AS money, COALESCE(SUM(value), 0) AS value " +
+                "FROM fso_objects WHERE owner_id = @owner_id", new { owner_id }).FirstOrDefault()
+                ?? new DbObjectNetWorth();
+        }
     }
 }
