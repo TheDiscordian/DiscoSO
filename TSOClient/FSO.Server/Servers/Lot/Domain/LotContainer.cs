@@ -794,9 +794,13 @@ namespace FSO.Server.Servers.Lot.Domain
                     {
                         billCount = db.LotBills.GetOutstanding(Context.DbId).Count;
                     }
-                    //the master tile (0x39CCF441) carries the pie test + tree state; target it directly
-                    var mailbox = Lot.Entities.FirstOrDefault(x => x.Object.OBJ.GUID == 0x39CCF441);
-                    mailbox?.SetAttribute(1, (short)Math.Min(short.MaxValue, billCount));
+                    //the pie test reads whichever tile gets clicked - mark every tile of the group
+                    var mailbox = Lot.Entities.FirstOrDefault(x => x.Object.OBJ.GUID == 0x39CCF441 || x.Object.OBJ.GUID == 0xEF121974 || x.Object.OBJ.GUID == 0x729C4842);
+                    if (mailbox != null)
+                    {
+                        foreach (var tile in mailbox.MultitileGroup.Objects) tile.SetAttribute(1, (short)Math.Min(short.MaxValue, billCount));
+                        LOG.Info("mailbox bill count " + billCount + " set on " + mailbox.MultitileGroup.Objects.Count + " tile(s) for lot " + Context.DbId);
+                    }
                 }
                 catch (Exception e)
                 {
