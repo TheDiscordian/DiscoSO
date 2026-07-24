@@ -51,6 +51,11 @@ namespace FSO.Common.DatabaseService
             return Request<GetAvatarBudgetResponse>(DBRequestType.GetDataServiceAvatarBudgetByID, DBResponseType.GetDataServiceAvatarBudgetByID, null, request);
         }
 
+        public Task<GetLotLogResponse> GetLotLog(GetLotLogRequest request)
+        {
+            return Request<GetLotLogResponse>(DBRequestType.GetLotList, DBResponseType.GetLotList, null, request);
+        }
+
 
         //[MethodImpl(MethodImplOptions.Synchronized)]
         private Task<T> Request<T>(DBRequestType type, DBResponseType responseType, uint? parameter, object complexParameter)

@@ -33,6 +33,13 @@ namespace FSO.Server.Database.DA.DbEvents
             return Context.Connection.Execute("DELETE FROM fso_events WHERE event_id = @event_id", new { event_id = event_id }) > 0;
         }
 
+        public List<DbEvent> GetRecentAndUpcoming(DateTime cutoff, int limit)
+        {
+            return Context.Connection.Query<DbEvent>(
+                "SELECT * FROM fso_events WHERE end_day >= @cutoff ORDER BY start_day DESC LIMIT @limit",
+                new { cutoff = cutoff, limit = limit }).ToList();
+        }
+
         public List<DbEvent> GetActive(DateTime time)
         {
             return Context.Connection.Query<DbEvent>("SELECT * FROM fso_events WHERE start_day <= @time AND end_day >= @time", new { time = time }).ToList();

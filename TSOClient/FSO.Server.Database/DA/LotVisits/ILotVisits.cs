@@ -62,5 +62,6 @@ namespace FSO.Server.Database.DA.LotVisitors
         IEnumerable<DbLotVisitNhood> StreamBetweenOneNhood(uint nhood_id, DateTime start, DateTime end);
 
 
+        List<DbLotVisitSummary> GetRecentVisits(int lot_id, int limit);
     }
 }

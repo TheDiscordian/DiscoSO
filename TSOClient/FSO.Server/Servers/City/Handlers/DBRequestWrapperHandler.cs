@@ -59,6 +59,10 @@ namespace FSO.Server.Servers.City.Handlers
                 case DBRequestType.GetDataServiceAvatarBudgetByID:
                     response = HandleGetBudget(session, msg);
                     break;
+
+                case DBRequestType.GetLotList: //DiscoSO: house panel activity log
+                    response = HandleGetLotLog(session, msg);
+                    break;
             }
 
             if(response != null){
@@ -180,6 +184,63 @@ namespace FSO.Server.Servers.City.Handlers
                         ObjectsValue = (uint)Math.Min(uint.MaxValue, netWorth.value),
                         Days = days,
                         Categories = categories
+                    }
+                };
+            }
+        }
+
+        private object HandleGetLotLog(IVoltronSession session, cTSONetMessageStandard msg)
+        {
+            var request = msg.ComplexParameter as GetLotLogRequest;
+            if (request == null) { return null; }
+
+            using (var da = DAFactory.Get())
+            {
+                var lot = da.Lots.GetByLocation(Context.ShardId, request.Location);
+                if (lot == null) return null;
+
+                //the log is for roommates (and moderators) only
+                var roommates = da.Roommates.GetLotRoommates(lot.lot_id);
+                if (!roommates.Any(r => r.avatar_id == session.AvatarId && r.is_pending == 0))
+                {
+                    var avatar = da.Avatars.Get(session.AvatarId);
+                    if (avatar == null || avatar.moderation_level == 0) return null;
+                }
+
+                var epoch = new DateTime(1970, 1, 1);
+                var visits = da.LotVisits.GetRecentVisits(lot.lot_id, 50).Select(x => new LotLogEntry
+                {
+                    Name = x.name,
+                    Time = (uint)(x.time_created - epoch).TotalSeconds,
+                    Type = (byte)x.type
+                }).ToList();
+
+                var roomies = da.Roommates.GetLotRoommatesWithInfo(lot.lot_id).Select(x => new LotLogEntry
+                {
+                    Name = x.name,
+                    Time = x.move_date,
+                    Type = x.permissions_level
+                }).ToList();
+
+                var events = da.Events.GetRecentAndUpcoming(DateTime.UtcNow.AddDays(-30), 20).Select(x => new LotLogEvent
+                {
+                    Title = x.title ?? "",
+                    Description = x.description ?? "",
+                    StartTime = (uint)(x.start_day - epoch).TotalSeconds,
+                    EndTime = (uint)(x.end_day - epoch).TotalSeconds
+                }).ToList();
+
+                return new cTSONetMessageStandard()
+                {
+                    MessageID = 0x4AA84720,
+                    DatabaseType = DBResponseType.GetLotList.GetResponseID(),
+                    Parameter = msg.Parameter,
+
+                    ComplexParameter = new GetLotLogResponse()
+                    {
+                        Visitors = visits,
+                        Roommates = roomies,
+                        Events = events
                     }
                 };
             }

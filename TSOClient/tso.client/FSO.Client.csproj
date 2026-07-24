@@ -113,6 +113,7 @@
     <Compile Include="Controllers\NeighborhoodActionController.cs" />
     <Compile Include="Controllers\Panels\BookmarksController.cs" />
     <Compile Include="Controllers\Panels\BudgetController.cs" />
+    <Compile Include="Controllers\Panels\LotLogController.cs" />
     <Compile Include="Controllers\Panels\BulletinDialogController.cs" />
     <Compile Include="Controllers\Panels\GenericSearchController.cs" />
     <Compile Include="Controllers\Panels\LotAdmitController.cs" />
