@@ -21,7 +21,8 @@ namespace FSO.Server.Database.DA.LotBills
             var lightsRate = tune(5, 0);
             var stallRate = tune(7, 0);
             var radioRate = tune(8, 0);
-            if (lightsRate <= 0 && stallRate <= 0 && radioRate <= 0) return 0;
+            var tvRate = tune(9, 0);
+            if (lightsRate <= 0 && stallRate <= 0 && radioRate <= 0 && tvRate <= 0) return 0;
 
             var today = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
             var grace = Math.Max(0, (int)tune(3, 3));
@@ -30,10 +31,10 @@ namespace FSO.Server.Database.DA.LotBills
             if (oldest != null && today - oldest.Value - grace >= pauseDays) return 0; //far overdue: accrual paused
 
             var projected = db.LotUsage.GetUnbilled(lot_id);
-            if ((int)Math.Round(projected.light_hours * lightsRate + projected.stall_hours * stallRate + projected.radio_hours * radioRate) < 1) return 0;
+            if ((int)Math.Round(projected.light_hours * lightsRate + projected.stall_hours * stallRate + projected.radio_hours * radioRate + projected.tv_hours * tvRate) < 1) return 0;
 
             var actual = db.LotUsage.CollectUnbilled(lot_id);
-            var charge = (int)Math.Round(actual.light_hours * lightsRate + actual.stall_hours * stallRate + actual.radio_hours * radioRate);
+            var charge = (int)Math.Round(actual.light_hours * lightsRate + actual.stall_hours * stallRate + actual.radio_hours * radioRate + actual.tv_hours * tvRate);
             if (charge < 1) return 0;
             return db.LotBills.AddToDay(lot_id, today, charge) ? charge : 0;
         }

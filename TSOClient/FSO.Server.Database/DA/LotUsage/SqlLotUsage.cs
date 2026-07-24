@@ -9,18 +9,18 @@ namespace FSO.Server.Database.DA.LotUsage
         {
         }
 
-        public void AddUsage(int lot_id, int day, float lightHours, float stallHours, float radioHours)
+        public void AddUsage(int lot_id, int day, float lightHours, float stallHours, float radioHours, float tvHours)
         {
             Context.Connection.Execute(
-                "INSERT INTO fso_lot_usage (lot_id, day, light_hours, stall_hours, radio_hours) VALUES (@lot_id, @day, @lightHours, @stallHours, @radioHours) "
-                + "ON DUPLICATE KEY UPDATE light_hours = light_hours + @lightHours, stall_hours = stall_hours + @stallHours, radio_hours = radio_hours + @radioHours",
-                new { lot_id, day, lightHours, stallHours, radioHours });
+                "INSERT INTO fso_lot_usage (lot_id, day, light_hours, stall_hours, radio_hours, tv_hours) VALUES (@lot_id, @day, @lightHours, @stallHours, @radioHours, @tvHours) "
+                + "ON DUPLICATE KEY UPDATE light_hours = light_hours + @lightHours, stall_hours = stall_hours + @stallHours, radio_hours = radio_hours + @radioHours, tv_hours = tv_hours + @tvHours",
+                new { lot_id, day, lightHours, stallHours, radioHours, tvHours });
         }
 
         public DbLotUsageTotal GetUsageBetween(int lot_id, int afterDay, int toDay)
         {
             return Context.Connection.Query<DbLotUsageTotal>(
-                "SELECT COALESCE(SUM(light_hours), 0) AS light_hours, COALESCE(SUM(stall_hours), 0) AS stall_hours, COALESCE(SUM(radio_hours), 0) AS radio_hours "
+                "SELECT COALESCE(SUM(light_hours), 0) AS light_hours, COALESCE(SUM(stall_hours), 0) AS stall_hours, COALESCE(SUM(radio_hours), 0) AS radio_hours, COALESCE(SUM(tv_hours), 0) AS tv_hours "
                 + "FROM fso_lot_usage WHERE lot_id = @lot_id AND day > @afterDay AND day <= @toDay",
                 new { lot_id, afterDay, toDay }).FirstOrDefault() ?? new DbLotUsageTotal();
         }
@@ -30,7 +30,8 @@ namespace FSO.Server.Database.DA.LotUsage
             return Context.Connection.Query<DbLotUsageTotal>(
                 "SELECT COALESCE(SUM(GREATEST(light_hours - billed_light_hours, 0)), 0) AS light_hours, "
                 + "COALESCE(SUM(GREATEST(stall_hours - billed_stall_hours, 0)), 0) AS stall_hours, "
-                + "COALESCE(SUM(GREATEST(radio_hours - billed_radio_hours, 0)), 0) AS radio_hours "
+                + "COALESCE(SUM(GREATEST(radio_hours - billed_radio_hours, 0)), 0) AS radio_hours, "
+                + "COALESCE(SUM(GREATEST(tv_hours - billed_tv_hours, 0)), 0) AS tv_hours "
                 + "FROM fso_lot_usage WHERE lot_id = @lot_id",
                 new { lot_id }).FirstOrDefault() ?? new DbLotUsageTotal();
         }
@@ -42,9 +43,9 @@ namespace FSO.Server.Database.DA.LotUsage
             {
                 var rows = conn.Query<DbLotUsageDelta>(
                     "SELECT day, light_hours - billed_light_hours AS light_delta, stall_hours - billed_stall_hours AS stall_delta, "
-                    + "radio_hours - billed_radio_hours AS radio_delta "
+                    + "radio_hours - billed_radio_hours AS radio_delta, tv_hours - billed_tv_hours AS tv_delta "
                     + "FROM fso_lot_usage WHERE lot_id = @lot_id "
-                    + "AND (light_hours > billed_light_hours OR stall_hours > billed_stall_hours OR radio_hours > billed_radio_hours) FOR UPDATE",
+                    + "AND (light_hours > billed_light_hours OR stall_hours > billed_stall_hours OR radio_hours > billed_radio_hours OR tv_hours > billed_tv_hours) FOR UPDATE",
                     new { lot_id }, txn).ToList();
                 var total = new DbLotUsageTotal();
                 foreach (var row in rows)
@@ -52,14 +53,17 @@ namespace FSO.Server.Database.DA.LotUsage
                     var light = System.Math.Max(0, row.light_delta);
                     var stall = System.Math.Max(0, row.stall_delta);
                     var radio = System.Math.Max(0, row.radio_delta);
+                    var tv = System.Math.Max(0, row.tv_delta);
                     conn.Execute(
                         "UPDATE fso_lot_usage SET billed_light_hours = billed_light_hours + @light, "
                         + "billed_stall_hours = billed_stall_hours + @stall, "
-                        + "billed_radio_hours = billed_radio_hours + @radio WHERE lot_id = @lot_id AND day = @day",
-                        new { light, stall, radio, lot_id, row.day }, txn);
+                        + "billed_radio_hours = billed_radio_hours + @radio, "
+                        + "billed_tv_hours = billed_tv_hours + @tv WHERE lot_id = @lot_id AND day = @day",
+                        new { light, stall, radio, tv, lot_id, row.day }, txn);
                     total.light_hours += light;
                     total.stall_hours += stall;
                     total.radio_hours += radio;
+                    total.tv_hours += tv;
                 }
                 txn.Commit();
                 return total;

@@ -934,12 +934,19 @@ namespace FSO.Server.Servers.Lot.Domain
 
         private static readonly HashSet<string> StallIffs = new HashSet<string> { "foodcounter.iff", "foodcounterunleashed.iff" };
         private static readonly HashSet<string> StereoIffs = new HashSet<string> { "stereos.iff", "stereos2.iff", "jukebox.iff", "stereowallunleashed.iff", "stereospeakers.iff" };
+        private static readonly HashSet<string> TvIffs = new HashSet<string> { "tvs.iff" };
         private int UsageSampleTicker;
 
         private static bool IsStall(VMEntity obj)
         {
             var iff = (obj as VMGameObject)?.Object?.Resource?.MainIff?.Filename;
             return iff != null && StallIffs.Contains(iff);
+        }
+
+        private static bool IsTv(VMEntity obj)
+        {
+            var iff = (obj as VMGameObject)?.Object?.Resource?.MainIff?.Filename;
+            return iff != null && TvIffs.Contains(iff);
         }
 
         private static bool IsStereo(VMEntity obj)
@@ -1151,7 +1158,7 @@ namespace FSO.Server.Servers.Lot.Domain
                             {
                                 if (ent is VMGameObject && ent.MultitileGroup != null) groups.Add(ent.MultitileGroup);
                             }
-                            int litLamps = 0, openStalls = 0, playingStereos = 0;
+                            int litLamps = 0, openStalls = 0, playingStereos = 0, playingTvs = 0;
                             foreach (var group in groups)
                             {
                                 //the engine's real-light test: windows and doors carry a daylight contribution
@@ -1165,8 +1172,9 @@ namespace FSO.Server.Servers.Lot.Domain
                                 })) litLamps++;
                                 if (IsStall(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(1) > 0)) openStalls++; //"Is open?" lives on the control segment, not the base tile
                                 if (IsStereo(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(0) > 0)) playingStereos++; //attribute 0 = "Power (Off/On)" on every stereo family
+                                if (IsTv(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(0) > 0)) playingTvs++; //attribute 0 = "Power (Off/On)" on tvs.iff
                             }
-                            if (litLamps > 0 || openStalls > 0 || playingStereos > 0)
+                            if (litLamps > 0 || openStalls > 0 || playingStereos > 0 || playingTvs > 0)
                             {
                                 var day = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
                                 var lotId = Context.DbId;
@@ -1176,7 +1184,7 @@ namespace FSO.Server.Servers.Lot.Domain
                                     {
                                         using (var db = DAFactory.Get())
                                         {
-                                            db.LotUsage.AddUsage(lotId, day, litLamps, openStalls, playingStereos);
+                                            db.LotUsage.AddUsage(lotId, day, litLamps, openStalls, playingStereos, playingTvs);
                                         }
                                     }
                                     catch (Exception) { }
