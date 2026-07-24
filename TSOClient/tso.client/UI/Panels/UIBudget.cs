@@ -105,6 +105,7 @@ namespace FSO.Client.UI.Panels
             {
                 labels[i].Alignment = TextAlignment.Left | TextAlignment.Middle;
                 values[i].Alignment = TextAlignment.Right | TextAlignment.Middle;
+                labels[i].Y -= 4; //sit the text on the tab finger's centre line
                 values[i].Y = labels[i].Y;
             }
 
