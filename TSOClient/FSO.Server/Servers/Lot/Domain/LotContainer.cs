@@ -994,7 +994,10 @@ namespace FSO.Server.Servers.Lot.Domain
                     StackObject = ent,
                     Args = new short[4]
                 };
-                VMThread.EvaluateCheck(Lot.Context, ent, frame);
+                var result = VMThread.EvaluateCheck(Lot.Context, ent, frame);
+                LOG.Info("community stall auto-open on lot " + Context.DbId + ": " + ((ent as VMGameObject)?.Object?.OBJ?.ChunkLabel ?? "?")
+                    + " -> " + result + ", open=[" + string.Join(",", group.Objects.Select(o => o.GetAttribute(1)))
+                    + "] stock=[" + string.Join(",", group.Objects.Select(o => o.GetAttribute(3))) + "]");
             }
         }
 
