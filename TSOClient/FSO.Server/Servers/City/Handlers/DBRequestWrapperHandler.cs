@@ -63,6 +63,10 @@ namespace FSO.Server.Servers.City.Handlers
                 case DBRequestType.GetLotList: //DiscoSO: house panel activity log
                     response = HandleGetLotLog(session, msg);
                     break;
+
+                case DBRequestType.DebitCredit: //DiscoSO: pay outstanding property bills
+                    response = HandlePayBills(session, msg);
+                    break;
             }
 
             if(response != null){
@@ -163,6 +167,7 @@ namespace FSO.Server.Servers.City.Handlers
                     Expense = (uint)Math.Min(uint.MaxValue, g.Aggregate(0ul, (acc, x) => acc + x.expense))
                 }).OrderByDescending(x => x.Day).ToList();
 
+                var outstanding = da.LotBills.GetOutstandingForAvatarLots(session.AvatarId);
                 var billsDays = summary.Where(x => x.transaction_type == 108).Select(x => new BudgetDaySummary
                 {
                     Day = x.day,
@@ -192,7 +197,9 @@ namespace FSO.Server.Servers.City.Handlers
                         Days = days,
                         Categories = categories,
                         BillsDays = billsDays,
-                        BillsEnabled = da.Tuning.AllCategory("discoso_bills", 0).Any(x => x.value > 0)
+                        BillsEnabled = da.Tuning.AllCategory("discoso_bills", 0).Any(x => x.value > 0) || outstanding.Count > 0,
+                        OutstandingBills = (uint)outstanding.Sum(x => (long)x.amount),
+                        OldestBilledDay = (uint)(outstanding.Count > 0 ? outstanding.Min(x => x.billed_day) : 0)
                     }
                 };
             }
@@ -253,6 +260,53 @@ namespace FSO.Server.Servers.City.Handlers
                     }
                 };
             }
+        }
+
+        private object HandlePayBills(IVoltronSession session, cTSONetMessageStandard msg)
+        {
+            var request = msg.ComplexParameter as PayBillsRequest;
+            if (request == null) { return null; }
+            if (request.AvatarId != session.AvatarId)
+            {
+                throw new Exception("Permission denied, you cannot pay bills for another avatar");
+            }
+
+            var success = false;
+            uint paid = 0;
+            using (var da = DAFactory.Get())
+            {
+                var outstanding = da.LotBills.GetOutstandingForAvatarLots(session.AvatarId);
+                if (outstanding.Count == 0)
+                {
+                    success = true;
+                }
+                else
+                {
+                    var total = outstanding.Sum(x => (long)x.amount);
+                    var avatar = da.Avatars.Get(session.AvatarId);
+                    if (avatar != null && total > 0 && total <= avatar.budget)
+                    {
+                        var today = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
+                        var ids = outstanding.Select(x => x.bill_id).ToList();
+                        //the inject runs inside the money transaction, so payment and settling are atomic
+                        var result = da.Avatars.Transaction(session.AvatarId, uint.MaxValue, (int)total, 108,
+                            () => da.LotBills.MarkPaid(ids, session.AvatarId, today) > 0);
+                        if (result != null && result.success)
+                        {
+                            success = true;
+                            paid = (uint)total;
+                        }
+                    }
+                }
+            }
+
+            return new cTSONetMessageStandard()
+            {
+                MessageID = 0x3C24F6BC,
+                DatabaseType = DBResponseType.DebitCredit.GetResponseID(),
+                Parameter = msg.Parameter,
+                ComplexParameter = new PayBillsResponse { Success = success, AmountPaid = paid }
+            };
         }
 
         private static string FormatLotEvent(FSO.Server.Database.DA.LotEvents.DbLotEvent evt)

@@ -56,6 +56,11 @@ namespace FSO.Common.DatabaseService
             return Request<GetLotLogResponse>(DBRequestType.GetLotList, DBResponseType.GetLotList, null, request);
         }
 
+        public Task<PayBillsResponse> PayBills(PayBillsRequest request)
+        {
+            return Request<PayBillsResponse>(DBRequestType.DebitCredit, DBResponseType.DebitCredit, null, request);
+        }
+
 
         //[MethodImpl(MethodImplOptions.Synchronized)]
         private Task<T> Request<T>(DBRequestType type, DBResponseType responseType, uint? parameter, object complexParameter)

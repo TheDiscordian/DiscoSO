@@ -91,6 +91,7 @@ namespace FSO.Client.UI.Panels
             Add(CashTabButton); Add(NetWorthTabButton); Add(DebtTabButton); Add(IncomeTabButton); Add(ExpensesTabButton);
             Add(ListBox); Add(ListBoxSlider); Add(ListBoxScrollUpButton); Add(ListBoxScrollDownButton);
 
+            ListBox.OnDoubleClick += ListBox_OnDoubleClick;
             ListBox.AttachSlider(ListBoxSlider);
             ListBoxSlider.AttachButtons(ListBoxScrollUpButton, ListBoxScrollDownButton, 1);
             var listStyle = Script.Create<UIListBoxTextStyle>("ListBoxLeftColumnColors", ListBox.FontStyle);
@@ -145,7 +146,7 @@ namespace FSO.Client.UI.Panels
         {
             CashTabValue.Caption = FormatMoney(Data?.Cash ?? 0);
             NetWorthTabValue.Caption = FormatMoney(NetWorthTotal());
-            DebtTabValue.Caption = FormatMoney(TotalBills());
+            DebtTabValue.Caption = FormatMoney((Data?.OutstandingBills ?? 0) > 0 ? Data.OutstandingBills : TotalBills());
             IncomeTabValue.Caption = FormatMoney(TotalIncome());
             ExpensesTabValue.Caption = FormatMoney(TotalExpenses());
         }
@@ -207,11 +208,16 @@ namespace FSO.Client.UI.Panels
                         }
                     }
                     break;
-                case 2: //bills by day
+                case 2: //bills: outstanding first (double-click to pay), then paid history
                     if (Data != null)
                     {
+                        if (Data.OutstandingBills > 0)
+                        {
+                            var due = new UIListBoxItem("PAY", new object[] { (string)Script["DebtTabLabelText"] + " due " + DayLabel(Data.OldestBilledDay), "", FormatMoney(Data.OutstandingBills) });
+                            items.Add(due);
+                        }
                         foreach (var day in Data.BillsDays)
-                            items.Add(Row(DayLabel(day.Day), FormatMoney(day.Expense)));
+                            items.Add(Row(DayLabel(day.Day) + " paid", FormatMoney(day.Expense)));
                     }
                     break;
                 case 1: //net worth breakdown
@@ -269,6 +275,27 @@ namespace FSO.Client.UI.Panels
         public void ShowBills()
         {
             if (SelectedTab != 2) SelectTab(2);
+        }
+
+        private void ListBox_OnDoubleClick(UIElement element)
+        {
+            if (SelectedTab != 2 || !"PAY".Equals(ListBox.SelectedItem?.Data) || (Data?.OutstandingBills ?? 0) == 0) return;
+            var amount = Data.OutstandingBills;
+            UIAlert alert = null;
+            alert = UIScreen.GlobalShowAlert(new UIAlertOptions
+            {
+                Title = (string)Script["DebtTabLabelText"],
+                Message = "Pay all outstanding bills ($" + amount.ToString("##,#0") + ")?",
+                Buttons = new UIAlertButton[]
+                {
+                    new UIAlertButton(UIAlertButtonType.Yes, b =>
+                    {
+                        FindController<BudgetController>()?.PayBills();
+                        UIScreen.RemoveDialog(alert);
+                    }),
+                    new UIAlertButton(UIAlertButtonType.No, b => UIScreen.RemoveDialog(alert))
+                }
+            }, true);
         }
 
         private ulong TotalExpenses()

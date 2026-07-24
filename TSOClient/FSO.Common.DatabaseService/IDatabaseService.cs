@@ -11,5 +11,6 @@ namespace FSO.Common.DatabaseService
         Task<GetTop100Response> GetTop100(GetTop100Request request);
         Task<GetAvatarBudgetResponse> GetAvatarBudget(GetAvatarBudgetRequest request);
         Task<GetLotLogResponse> GetLotLog(GetLotLogRequest request);
+        Task<PayBillsResponse> PayBills(PayBillsRequest request);
     }
 }

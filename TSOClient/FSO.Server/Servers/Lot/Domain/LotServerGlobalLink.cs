@@ -69,6 +69,25 @@ namespace FSO.Server.Servers.Lot.Domain
             {
                 using (var db = DAFactory.Get())
                 {
+                    //overdue bills tier 2: purchases, building, upgrades, and expansion are blocked until paid
+                    if (!testOnly && amount > 0 && (type == (short)VMTransferFundsExpenseType.ExpenseObjectPurchase
+                        || type == (short)VMTransferFundsExpenseType.ExpenseArchitecture
+                        || type == (short)VMTransferFundsExpenseType.ExpenseObjectUpgrade
+                        || type == (short)VMTransferFundsExpenseType.ExpenseLotExpansion)
+                        && Database.DA.LotBills.LotBillsUtils.GetOverdueTier(db, Context.DbId) >= Database.DA.LotBills.LotBillsUtils.TIER_NO_BUILD)
+                    {
+                        vm.SendCommand(new VMNetAsyncResponseCmd(thread, new VMTransferFundsState
+                        {
+                            Responded = true,
+                            Success = false,
+                            TransferAmount = 0,
+                            UID1 = uid1,
+                            UID2 = uid2
+                        }));
+                        callback(false, 0, uid1, 0, uid2, 0);
+                        return;
+                    }
+
                     var result = (testOnly)?db.Avatars.TestTransaction(uid1, uid2, amount, 0):db.Avatars.Transaction(uid1, uid2, amount, type);
                     if (result == null) result = new Database.DA.Avatars.DbTransactionResult() { success = false };
 

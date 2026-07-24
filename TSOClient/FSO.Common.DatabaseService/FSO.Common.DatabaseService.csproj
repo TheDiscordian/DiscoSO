@@ -89,6 +89,8 @@
     <Compile Include="Model\GetAvatarBudgetResponse.cs" />
     <Compile Include="Model\GetLotLogRequest.cs" />
     <Compile Include="Model\GetLotLogResponse.cs" />
+    <Compile Include="Model\PayBillsRequest.cs" />
+    <Compile Include="Model\PayBillsResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
