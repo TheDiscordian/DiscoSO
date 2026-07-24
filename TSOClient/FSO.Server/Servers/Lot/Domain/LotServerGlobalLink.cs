@@ -204,7 +204,8 @@ namespace FSO.Server.Servers.Lot.Domain
                         ActorUID = callerId,
                         ActionUID = actionUID,
                         Accepted = true,
-                        Value = (int)Math.Min(int.MaxValue, total)
+                        Value = (int)Math.Min(int.MaxValue, total),
+                        TargetUID = callerId
                     });
                 }
                 catch (Exception e)

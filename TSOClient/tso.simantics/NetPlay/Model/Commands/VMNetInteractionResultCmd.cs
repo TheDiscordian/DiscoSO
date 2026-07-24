@@ -8,18 +8,20 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
         public ushort ActionUID;
         public bool Accepted;
         public int Value; //optional payload for the accepting tree (DiscoSO: outstanding bill total into TempXL 0)
+        public uint TargetUID; //explicit target avatar for server-sent results - the driver rewrites ActorUID on those
         public override bool Execute(VM vm, VMAvatar caller)
         {
             if (Value != 0 || Accepted)
                 FSO.SimAntics.Utils.VMDiscoSOMailboxPatch.Log("result cmd: actor=" + ActorUID + " action=" + ActionUID
-                    + " accepted=" + Accepted + " value=" + Value + " caller=" + (caller != null)
+                    + " accepted=" + Accepted + " value=" + Value + " target=" + TargetUID + " caller=" + (caller != null)
                     + " interaction=" + (caller != null && caller.Thread.Queue.Any(x => x.UID == ActionUID)));
-            if (caller == null) return false;
-            var interaction = caller.Thread.Queue.FirstOrDefault(x => x.UID == ActionUID);
+            var target = (TargetUID != 0) ? vm.GetAvatarByPersist(TargetUID) : caller;
+            if (target == null) return false;
+            var interaction = target.Thread.Queue.FirstOrDefault(x => x.UID == ActionUID);
             if (interaction != null)
             {
                 interaction.InteractionResult = (sbyte)(Accepted ? 2 : 1);
-                if (Accepted) caller.Thread.TempXL[0] = Value;
+                if (Accepted && TargetUID != 0) target.Thread.TempXL[0] = Value;
             }
             return true;
         }
@@ -32,6 +34,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
             writer.Write(ActionUID);
             writer.Write(Accepted);
             writer.Write(Value);
+            writer.Write(TargetUID);
         }
 
         public override void Deserialize(BinaryReader reader)
@@ -40,6 +43,7 @@ namespace FSO.SimAntics.NetPlay.Model.Commands
             ActionUID = reader.ReadUInt16();
             Accepted = reader.ReadBoolean();
             Value = reader.ReadInt32();
+            TargetUID = reader.ReadUInt32();
         }
 
         #endregion
