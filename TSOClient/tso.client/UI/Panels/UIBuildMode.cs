@@ -10,6 +10,8 @@ using FSO.Client.UI.Controls.Catalog;
 using FSO.Client.UI.Framework;
 using FSO.Client.UI.Model;
 using FSO.HIT;
+using FSO.LotView.Model;
+using FSO.SimAntics;
 using FSO.SimAntics.Model.TSOPlatform;
 
 namespace FSO.Client.UI.Panels
@@ -256,11 +258,7 @@ namespace FSO.Client.UI.Panels
             var level = world.State.Level;
 
             var floorPat = arch.GetFloor(x, y, level).Pattern;
-            var wall = arch.GetWall(x, y, level);
-            var wallPat = wall.TopLeftPattern;
-            if (wallPat == 0) wallPat = wall.TopRightPattern;
-            if (wallPat == 0) wallPat = wall.BottomLeftPattern;
-            if (wallPat == 0) wallPat = wall.BottomRightPattern;
+            var wallPat = SampleWallPattern(arch, tilePos, level);
 
             //wallpaper category prefers sampling walls, everything else prefers floors
             ushort pattern; int category;
@@ -277,6 +275,90 @@ namespace FSO.Client.UI.Panels
 
             if (pattern == 0 || !SelectCatalogItem(category, pattern))
                 HITVM.Get().PlaySoundEvent(UISounds.Error);
+        }
+
+        //dir indices match VMArchitectureTools: 0=TopLeft(x-), 1=TopRight(y-), 2=BottomRight(x+), 3=BottomLeft(y+)
+        private static readonly Point[] DirOffsets = { new Point(-1, 0), new Point(0, -1), new Point(1, 0), new Point(0, 1) };
+
+        /// <summary>
+        /// Samples the wall face the cursor visually hit. The tile estimate projects onto the floor plane,
+        /// so a click on a wall face lands PAST the wall's base tile - walking back down-screen finds the
+        /// wall whose viewer-facing face was clicked, rather than reading the far side's pattern.
+        /// </summary>
+        private ushort SampleWallPattern(VMArchitecture arch, Vector2 tilePos, sbyte level)
+        {
+            int r = (int)LotController.World.State.CutRotation;
+            var t = new Point((int)tilePos.X, (int)tilePos.Y);
+            var fract = new Vector2(tilePos.X - t.X, tilePos.Y - t.Y);
+
+            int upA = (4 - r) & 3, upB = (5 - r) & 3; //edges facing away from the viewer (walls' visible faces point into t)
+            int downA = (6 - r) & 3, downB = (7 - r) & 3; //edges toward the viewer
+            var downStep = new Point(DirOffsets[downA].X + DirOffsets[downB].X, DirOffsets[downA].Y + DirOffsets[downB].Y);
+
+            //clicked the floor just in front of a wall base: sample that wall's face into this tile
+            var upNear = (EdgeDist(fract, upA) <= EdgeDist(fract, upB)) ? upA : upB;
+            if (EdgeDist(fract, upNear) < 0.3f)
+            {
+                var basePat = FaceIntoTile(arch, t, upNear, level);
+                if (basePat != -1) return (ushort)basePat;
+            }
+
+            //walk toward the viewer; the clicked face belongs to the first wall under the cursor's screen column
+            for (int k = 0; k < 4; k++)
+            {
+                var tk = new Point(t.X + downStep.X * k, t.Y + downStep.Y * k);
+                if (tk.X < 0 || tk.Y < 0 || tk.X >= arch.Width || tk.Y >= arch.Height) break;
+                var wall = arch.GetWall((short)tk.X, (short)tk.Y, level);
+
+                if ((wall.Segments & (WallSegments.HorizontalDiag | WallSegments.VerticalDiag)) > 0)
+                {
+                    if (wall.TopRightStyle != 1) continue;
+                    //same face mapping WallPatternDot uses for the painter's preferred direction
+                    if ((wall.Segments & WallSegments.HorizontalDiag) > 0)
+                        return (upNear < 2) ? wall.BottomRightPattern : wall.BottomLeftPattern;
+                    return (upNear > 0 && upNear < 3) ? wall.BottomLeftPattern : wall.BottomRightPattern;
+                }
+
+                var first = (EdgeDist(fract, downA) <= EdgeDist(fract, downB)) ? downA : downB;
+                var second = (first == downA) ? downB : downA;
+                for (int c = 0; c < 2; c++)
+                {
+                    var d = (c == 0) ? first : second;
+                    if ((wall.Segments & (WallSegments)(1 << d)) == 0) continue;
+                    //viewer-facing face of this wall = the face into the tile on the viewer's side
+                    var pat = FaceIntoTile(arch, new Point(tk.X + DirOffsets[d].X, tk.Y + DirOffsets[d].Y), (d + 2) & 3, level);
+                    if (pat != -1) return (ushort)pat;
+                }
+            }
+            return 0;
+        }
+
+        private static float EdgeDist(Vector2 fract, int d)
+        {
+            switch (d)
+            {
+                case 0: return fract.X;
+                case 1: return fract.Y;
+                case 2: return 1 - fract.X;
+                default: return 1 - fract.Y;
+            }
+        }
+
+        /// <summary>
+        /// Pattern of the wall face on edge d of tile t, as seen from inside t. -1 if no wall there.
+        /// </summary>
+        private int FaceIntoTile(VMArchitecture arch, Point t, int d, sbyte level)
+        {
+            if (t.X < 0 || t.Y < 0 || t.X >= arch.Width || t.Y >= arch.Height) return -1;
+            var w = arch.GetWall((short)t.X, (short)t.Y, level);
+            if ((w.Segments & (WallSegments)(1 << d)) == 0) return -1;
+            switch (d)
+            {
+                case 0: return w.TopLeftThick ? w.TopLeftPattern : -1;
+                case 1: return w.TopRightThick ? w.TopRightPattern : -1;
+                case 2: return (t.X + 1 < arch.Width && arch.GetWall((short)(t.X + 1), (short)t.Y, level).TopLeftThick) ? w.BottomRightPattern : -1;
+                default: return (t.Y + 1 < arch.Height && arch.GetWall((short)t.X, (short)(t.Y + 1), level).TopRightThick) ? w.BottomLeftPattern : -1;
+            }
         }
 
         private bool SelectCatalogItem(int category, ulong resID)
