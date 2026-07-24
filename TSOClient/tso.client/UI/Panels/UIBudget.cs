@@ -220,11 +220,10 @@ namespace FSO.Client.UI.Panels
                             items.Add(Row(DayLabel(day.Day) + " paid", FormatMoney(day.Expense)));
                     }
                     break;
-                case 1: //net worth breakdown
+                case 1: //net worth breakdown (the total already shows in the tab sidebar)
                     items.Add(Row((string)Script["NetWorthCashValue"], FormatMoney(Data?.Cash ?? 0)));
                     items.Add(Row((string)Script["NetWorthMoneyInObjects"], FormatMoney(Data?.ObjectsMoney ?? 0)));
                     items.Add(Row((string)Script["NetWorthObjectValue"], FormatMoney(Data?.ObjectsValue ?? 0)));
-                    items.Add(Row((string)Script["NetWorthSumTotal"], FormatMoney(NetWorthTotal())));
                     break;
                 case 3: //income by category
                     foreach (var cat in ByCategory(x => x.Income))
