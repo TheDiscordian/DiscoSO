@@ -57,15 +57,17 @@ namespace FSO.SimAntics.Model
             } else
             {
                 if (rate < 0) return rate;
+                //testing accelerator (discoso 0:3, unset = 1x): scales all positive motive gains
+                var regenMul = vm.Tuning?.GetTuning("discoso", 0, 3) ?? 1f;
                 if (LotMotives == null) LotMotives = Content.Content.Get().GlobalTuning.EntriesByName["lotmotives"];
                 if (vm.TSOState.PropertyCategory == 4 && type > 0) rate = (rate * 3) / 2; //1.5x gain multiplier on services lots
-                if (VMMotive.Comfort == type) return rate;
+                if (VMMotive.Comfort == type) return (int)(rate * regenMul);
                 var ind = Array.IndexOf(VMAvatarMotiveDecay.DecrementMotives, type);
                 var cat = vm.TSOState.PropertyCategory;
                 if (cat > 10) cat = 0;
                 string category = VMAvatarMotiveDecay.CategoryNames[cat];
                 var weight = ToFixed1000(LotMotives.Value.GetNum(category + "_" + VMAvatarMotiveDecay.LotMotiveNames[ind] + "Weight"));
-                return (rate * 1000) / weight;
+                return (int)(rate * regenMul * 1000) / weight;
             }
         }
 
