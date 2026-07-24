@@ -198,6 +198,7 @@ namespace FSO.Server.Servers.Lot.Domain
                     {
                         total = db.LotBills.GetOutstanding(lotId).Sum(x => (long)x.amount);
                     }
+                    LOG.Info("bill query: lot " + lotId + " total $" + total + " -> actor " + callerId + " action " + actionUID);
                     vm.SendCommand(new VMNetInteractionResultCmd
                     {
                         ActorUID = callerId,

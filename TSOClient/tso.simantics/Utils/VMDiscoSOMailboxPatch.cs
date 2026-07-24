@@ -171,7 +171,7 @@ namespace FSO.SimAntics.Utils
             return new BHAVInstruction { Opcode = opcode, TruePointer = t, FalsePointer = f, Operand = operand };
         }
 
-        private static void Log(string msg)
+        public static void Log(string msg)
         {
             try
             {
