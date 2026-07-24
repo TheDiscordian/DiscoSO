@@ -80,6 +80,11 @@ namespace FSO.Client.UI.Panels
                 { LotResizeButton, 7 }
             };
 
+            //EA's tooltip strings still say "- Coming Soon!" for these
+            StatisticsButton.Tooltip = "Property Stats";
+            LogButton.Tooltip = "Activity Logs";
+            BillsButton.Tooltip = "Bills";
+
             foreach (var btn in BtnToMode.Keys)
                 btn.OnButtonClick += SetMode;
 
@@ -227,6 +232,14 @@ namespace FSO.Client.UI.Panels
             foreach (var val in new[] { AreaValue, BedroomsValue, BathroomsValue, FloorsValue, LotSizeValue })
                 val.Alignment = TextAlignment.Left | TextAlignment.Middle;
             TitleLabel.Alignment = TextAlignment.Left | TextAlignment.Middle;
+
+            //fill like skill bars: 0-10 scale, no percentage caption
+            foreach (var bar in new[] { SizeProgress, FurnishingsProgress, YardProgress, UpkeepProgress, LayoutProgress })
+            {
+                bar.MinValue = 0;
+                bar.MaxValue = 10;
+                bar.Caption = "";
+            }
 
             Refresh();
         }
@@ -449,13 +462,14 @@ namespace FSO.Client.UI.Panels
 
             LogBackground = script.Create<UIImage>("LogBackground");
             AddAt(0, LogBackground);
+            TitleLabel.Visible = false; //the per-mode titles carry the heading
 
             Rows = new UILabel[RowCount];
             for (int i = 0; i < RowCount; i++)
             {
                 var row = new UILabel();
-                row.Position = new Vector2(74, 20 + i * 17);
-                row.Size = new Vector2(144, 16);
+                row.Position = new Vector2(88, 20 + i * 17);
+                row.Size = new Vector2(266, 16);
                 row.Alignment = TextAlignment.Left | TextAlignment.Middle;
                 row.CaptionStyle = RoommatesTitleText.CaptionStyle.Clone();
                 row.CaptionStyle.Shadow = true;
