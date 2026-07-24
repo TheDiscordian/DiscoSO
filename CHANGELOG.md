@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Changed
+- Bills are now switched on: daily property charges, and metered lamp, stall, and stereo hours, begin billing lot owners. 💸
+
 ## 1.0.15 — July 2026 📬
 
 ### Added
