@@ -8,6 +8,7 @@ namespace FSO.Server.Servers.Lot
 
         public string SimNFS;
         public int RingBufferSize = 10;
+        public int Clock_Ticks_Per_Minute = 0; //0 = engine default (150: 1 game min per 5 real s); staging sets 30 for 5x faster testing
         public bool Timeout_No_Auth = true;
         public bool LogJobLots = false;
 

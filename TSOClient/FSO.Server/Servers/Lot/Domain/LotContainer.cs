@@ -805,6 +805,10 @@ namespace FSO.Server.Servers.Lot.Domain
 
             ResyncTime();
 
+            //clock speed override for testing; normalize when unset so saved states can't carry a stale speed.
+            //joining clients pick the value up from the lot state marshal, so the VMs stay in lockstep.
+            Lot.Context.Clock.TicksPerMinute = (Config.Clock_Ticks_Per_Minute > 0) ? Config.Clock_Ticks_Per_Minute : 30 * 5;
+
             if (Lot.Tuning == null || (Lot.Tuning.GetTuning("forcedTuning", 0, 0) ?? 0f) == 0f)
             {
                 Lot.ForwardCommand(new VMNetTuningCmd()
