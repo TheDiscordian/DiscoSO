@@ -17,7 +17,7 @@ namespace FSO.Server.Servers.Tasks.Domain
     /// Community lots are never billed.
     /// Tuning (discoso_bills table 0): 0 = $/active day per size step, 1 = per-extra-floor
     /// multiplier, 2 = bill period days, 3 = grace days, 4 = extra days to tier 2,
-    /// 5 = lights $/hour open, 6 = overdue days past grace that pause accrual (and cut
+    /// 5 = lights $ per in-game hour open (1 game hour = 1 real minute), 6 = overdue days past grace that pause accrual (and cut
     /// lights, once the VM side lands). Indices 0 and 5 both 0 = dormant.
     /// </summary>
     public class BillsTask : ITask
@@ -96,7 +96,9 @@ namespace FSO.Server.Servers.Tasks.Domain
                     var size = lot.size & 255;
                     var extraFloors = (lot.size >> 8) & 255;
                     var perDay = perDayPerSize * (size + 1) * (1f + floorMul * extraFloors);
-                    var bill = (int)Math.Round(activeDays.Count * perDay + openHours * lightsRate);
+                    //lights bill per IN-GAME hour: TSO runs 1 game minute per real second, so 1 real hour = 60 game hours
+                    var lightsGameHours = openHours * 60.0;
+                    var bill = (int)Math.Round(activeDays.Count * perDay + lightsGameHours * lightsRate);
                     if (bill <= 0) continue;
 
                     db.LotBills.Create(new DbLotBill { lot_id = lot.lot_id, amount = bill, billed_day = today });
