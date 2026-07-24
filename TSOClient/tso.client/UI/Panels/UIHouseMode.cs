@@ -80,8 +80,6 @@ namespace FSO.Client.UI.Panels
                 { LotResizeButton, 7 }
             };
 
-            BillsButton.Disabled = true;
-
             foreach (var btn in BtnToMode.Keys)
                 btn.OnButtonClick += SetMode;
 
@@ -99,6 +97,11 @@ namespace FSO.Client.UI.Panels
                     controller.ShowLotPage(controller.GetCurrentLotID());
                     return;
                 }
+            }
+            if (button == BillsButton)
+            {
+                GameFacade.Screens.CurrentUIScreen.FindController<FSO.Client.Controllers.CoreGameScreenController>()?.ShowBudgetBills();
+                return;
             }
 
             var btn = (UIButton)button;

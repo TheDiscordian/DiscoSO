@@ -272,6 +272,11 @@ namespace FSO.Client.Controllers
             ((BudgetController)Screen.Budget.Controller).Toggle();
         }
 
+        public void ShowBudgetBills()
+        {
+            ((BudgetController)Screen.Budget.Controller).ShowBills();
+        }
+
         public void ShowPersonPage(uint avatarId){
             ((PersonPageController)Screen.PersonPage.Controller).Show(avatarId);
         }

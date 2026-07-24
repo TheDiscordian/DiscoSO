@@ -263,6 +263,7 @@
     <Compile Include="Servers\Lot\LotServer.cs" />
     <Compile Include="Servers\Lot\LotServerConfiguration.cs" />
     <Compile Include="Servers\Lot\LotServerModule.cs" />
+    <Compile Include="Servers\Tasks\Domain\BillsTask.cs" />
     <Compile Include="Servers\Tasks\Domain\BonusTask.cs" />
     <Compile Include="Servers\Tasks\Domain\ShutdownTask.cs" />
     <Compile Include="Servers\Tasks\Handlers\TaskEngineHandler.cs" />

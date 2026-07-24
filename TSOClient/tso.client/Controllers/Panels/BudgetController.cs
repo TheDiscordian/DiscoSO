@@ -41,6 +41,12 @@ namespace FSO.Client.Controllers.Panels
                 });
         }
 
+        public void ShowBills()
+        {
+            View.ShowBills();
+            Show();
+        }
+
         public void Close()
         {
             View.Visible = false;

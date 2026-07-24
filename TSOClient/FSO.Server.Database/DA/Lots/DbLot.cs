@@ -48,4 +48,11 @@ namespace FSO.Server.Database.DA.Lots
 	Lot_HoursSinceLastLotCatChange : Uint32 (0)
 	Lot_ThumbnailCheckSum : Uint32 (0)
 	Lot_Category : Uint8 (0)**/
+
+    public class DbLotValueSummary
+    {
+        public int lot_id { get; set; }
+        public uint? owner_id { get; set; }
+        public long obj_value { get; set; }
+    }
 }
