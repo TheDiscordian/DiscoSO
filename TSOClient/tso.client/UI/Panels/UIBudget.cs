@@ -327,6 +327,9 @@ namespace FSO.Client.UI.Panels
                 case 102: return "Building";
                 case 103: return "Upgrades";
                 case 104: return "Lot expansion";
+                case 105: return "Visitor bonus";
+                case 106: return "Property bonus";
+                case 107: return "Sim bonus";
                 default: return "Other";
             }
         }
