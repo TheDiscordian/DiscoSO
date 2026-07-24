@@ -400,6 +400,7 @@ namespace FSO.Server.Servers.Lot.Domain
                 var path = Path.Combine(Config.SimNFS, "Lots/" + lotStr + "/state_" + newBackup.ToString() + ".fsov");
                 var marshal = Lot.Save();
                 var hmarshal = Lot.HollowSave();
+                var packedSize = Lot.TSOState.Size;
 
                 Host.InBackground(() => {
                     try
@@ -419,6 +420,7 @@ namespace FSO.Server.Servers.Lot.Domain
                         using (var db = DAFactory.Get())
                         {
                             db.Lots.UpdateRingBackup(LotPersist.lot_id, newBackup);
+                            db.Lots.UpdateLotSize(LotPersist.lot_id, packedSize);
                             //db.Flush();
                         }
                     }

@@ -63,5 +63,6 @@ namespace FSO.Server.Database.DA.LotVisitors
 
 
         List<DbLotVisitSummary> GetRecentVisits(int lot_id, int limit);
+        List<DbLotVisit> GetVisitsBetween(int lot_id, System.DateTime start, System.DateTime end);
     }
 }

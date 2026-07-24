@@ -14,6 +14,8 @@ namespace FSO.Server.Database.DA.Lots
         DbLot GetByName(int shard_id, string name);
         DbLot GetByLocation(int shard_id, uint location);
         System.Collections.Generic.List<DbLotValueSummary> GetLotValueSummaries(int shard_id);
+        System.Collections.Generic.List<DbBillableLot> GetBillableLots(int shard_id);
+        void UpdateLotSize(int lot_id, int size);
         List<DbLot> GetAdjToLocation(int shard_id, uint location);
         DbLot GetByOwner(uint owner_id);
         DbLot Get(int id);

@@ -141,6 +141,21 @@ namespace FSO.Server.Database.DA.Lots
             return Context.Connection.Query<DbLot>("SELECT * FROM fso_lots WHERE name = @name AND shard_id = @shard_id", new { name, shard_id = shard_id }).FirstOrDefault();
         }
 
+        public List<DbBillableLot> GetBillableLots(int shard_id)
+        {
+            //community lots never get bills
+            return Context.Connection.Query<DbBillableLot>(
+                "SELECT lot_id, owner_id, size FROM fso_lots "
+                + "WHERE shard_id = @shard_id AND owner_id IS NOT NULL AND category != 11",
+                new { shard_id = shard_id }).ToList();
+        }
+
+        public void UpdateLotSize(int lot_id, int size)
+        {
+            Context.Connection.Execute("UPDATE fso_lots SET size = @size WHERE lot_id = @lot_id",
+                new { lot_id = lot_id, size = size });
+        }
+
         public List<DbLotValueSummary> GetLotValueSummaries(int shard_id)
         {
             return Context.Connection.Query<DbLotValueSummary>(

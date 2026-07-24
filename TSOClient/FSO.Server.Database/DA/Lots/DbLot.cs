@@ -17,6 +17,7 @@ namespace FSO.Server.Database.DA.Lots
         public LotCategory category { get; set; }
         public byte skill_mode { get; set; }
         public uint buildable_area { get; set; }
+        public int size { get; set; } //packed: size | floors << 8, mirrored from the lot state on save
         public sbyte ring_backup_num { get; set; }
         public byte admit_mode { get; set; }
         public byte move_flags { get; set; }
@@ -48,6 +49,13 @@ namespace FSO.Server.Database.DA.Lots
 	Lot_HoursSinceLastLotCatChange : Uint32 (0)
 	Lot_ThumbnailCheckSum : Uint32 (0)
 	Lot_Category : Uint8 (0)**/
+
+    public class DbBillableLot
+    {
+        public int lot_id { get; set; }
+        public uint? owner_id { get; set; }
+        public int size { get; set; }
+    }
 
     public class DbLotValueSummary
     {
