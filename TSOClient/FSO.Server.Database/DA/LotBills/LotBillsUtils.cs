@@ -10,9 +10,9 @@ namespace FSO.Server.Database.DA.LotBills
         public const int TIER_NO_BUILD = 2;
 
         /// <summary>
-        /// Fold all unbilled metered usage (lights, stalls) into today's bill. Returns the amount
-        /// charged, or 0 if nothing was billed (rates unset, accrual paused, today's bill already
-        /// paid, or the charge would round below $1 - fractions stay unbilled until they add up).
+        /// Fold all unbilled metered usage (lights, stalls, stereos) into today's bill. Returns the
+        /// amount charged, or 0 if nothing was billed (rates unset, accrual paused, or the charge
+        /// would round below $1 - fractions stay unbilled until they add up).
         /// </summary>
         public static int DeliverUsage(IDA db, int lot_id)
         {
@@ -28,8 +28,6 @@ namespace FSO.Server.Database.DA.LotBills
             var pauseDays = Math.Max(1, (int)tune(6, 6));
             var oldest = db.LotBills.OldestOutstandingDay(lot_id);
             if (oldest != null && today - oldest.Value - grace >= pauseDays) return 0; //far overdue: accrual paused
-
-            if (db.LotBills.HasPaidBillOnDay(lot_id, today)) return 0; //today's bill is settled; usage waits
 
             var projected = db.LotUsage.GetUnbilled(lot_id);
             if ((int)Math.Round(projected.light_hours * lightsRate + projected.stall_hours * stallRate + projected.radio_hours * radioRate) < 1) return 0;

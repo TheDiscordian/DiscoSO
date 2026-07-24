@@ -6,7 +6,6 @@ namespace FSO.Server.Database.DA.LotBills
     {
         void Create(DbLotBill bill);
         bool AddToDay(int lot_id, int day, int amount);
-        bool HasPaidBillOnDay(int lot_id, int day);
         List<DbLotBill> GetOutstanding(int lot_id);
         List<DbLotBill> GetOutstandingForAvatarLots(uint avatar_id);
         int? LastBilledDay(int lot_id);
