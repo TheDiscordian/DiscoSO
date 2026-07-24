@@ -1,6 +1,10 @@
 ﻿using FSO.Client.UI.Controls;
 using FSO.Client.UI.Framework;
+using FSO.Client.UI.Framework.Parser;
+using FSO.Common;
 using FSO.Common.Utils;
+using FSO.SimAntics;
+using FSO.SimAntics.Entities;
 using FSO.SimAntics.Model;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -75,7 +79,6 @@ namespace FSO.Client.UI.Panels
                 { LotResizeButton, 7 }
             };
 
-            StatisticsButton.Disabled = true;
             BillsButton.Disabled = true;
             LogButton.Disabled = true;
 
@@ -178,13 +181,124 @@ namespace FSO.Client.UI.Panels
     // NOTE: See UIEnvPanel.cs for the EnvPanel and its subpanels.
 
     /// <summary>
-    /// Same as TS1 house stats. TODO: make freeso calculate these values.
+    /// House statistics, computed live from the lot VM.
     /// </summary>
     public class UIStatsPanel : UIContainer
     {
+        public UILabel TitleLabel { get; set; }
+        public UILabel AreaLabel { get; set; }
+        public UILabel BedroomsLabel { get; set; }
+        public UILabel BathroomsLabel { get; set; }
+        public UILabel FloorsLabel { get; set; }
+        public UILabel LotSizeLabel { get; set; }
+        public UILabel AreaValue { get; set; }
+        public UILabel BedroomsValue { get; set; }
+        public UILabel BathroomsValue { get; set; }
+        public UILabel FloorsValue { get; set; }
+        public UILabel LotSizeValue { get; set; }
+        public UILabel SizeLabel { get; set; }
+        public UILabel FurnishingsLabel { get; set; }
+        public UILabel YardLabel { get; set; }
+        public UILabel UpkeepLabel { get; set; }
+        public UILabel LayoutLabel { get; set; }
+        public UIProgressBar SizeProgress { get; set; }
+        public UIProgressBar FurnishingsProgress { get; set; }
+        public UIProgressBar YardProgress { get; set; }
+        public UIProgressBar UpkeepProgress { get; set; }
+        public UIProgressBar LayoutProgress { get; set; }
+
+        private UILotControl LotControl;
+        private UIScript Script;
+        private int RefreshTicks;
+
         public UIStatsPanel(UILotControl lotController)
         {
-            this.RenderScript("statisticspanel.uis");
+            LotControl = lotController;
+            Script = this.RenderScript("statisticspanel.uis");
+
+            //the uis alignments (1 left, 5 right) are not mapped by the parser - set directly
+            foreach (var lbl in new[] { AreaLabel, BedroomsLabel, BathroomsLabel, FloorsLabel, LotSizeLabel,
+                SizeLabel, FurnishingsLabel, YardLabel, UpkeepLabel, LayoutLabel })
+                lbl.Alignment = TextAlignment.Right | TextAlignment.Middle;
+            foreach (var val in new[] { AreaValue, BedroomsValue, BathroomsValue, FloorsValue, LotSizeValue })
+                val.Alignment = TextAlignment.Left | TextAlignment.Middle;
+            TitleLabel.Alignment = TextAlignment.Left | TextAlignment.Middle;
+
+            Refresh();
+        }
+
+        public override void Update(UpdateState state)
+        {
+            base.Update(state);
+            if (++RefreshTicks >= FSOEnvironment.RefreshRate * 5)
+            {
+                RefreshTicks = 0;
+                Refresh();
+            }
+        }
+
+        private void Refresh()
+        {
+            var vm = LotControl.vm;
+            if (vm?.Context?.RoomInfo == null) return;
+            var arch = vm.Context.Architecture;
+
+            int interiorArea = 0, insideRooms = 0, bedrooms = 0, bathrooms = 0, reasonableRooms = 0;
+            var seenRooms = new HashSet<ushort>();
+            foreach (var info in vm.Context.RoomInfo)
+            {
+                var room = info.Room;
+                if (room.IsOutside || room.IsPool || room.Area == 0 || !seenRooms.Add(room.RoomID)) continue;
+                insideRooms++;
+                interiorArea += room.Area;
+                if (room.Area >= 9 && room.Area <= 120) reasonableRooms++;
+                if (info.Entities != null)
+                {
+                    if (info.Entities.Any(e => e.SemiGlobal?.Iff?.Filename == "bedsemiglobal.iff")) bedrooms++;
+                    if (info.Entities.Any(e => e.SemiGlobal?.Iff?.Filename == "toiletsemiglobal.iff")) bathrooms++;
+                }
+            }
+
+            var lotSize = vm.TSOState.Size & 255;
+            var lotFloors = ((vm.TSOState.Size >> 8) & 255) + 2; //stored as extra floors above the base 2
+            var buildableTiles = Math.Max(1, arch.BuildableArea.Width * arch.BuildableArea.Height);
+
+            //user object groups: value totals for furnishings/yard/upkeep
+            var groups = new HashSet<VMMultitileGroup>();
+            foreach (var ent in vm.Entities)
+            {
+                if (ent is VMGameObject && ent.PersistID != 0 && ent.MultitileGroup != null) groups.Add(ent.MultitileGroup);
+            }
+            long objValue = 0, outdoorValue = 0, initialValue = 0, currentOfInitial = 0;
+            foreach (var group in groups)
+            {
+                var price = Math.Max(0, group.Price);
+                objValue += price;
+                var baseObj = group.BaseObject;
+                if (baseObj != null)
+                {
+                    var room = vm.Context.GetObjectRoom(baseObj);
+                    if (room < vm.Context.RoomInfo.Length && vm.Context.RoomInfo[room].Room.IsOutside) outdoorValue += price;
+                }
+                if (group.InitialPrice > 0)
+                {
+                    initialValue += group.InitialPrice;
+                    currentOfInitial += Math.Min(price, group.InitialPrice);
+                }
+            }
+
+            AreaValue.Caption = interiorArea.ToString();
+            BedroomsValue.Caption = bedrooms.ToString();
+            BathroomsValue.Caption = bathrooms.ToString();
+            FloorsValue.Caption = lotFloors.ToString();
+            LotSizeValue.Caption = (string)Script[(lotSize <= 1) ? "SmallLotSizeText" : ((lotSize <= 3) ? "MediumLotSizeText" : "LargeLotSizeText")];
+
+            //DiscoSO evaluators, 0-10
+            SizeProgress.Value = Math.Min(10f, (interiorArea * 10f) / buildableTiles);
+            FurnishingsProgress.Value = Math.Min(10f, objValue / (interiorArea > 0 ? interiorArea * 50f : 5000f));
+            YardProgress.Value = Math.Min(10f, outdoorValue / (buildableTiles * 5f));
+            UpkeepProgress.Value = (initialValue > 0) ? (currentOfInitial * 10f) / initialValue : 10f;
+            LayoutProgress.Value = (insideRooms > 0) ? (reasonableRooms * 10f) / insideRooms : 0f;
         }
     }
     
