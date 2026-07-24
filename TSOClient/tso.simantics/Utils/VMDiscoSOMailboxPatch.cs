@@ -90,7 +90,10 @@ namespace FSO.SimAntics.Utils
                 }
             };
             mailbox.Resource.MainIff.AddChunk(bhav);
-            Log("installed Pay Bills at index " + stringIndex + " (" + ttab.Interactions.Length + " interactions, " + ttas.Length + " strings)");
+            //the routine cache was built at content load; rebuild it so the new tree resolves
+            //(GetRoutine misses -> GetAction null -> the pie silently drops the entry)
+            mailbox.Resource.Recache();
+            Log("installed Pay Bills at index " + stringIndex + " (" + ttab.Interactions.Length + " interactions, " + ttas.Length + " strings, routine=" + (mailbox.Resource.GetRoutine(PAY_BILLS_TREE) != null) + ")");
         }
 
         private static void Log(string msg)
