@@ -2,7 +2,7 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased
+## 1.0.15 — July 2026 📬
 
 ### Added
 - **Property Statistics** — the house panel's Statistics button now works: interior area, bedrooms, bathrooms, floors, and lot size, plus live 0–10 ratings for Size, Furnishings, Yard, Upkeep (object wear), and Layout. 📊
