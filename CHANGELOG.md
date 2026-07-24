@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Changed
+- New Sims now start with $150. 💵
+
 ## 1.0.16 — July 2026 💸
 
 ### Added
