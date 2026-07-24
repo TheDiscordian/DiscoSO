@@ -126,12 +126,26 @@ namespace FSO.Client.UI.Panels
             SetTabValues();
         }
 
+        private long LastRefresh;
         public override void Update(UpdateState state)
         {
             base.Update(state);
             //UIDialog's render cache is only regenerated when Invalidated is set; resizing after
             //display (our expand/collapse) leaves stale fragments behind. re-render while open.
             if (Visible) Invalidated = true;
+
+            //poll while open so out-of-band changes (paying at the mailbox, metered charges) show promptly
+            if (Visible)
+            {
+                var now = System.DateTime.UtcNow.Ticks;
+                if (LastRefresh == 0) LastRefresh = now;
+                else if (now - LastRefresh > 5 * System.TimeSpan.TicksPerSecond)
+                {
+                    LastRefresh = now;
+                    FindController<BudgetController>()?.Refresh();
+                }
+            }
+            else LastRefresh = 0;
         }
 
         public void SetData(GetAvatarBudgetResponse data)

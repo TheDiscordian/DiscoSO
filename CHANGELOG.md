@@ -6,6 +6,7 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ### Changed
 - New Sims now start with $150. 💵
+- The Budget Window now refreshes itself while open, so bills paid at the mailbox, and fresh metered charges, show up right away. 🔄
 
 ## 1.0.16 — July 2026 💸
 
