@@ -901,16 +901,28 @@ namespace FSO.Server.Servers.Lot.Domain
             }
         }
 
+        private bool StartHourApplied;
         private void ResyncTime()
         {
             var time = DateTime.UtcNow;
             var tsoTime = TSOTime.FromUTC(time);
+            int hours = tsoTime.Item1, minutes = tsoTime.Item2, seconds = tsoTime.Item3;
+
+            //fixed start hour (testing): set once at load, then let the clock run freely
+            if (Config.Clock_Start_Hour >= 0)
+            {
+                if (StartHourApplied) return;
+                StartHourApplied = true;
+                hours = Config.Clock_Start_Hour;
+                minutes = 0;
+                seconds = 0;
+            }
 
             Lot.ForwardCommand(new VMNetSetTimeCmd()
             {
-                Hours = tsoTime.Item1,
-                Minutes = tsoTime.Item2,
-                Seconds = tsoTime.Item3,
+                Hours = hours,
+                Minutes = minutes,
+                Seconds = seconds,
                 UTCStart = DateTime.UtcNow.Ticks
             });
         }
