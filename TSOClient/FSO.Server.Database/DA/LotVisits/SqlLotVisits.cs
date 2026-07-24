@@ -79,6 +79,14 @@ namespace FSO.Server.Database.DA.LotVisitors
                 new { start = start, end = end, neighborhood_id = neighborhood_id }, buffered: false);
         }
     
+        public List<DbLotVisit> GetVisitsBetween(int lot_id, System.DateTime start, System.DateTime end)
+        {
+            return Context.Connection.Query<DbLotVisit>(
+                "SELECT * FROM fso_lot_visits WHERE lot_id = @lot_id AND time_closed IS NOT NULL "
+                + "AND time_closed > @start AND time_created < @end",
+                new { lot_id = lot_id, start = start, end = end }).ToList();
+        }
+
         public List<DbLotVisitSummary> GetRecentVisits(int lot_id, int limit)
         {
             return Context.Connection.Query<DbLotVisitSummary>(
