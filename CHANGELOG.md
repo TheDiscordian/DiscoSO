@@ -2,7 +2,10 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased
+## 1.0.16 — July 2026 💸
+
+### Added
+- Food stalls on community lots now have a vendor ready to serve. 🌭
 
 ### Changed
 - Bills are now switched on: daily property charges, and metered lamp, stall, and stereo hours, begin billing lot owners. 💸
