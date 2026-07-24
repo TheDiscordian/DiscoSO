@@ -118,6 +118,7 @@ namespace FSO.Client.UI.Panels
             CloseButton.OnButtonClick += b => FindController<BudgetController>()?.Close();
 
             SetExpanded(false);
+            SetTabSelection();
             SetTabValues();
         }
 
@@ -167,6 +168,13 @@ namespace FSO.Client.UI.Panels
             DebtTabButton.Selected = SelectedTab == 2;
             IncomeTabButton.Selected = SelectedTab == 3;
             ExpensesTabButton.Selected = SelectedTab == 4;
+
+            //selected-tab state overlays - one visible at a time, like Bookmarks' SimsTab/IgnoreTab
+            CashTabImage.Visible = SelectedTab == 0;
+            NetWorthTabImage.Visible = SelectedTab == 1;
+            DebtTabImage.Visible = SelectedTab == 2;
+            IncomeTabImage.Visible = SelectedTab == 3;
+            ExpensesTabImage.Visible = SelectedTab == 4;
         }
 
         private void SetExpanded(bool expanded)
