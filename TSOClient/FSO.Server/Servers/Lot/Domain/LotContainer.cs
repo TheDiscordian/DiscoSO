@@ -7,6 +7,7 @@ using FSO.LotView.Model;
 using FSO.Server.Common;
 using FSO.Server.Database.DA;
 using FSO.Server.Database.DA.Avatars;
+using FSO.Server.Database.DA.LotBills;
 using FSO.Server.Database.DA.Lots;
 using FSO.Server.Database.DA.LotVisitors;
 using FSO.Server.Database.DA.Objects;
@@ -912,8 +913,6 @@ namespace FSO.Server.Servers.Lot.Domain
 
         private static readonly HashSet<string> StallIffs = new HashSet<string> { "foodcounter.iff", "foodcounterunleashed.iff" };
         private int UsageSampleTicker;
-        private const int MAIL_HOUR = 10; //in-game hour the mailperson comes by
-        private bool MailDeliveredToday;
 
         private static bool IsStall(VMEntity obj)
         {
@@ -921,8 +920,9 @@ namespace FSO.Server.Servers.Lot.Domain
             return iff != null && StallIffs.Contains(iff);
         }
 
-        //crystallize unbilled metered usage (lights, stalls) into today's bill.
-        //runs at in-game mail time while the lot is online, and once more when the lot goes offline.
+        //fold unbilled metered usage (lights, stalls) into today's bill.
+        //the mail carrier's mailbox delivery covers this while the lot is online
+        //(DiscoSODeliverBills); this covers the lot going offline.
         private void DeliverUsageBill()
         {
             if (JobLot || LotPersist.category == LotCategory.community) return;
@@ -931,28 +931,8 @@ namespace FSO.Server.Servers.Lot.Domain
             {
                 using (var db = DAFactory.Get())
                 {
-                    var tuning = db.Tuning.AllCategory("discoso_bills", 0).ToDictionary(x => x.tuning_index);
-                    Func<int, float, float> tune = (i, def) => tuning.ContainsKey(i) ? tuning[i].value : def;
-                    var lightsRate = tune(5, 0);
-                    var stallRate = tune(7, 0);
-                    if (lightsRate <= 0 && stallRate <= 0) return;
-
-                    var today = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
-                    var grace = Math.Max(0, (int)tune(3, 3));
-                    var pauseDays = Math.Max(1, (int)tune(6, 6));
-                    var oldest = db.LotBills.OldestOutstandingDay(lotId);
-                    if (oldest != null && today - oldest.Value - grace >= pauseDays) return; //far overdue: accrual paused
-
-                    if (db.LotBills.HasPaidBillOnDay(lotId, today)) return; //today's bill is settled; usage waits for the next one
-
-                    var projected = db.LotUsage.GetUnbilled(lotId);
-                    if ((int)Math.Round(projected.light_hours * lightsRate + projected.stall_hours * stallRate) < 1) return;
-
-                    var actual = db.LotUsage.CollectUnbilled(lotId);
-                    var charge = (int)Math.Round(actual.light_hours * lightsRate + actual.stall_hours * stallRate);
-                    if (charge < 1) return;
-                    if (db.LotBills.AddToDay(lotId, today, charge))
-                        LOG.Info("Mail delivery: lot " + lotId + " billed $" + charge + " for metered usage.");
+                    var charge = LotBillsUtils.DeliverUsage(db, lotId);
+                    if (charge > 0) LOG.Info("Lot close: lot " + lotId + " billed $" + charge + " for metered usage.");
                 }
             }
             catch (Exception e)
@@ -1147,17 +1127,6 @@ namespace FSO.Server.Servers.Lot.Domain
                         {
                             LOG.Warn(e, "usage metering failed for lot " + Context.DbId);
                         }
-
-                        //mail time: fold metered charges into today's bill while the lot is online
-                        if (Lot.Context.Clock.Hours == MAIL_HOUR)
-                        {
-                            if (!MailDeliveredToday)
-                            {
-                                MailDeliveredToday = true;
-                                Host.InBackground(() => DeliverUsageBill());
-                            }
-                        }
-                        else MailDeliveredToday = false;
                     }
 
                     if (Lot.Aborting)

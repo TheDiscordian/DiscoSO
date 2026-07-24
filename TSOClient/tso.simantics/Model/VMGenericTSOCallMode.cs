@@ -87,6 +87,7 @@
         FSOIsStackObjectAllowedByLotCategory = 141,
 
         //DiscoSO functions
-        DiscoSOPayBills = 200
+        DiscoSOPayBills = 200,
+        DiscoSODeliverBills = 201
     }
 }

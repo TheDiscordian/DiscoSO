@@ -162,6 +162,28 @@ namespace FSO.Server.Servers.Lot.Domain
             });
         }
 
+        public void DeliverLotBills(VM vm)
+        {
+            //the mail carrier reached the mailbox - fold unbilled metered usage into today's bill
+            if (((VMTSOLotState)vm.TSOState).PropertyCategory == (byte)FSO.Common.Enum.LotCategory.community) return;
+            var lotId = Context.DbId;
+            Host.InBackground(() =>
+            {
+                try
+                {
+                    using (var db = DAFactory.Get())
+                    {
+                        var charge = Database.DA.LotBills.LotBillsUtils.DeliverUsage(db, lotId);
+                        if (charge > 0) LOG.Info("Mail delivery: lot " + lotId + " billed $" + charge + " for metered usage.");
+                    }
+                }
+                catch (Exception e)
+                {
+                    LOG.Warn(e, "mail bill delivery failed for lot " + lotId);
+                }
+            });
+        }
+
         public void RequestRoommate(VM vm, uint avatarID, int mode, byte permissions)
         {
             //0 = initiate. 1 = accept. 2 = reject.
