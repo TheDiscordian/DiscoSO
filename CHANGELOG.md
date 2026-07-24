@@ -14,6 +14,9 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 - Ambience volume now defaults to 80% for new installations (it was nearly silent). 🔊
 - The Budget Window's selected tab now connects seamlessly into its detail panel.
 
+### Fixed
+- Object expenses — pet food refills, and other refills, maintenance, and miscellaneous costs — now show up in the Budget Window's Expenses tab. They previously never reached the ledger. 🐾
+
 ## 1.0.14 — July 2026 💰
 
 ### Added
