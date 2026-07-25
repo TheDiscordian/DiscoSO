@@ -2,6 +2,14 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Fixed
+- Property statistics now count donated furniture. Donating an object gives up its resale value, and everything on a community lot is donated, so Furnishings and Yard sat at zero however well furnished the property was. Objects with no resale value are now counted at their catalogue price. 📊
+
+### Changed
+- The Yard rating is measured against the part of the lot that isn't built on, so extending the house no longer drags it down, and the amount of landscaping needed to fill the bar is one a real garden can reach. 🌳
+
 ## 1.0.26 — July 2026 🚽
 
 ### Fixed

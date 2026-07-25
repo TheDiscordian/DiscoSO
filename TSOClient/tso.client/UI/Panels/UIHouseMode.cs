@@ -270,7 +270,7 @@ namespace FSO.Client.UI.Panels
             if (vm?.Context?.RoomInfo == null) return;
             var arch = vm.Context.Architecture;
 
-            int interiorArea = 0, insideRooms = 0, bedrooms = 0, bathrooms = 0, reasonableRooms = 0;
+            int interiorArea = 0, groundArea = 0, insideRooms = 0, bedrooms = 0, bathrooms = 0, reasonableRooms = 0;
             var seenRooms = new HashSet<ushort>();
             foreach (var info in vm.Context.RoomInfo)
             {
@@ -278,6 +278,7 @@ namespace FSO.Client.UI.Panels
                 if (room.IsOutside || room.IsPool || room.Area == 0 || !seenRooms.Add(room.RoomID)) continue;
                 insideRooms++;
                 interiorArea += room.Area;
+                if (room.Floor == 0) groundArea += room.Area; //house footprint, ie. the part of the lot that isn't yard
                 if (room.Area >= 9 && room.Area <= 120) reasonableRooms++;
                 if (info.Entities != null)
                 {
@@ -296,22 +297,18 @@ namespace FSO.Client.UI.Panels
             {
                 if (ent is VMGameObject && ent.PersistID != 0 && ent.MultitileGroup != null) groups.Add(ent.MultitileGroup);
             }
-            long objValue = 0, outdoorValue = 0, initialValue = 0, currentOfInitial = 0;
+            long objValue = 0, outdoorValue = 0, newValue = 0;
             foreach (var group in groups)
             {
-                var price = Math.Max(0, group.Price);
-                objValue += price;
                 var baseObj = group.BaseObject;
-                if (baseObj != null)
-                {
-                    var room = vm.Context.GetObjectRoom(baseObj);
-                    if (room < vm.Context.RoomInfo.Length && vm.Context.RoomInfo[room].Room.IsOutside) outdoorValue += price;
-                }
-                if (group.InitialPrice > 0)
-                {
-                    initialValue += group.InitialPrice;
-                    currentOfInitial += Math.Min(price, group.InitialPrice);
-                }
+                var basePrice = (baseObj == null) ? 0 : BasePrice(group, baseObj);
+                if (basePrice <= 0) continue;
+                var wear = Math.Min(400, (int)((baseObj as VMGameObject)?.ObjectState?.Wear ?? (20 * 4)));
+                var price = (basePrice * (400 - wear)) / 400;
+                newValue += basePrice;
+                objValue += price;
+                var room = vm.Context.GetObjectRoom(baseObj);
+                if (room < vm.Context.RoomInfo.Length && vm.Context.RoomInfo[room].Room.IsOutside) outdoorValue += price;
             }
 
             AreaValue.Caption = interiorArea.ToString();
@@ -320,12 +317,27 @@ namespace FSO.Client.UI.Panels
             FloorsValue.Caption = lotFloors.ToString();
             LotSizeValue.Caption = (string)Script[(lotSize <= 1) ? "SmallLotSizeText" : ((lotSize <= 3) ? "MediumLotSizeText" : "LargeLotSizeText")];
 
-            //DiscoSO evaluators, 0-10, absolute scales so small properties read low
+            //DiscoSO evaluators, 0-10, absolute scales so small properties read low. the areas are
+            //floored so a one-room shack or a lot that's all house can't max a bar on a single item.
+            var furnishArea = Math.Max(100, interiorArea);
+            var yardArea = Math.Max(200, buildableTiles - groundArea);
             Bars[0].Value = Math.Min(10f, interiorArea / 40f); //Size: 400 interior tiles = max
-            Bars[1].Value = Math.Min(10f, objValue / (interiorArea > 0 ? interiorArea * 50f : 5000f)); //Furnishings
-            Bars[2].Value = Math.Min(10f, outdoorValue / (buildableTiles * 5f)); //Yard
-            Bars[3].Value = (initialValue > 0) ? (currentOfInitial * 10f) / initialValue : 10f; //Upkeep (wear)
+            Bars[1].Value = Math.Min(10f, objValue / (furnishArea * 50f)); //Furnishings: §500 an interior tile = max
+            Bars[2].Value = Math.Min(10f, outdoorValue / (yardArea * 1.2f)); //Yard: §12 an unbuilt tile = max
+            Bars[3].Value = (newValue > 0) ? (objValue * 10f) / newValue : 10f; //Upkeep (wear)
             Bars[4].Value = Math.Min(10f, reasonableRooms * 2f); //Layout: five well-sized rooms = max
+        }
+
+        /// <summary>
+        /// What an object is worth before wear. Donating one zeroes its sellback price outright,
+        /// and everything on a community lot is donated - fall back to the catalog so the stats
+        /// read the furniture that's there rather than what it would fetch resold.
+        /// </summary>
+        private static int BasePrice(VMMultitileGroup group, VMEntity baseObj)
+        {
+            if (group.InitialPrice > 0) return group.InitialPrice;
+            var def = baseObj.MasterDefinition ?? baseObj.Object.OBJ;
+            return (int)(Content.Content.Get().WorldCatalog.GetItemByGUID(def.GUID)?.Price ?? def.Price);
         }
     }
     
