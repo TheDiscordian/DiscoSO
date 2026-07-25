@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.23 — July 2026 💸
+
+### Changed
+- Sims can hand each other up to §30,000 at a time. 💸
+
 ## 1.0.22 — July 2026 📸
 
 ### Changed
