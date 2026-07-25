@@ -4,6 +4,9 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ## Unreleased
 
+### Added
+- Sandbox mode now runs lot bills. Lights, open food stalls, playing stereos and switched-on TVs cost money by the game hour, the paper carrier delivers the bill to the mailbox, and Pay Bills settles it from your budget — the same rules the live server uses. The daily property fee stays online-only, since a sandbox lot has no size on record. 💸
+
 ### Changed
 - Quick meals now cost §8 from the fridge's food stock, down from §10. 🍽️
 
