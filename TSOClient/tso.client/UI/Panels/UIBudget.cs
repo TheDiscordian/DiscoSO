@@ -225,7 +225,7 @@ namespace FSO.Client.UI.Panels
                 case 2: //bills: outstanding first (click to pay), then paid history
                     if (Data != null)
                     {
-                        if (Data.OutstandingBills > 0 && Data.BillsMenuPayEnabled)
+                        if (Data.OutstandingBills > 0)
                         {
                             var due = new UIListBoxItem("PAY", new object[] { (string)Script["DebtTabLabelText"] + " due " + DayLabel(Data.OldestBilledDay), "", FormatMoney(Data.OutstandingBills) });
                             items.Add(due);
