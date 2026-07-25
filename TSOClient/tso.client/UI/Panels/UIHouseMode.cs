@@ -270,7 +270,7 @@ namespace FSO.Client.UI.Panels
             if (vm?.Context?.RoomInfo == null) return;
             var arch = vm.Context.Architecture;
 
-            int interiorArea = 0, groundArea = 0, insideRooms = 0, bedrooms = 0, bathrooms = 0, reasonableRooms = 0;
+            int interiorArea = 0, insideRooms = 0, bedrooms = 0, bathrooms = 0, reasonableRooms = 0;
             var seenRooms = new HashSet<ushort>();
             foreach (var info in vm.Context.RoomInfo)
             {
@@ -278,7 +278,6 @@ namespace FSO.Client.UI.Panels
                 if (room.IsOutside || room.IsPool || room.Area == 0 || !seenRooms.Add(room.RoomID)) continue;
                 insideRooms++;
                 interiorArea += room.Area;
-                if (room.Floor == 0) groundArea += room.Area; //house footprint, ie. the part of the lot that isn't yard
                 if (room.Area >= 9 && room.Area <= 120) reasonableRooms++;
                 if (info.Entities != null)
                 {
@@ -317,13 +316,10 @@ namespace FSO.Client.UI.Panels
             FloorsValue.Caption = lotFloors.ToString();
             LotSizeValue.Caption = (string)Script[(lotSize <= 1) ? "SmallLotSizeText" : ((lotSize <= 3) ? "MediumLotSizeText" : "LargeLotSizeText")];
 
-            //DiscoSO evaluators, 0-10, absolute scales so small properties read low. the areas are
-            //floored so a one-room shack or a lot that's all house can't max a bar on a single item.
-            var furnishArea = Math.Max(100, interiorArea);
-            var yardArea = Math.Max(200, buildableTiles - groundArea);
+            //DiscoSO evaluators, 0-10, absolute scales so small properties read low
             Bars[0].Value = Math.Min(10f, interiorArea / 40f); //Size: 400 interior tiles = max
-            Bars[1].Value = Math.Min(10f, objValue / (furnishArea * 50f)); //Furnishings: §500 an interior tile = max
-            Bars[2].Value = Math.Min(10f, outdoorValue / (yardArea * 1.2f)); //Yard: §12 an unbuilt tile = max
+            Bars[1].Value = Math.Min(10f, objValue / (interiorArea > 0 ? interiorArea * 50f : 5000f)); //Furnishings
+            Bars[2].Value = Math.Min(10f, outdoorValue / (buildableTiles * 5f)); //Yard
             Bars[3].Value = (newValue > 0) ? (objValue * 10f) / newValue : 10f; //Upkeep (wear)
             Bars[4].Value = Math.Min(10f, reasonableRooms * 2f); //Layout: five well-sized rooms = max
         }
