@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Changed
+- Quick meals now cost §8 from the fridge's food stock, down from §10. 🍽️
+
 ## 1.0.23 — July 2026 💸
 
 ### Changed
