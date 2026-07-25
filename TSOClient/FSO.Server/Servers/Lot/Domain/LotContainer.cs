@@ -21,6 +21,7 @@ using FSO.Server.Servers.City.Domain;
 using FSO.SimAntics;
 using FSO.SimAntics.Entities;
 using FSO.SimAntics.Engine;
+using FSO.SimAntics.Engine.TSOGlobalLink;
 using FSO.SimAntics.Marshals;
 using FSO.SimAntics.Model;
 using FSO.SimAntics.Model.TSOPlatform;
@@ -932,28 +933,7 @@ namespace FSO.Server.Servers.Lot.Domain
         private static uint NHOOD_BULLETIN_GUID = 0x4B489F30;
         private static uint NHOOD_BULLETIN_SMART_GUID = 0x792617D7;
 
-        private static readonly HashSet<string> StallIffs = new HashSet<string> { "foodcounter.iff", "foodcounterunleashed.iff" };
-        private static readonly HashSet<string> StereoIffs = new HashSet<string> { "stereos.iff", "stereos2.iff", "jukebox.iff", "stereowallunleashed.iff", "stereospeakers.iff" };
-        private static readonly HashSet<string> TvIffs = new HashSet<string> { "tvs.iff" };
-        private int UsageSampleTicker;
-
-        private static bool IsStall(VMEntity obj)
-        {
-            var iff = (obj as VMGameObject)?.Object?.Resource?.MainIff?.Filename;
-            return iff != null && StallIffs.Contains(iff);
-        }
-
-        private static bool IsTv(VMEntity obj)
-        {
-            var iff = (obj as VMGameObject)?.Object?.Resource?.MainIff?.Filename;
-            return iff != null && TvIffs.Contains(iff);
-        }
-
-        private static bool IsStereo(VMEntity obj)
-        {
-            var iff = (obj as VMGameObject)?.Object?.Resource?.MainIff?.Filename;
-            return iff != null && StereoIffs.Contains(iff);
-        }
+        private VMLotUsageSampler UsageSampler = new VMLotUsageSampler();
 
         //fold unbilled metered usage (lights, stalls) into today's bill.
         //the mail carrier's mailbox delivery covers this while the lot is online
@@ -1001,7 +981,7 @@ namespace FSO.Server.Servers.Lot.Domain
 
             //stalls start open on community lots - run the cart's own open tree (DiscoSO piff tree 4210,
             //"Manage/Open" without the ownership gate; checks "Is open?" itself so it no-ops on open stalls)
-            var stallGroups = Lot.Entities.Where(x => IsStall(x)).Select(x => x.MultitileGroup).Where(x => x != null).Distinct().ToList();
+            var stallGroups = Lot.Entities.Where(x => VMLotUsageSampler.IsStall(x)).Select(x => x.MultitileGroup).Where(x => x != null).Distinct().ToList();
             foreach (var group in stallGroups)
             {
                 var ent = group.Objects.FirstOrDefault(o => o.TreeTable?.InteractionByIndex?.Values.Any(i => i.ActionFunction == 4102) == true);
@@ -1146,36 +1126,16 @@ namespace FSO.Server.Servers.Lot.Domain
                         return;
                     }
 
-                    //usage metering: sample once per in-game hour (TicksPerMinute x 60 ticks - 5 real
-                    //minutes on TSO lots). each sample adds 1 game hour per lit lamp and per open stall.
-                    if (!JobLot && ++UsageSampleTicker >= Lot.Context.Clock.TicksPerMinute * 60)
+                    //usage metering: the shared sampler counts what's running once per in-game hour.
+                    //each sample adds 1 game hour per lit lamp, open stall, playing stereo and on TV.
+                    if (!JobLot)
                     {
-                        UsageSampleTicker = 0;
                         try
                         {
-                            var groups = new HashSet<VMMultitileGroup>();
-                            foreach (var ent in Lot.Entities)
+                            var sample = UsageSampler.Tick(Lot);
+                            if (sample != null && sample.Value.Any)
                             {
-                                if (ent is VMGameObject && ent.MultitileGroup != null) groups.Add(ent.MultitileGroup);
-                            }
-                            int litLamps = 0, openStalls = 0, playingStereos = 0, playingTvs = 0;
-                            foreach (var group in groups)
-                            {
-                                //the engine's real-light test: windows and doors carry a daylight contribution
-                                //but aren't lamps, and an auto-off lamp contributes 0
-                                if (group.Objects.Any(o =>
-                                {
-                                    var lightFlags = (VMEntityFlags2)o.GetValue(VMStackObjectVariable.FlagField2);
-                                    return (lightFlags & VMEntityFlags2.GeneratesLight) > 0
-                                        && (lightFlags & (VMEntityFlags2.ArchitectualWindow | VMEntityFlags2.ArchitectualDoor)) == 0
-                                        && o.GetValue(VMStackObjectVariable.LightingContribution) > 0;
-                                })) litLamps++;
-                                if (IsStall(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(1) > 0)) openStalls++; //"Is open?" lives on the control segment, not the base tile
-                                if (IsStereo(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(0) > 0)) playingStereos++; //attribute 0 = "Power (Off/On)" on every stereo family
-                                if (IsTv(group.BaseObject) && group.Objects.Any(o => o.GetAttribute(0) > 0)) playingTvs++; //attribute 0 = "Power (Off/On)" on tvs.iff
-                            }
-                            if (litLamps > 0 || openStalls > 0 || playingStereos > 0 || playingTvs > 0)
-                            {
+                                var usage = sample.Value;
                                 var day = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
                                 var lotId = Context.DbId;
                                 Host.InBackground(() =>
@@ -1184,7 +1144,7 @@ namespace FSO.Server.Servers.Lot.Domain
                                     {
                                         using (var db = DAFactory.Get())
                                         {
-                                            db.LotUsage.AddUsage(lotId, day, litLamps, openStalls, playingStereos, playingTvs);
+                                            db.LotUsage.AddUsage(lotId, day, usage.LitLamps, usage.OpenStalls, usage.PlayingStereos, usage.PlayingTvs);
                                         }
                                     }
                                     catch (Exception) { }

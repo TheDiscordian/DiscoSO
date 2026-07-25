@@ -157,6 +157,7 @@
     <Compile Include="Model\DynamicTuning.cs" />
     <Compile Include="Model\DynTuningEntry.cs" />
     <Compile Include="Model\IntersectRectSet.cs" />
+    <Compile Include="Model\LotBills.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rendering\CachableTexture2D.cs" />
     <Compile Include="Rendering\Emoji\EmojiCache.cs" />

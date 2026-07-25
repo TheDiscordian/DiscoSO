@@ -8,7 +8,7 @@ namespace FSO.SimAntics.Engine.TSOGlobalLink
 {
     public class VMTSOStandaloneDatabase : VMSerializable
     {
-        public static readonly int CURRENT_VERSION = 2;
+        public static readonly int CURRENT_VERSION = 3;
         public int Version = CURRENT_VERSION;
 
         public Dictionary<string, uint> IpNameToPersist;
@@ -16,6 +16,7 @@ namespace FSO.SimAntics.Engine.TSOGlobalLink
         public HashSet<uint> Administrators;
 
         public Dictionary<uint, Dictionary<uint, byte[]>> PluginStorage;
+        public Dictionary<string, VMStandaloneLotBills> LotBills; //keyed by lot name
         //todo: inventory
         //todo: skills, motives...
 
@@ -45,6 +46,19 @@ namespace FSO.SimAntics.Engine.TSOGlobalLink
             TakenAvatarPersist = new HashSet<uint>();
             Administrators = new HashSet<uint>();
             PluginStorage = new Dictionary<uint, Dictionary<uint, byte[]>>();
+            LotBills = new Dictionary<string, VMStandaloneLotBills>();
+        }
+
+        public VMStandaloneLotBills BillsForLot(string name)
+        {
+            if (LotBills == null) LotBills = new Dictionary<string, VMStandaloneLotBills>();
+            VMStandaloneLotBills result;
+            if (!LotBills.TryGetValue(name, out result))
+            {
+                result = new VMStandaloneLotBills();
+                LotBills.Add(name, result);
+            }
+            return result;
         }
 
         public void Save()
@@ -134,6 +148,13 @@ namespace FSO.SimAntics.Engine.TSOGlobalLink
                     writer.Write(data.Value);
                 }
             }
+
+            writer.Write(LotBills.Count);
+            foreach (var lot in LotBills)
+            {
+                writer.Write(lot.Key);
+                lot.Value.SerializeInto(writer);
+            }
         }
 
         public void Deserialize(BinaryReader reader)
@@ -171,6 +192,19 @@ namespace FSO.SimAntics.Engine.TSOGlobalLink
                         ownerPlugins.Add(plugin, reader.ReadBytes(byteCount));
                     }
                     PluginStorage.Add(ownerID, ownerPlugins);
+                }
+            }
+
+            LotBills = new Dictionary<string, VMStandaloneLotBills>();
+            if (Version > 2)
+            {
+                var lots = reader.ReadInt32();
+                for (int i = 0; i < lots; i++)
+                {
+                    var name = reader.ReadString();
+                    var bills = new VMStandaloneLotBills();
+                    bills.Deserialize(reader);
+                    LotBills[name] = bills;
                 }
             }
         }

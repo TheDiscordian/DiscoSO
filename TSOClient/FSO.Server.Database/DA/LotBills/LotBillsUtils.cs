@@ -1,8 +1,65 @@
+using FSO.Common.Model;
+using FSO.Server.Database.DA.Tuning;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace FSO.Server.Database.DA.LotBills
 {
+    /// <summary>
+    /// Database-backed storage for the shared metered billing rules. Sandbox runs the same rules
+    /// against the standalone database instead.
+    /// </summary>
+    public class SqlLotBillsStore : ILotBillsStore
+    {
+        private readonly IDA DB;
+        private readonly int LotID;
+        private Dictionary<int, DbTuning> TuningRows;
+
+        public SqlLotBillsStore(IDA db, int lot_id)
+        {
+            DB = db;
+            LotID = lot_id;
+        }
+
+        public float Tuning(int index, float def)
+        {
+            if (TuningRows == null) TuningRows = DB.Tuning.AllCategory("discoso_bills", 0).ToDictionary(x => x.tuning_index);
+            return TuningRows.ContainsKey(index) ? TuningRows[index].value : def;
+        }
+
+        public int? OldestOutstandingDay()
+        {
+            return DB.LotBills.OldestOutstandingDay(LotID);
+        }
+
+        public LotUsageHours GetUnbilledUsage()
+        {
+            return Hours(DB.LotUsage.GetUnbilled(LotID));
+        }
+
+        public LotUsageHours CollectUnbilledUsage()
+        {
+            return Hours(DB.LotUsage.CollectUnbilled(LotID));
+        }
+
+        public bool AddMeteredCharge(int day, int amount)
+        {
+            return DB.LotBills.AddToDay(LotID, day, amount);
+        }
+
+        private static LotUsageHours Hours(LotUsage.DbLotUsageTotal total)
+        {
+            return new LotUsageHours()
+            {
+                LightHours = total.light_hours,
+                StallHours = total.stall_hours,
+                RadioHours = total.radio_hours,
+                TvHours = total.tv_hours
+            };
+        }
+    }
+
     public static class LotBillsUtils
     {
         public const int TIER_NONE = 0;
@@ -16,27 +73,7 @@ namespace FSO.Server.Database.DA.LotBills
         /// </summary>
         public static int DeliverUsage(IDA db, int lot_id)
         {
-            var tuning = db.Tuning.AllCategory("discoso_bills", 0).ToDictionary(x => x.tuning_index);
-            Func<int, float, float> tune = (i, def) => tuning.ContainsKey(i) ? tuning[i].value : def;
-            var lightsRate = tune(5, 0);
-            var stallRate = tune(7, 0);
-            var radioRate = tune(8, 0);
-            var tvRate = tune(9, 0);
-            if (lightsRate <= 0 && stallRate <= 0 && radioRate <= 0 && tvRate <= 0) return 0;
-
-            var today = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalDays;
-            var grace = Math.Max(0, (int)tune(3, 3));
-            var pauseDays = Math.Max(1, (int)tune(6, 6));
-            var oldest = db.LotBills.OldestOutstandingDay(lot_id);
-            if (oldest != null && today - oldest.Value - grace >= pauseDays) return 0; //far overdue: accrual paused
-
-            var projected = db.LotUsage.GetUnbilled(lot_id);
-            if ((int)Math.Round(projected.light_hours * lightsRate + projected.stall_hours * stallRate + projected.radio_hours * radioRate + projected.tv_hours * tvRate) < 1) return 0;
-
-            var actual = db.LotUsage.CollectUnbilled(lot_id);
-            var charge = (int)Math.Round(actual.light_hours * lightsRate + actual.stall_hours * stallRate + actual.radio_hours * radioRate + actual.tv_hours * tvRate);
-            if (charge < 1) return 0;
-            return db.LotBills.AddToDay(lot_id, today, charge) ? charge : 0;
+            return LotBillsPolicy.DeliverUsage(new SqlLotBillsStore(db, lot_id));
         }
 
         /// <summary>
