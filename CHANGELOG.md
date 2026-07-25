@@ -6,6 +6,7 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ### Changed
 - Election residency requirements now scale with a neighbourhood's age, so young neighbourhoods can hold their first elections — long-time residents qualify even before the full 30 days exist. 🗳️
+- The paper carrier now only visits the mailbox when there are actually bills to deliver — with a $0 balance she drops the paper and moves on, and the mailbox no longer offers Pay Bills. 📬
 
 ## 1.0.19 — July 2026 👻
 
