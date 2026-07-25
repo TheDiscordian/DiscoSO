@@ -83,6 +83,11 @@ namespace FSO.SimAntics.Engine.TSOTransaction
             //stub: no server
         }
 
+        public void DeliverLotBillsComplete(VM vm)
+        {
+            //stub: no server
+        }
+
         public void QueryLotBills(VM vm, uint callerId, ushort actionUID)
         {
             //stub: no server

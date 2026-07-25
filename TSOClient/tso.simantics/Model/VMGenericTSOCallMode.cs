@@ -89,6 +89,7 @@
         //DiscoSO functions
         DiscoSOPayBills = 200,
         DiscoSODeliverBills = 201,
-        DiscoSOQueryBills = 202
+        DiscoSOQueryBills = 202,
+        DiscoSODeliveredBills = 203
     }
 }

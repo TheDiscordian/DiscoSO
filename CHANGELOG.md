@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Changed
+- The mailbox's Pay Bills option now appears the moment the paper carrier finishes tucking the bills into the box — not before she gets there. 📬
+
 ## 1.0.20 — July 2026 📭
 
 ### Changed
