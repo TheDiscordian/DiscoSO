@@ -18,6 +18,7 @@ namespace FSO.Common.DatabaseService.Model
         public bool BillsEnabled; //discoso_bills tuning has a nonzero rate, or bills are outstanding
         public uint OutstandingBills; //total unpaid bills across the avatar's roommate lots
         public uint OldestBilledDay; //epoch day of the oldest unpaid bill (0 = none)
+        public bool BillsMenuPayEnabled = true; //server allows paying from the Budget Window (discoso_bills 0:10; absent = allowed)
 
         public void Serialize(IoBuffer output, ISerializationContext context)
         {
@@ -52,6 +53,7 @@ namespace FSO.Common.DatabaseService.Model
             output.PutBool(BillsEnabled);
             output.PutUInt32(OutstandingBills);
             output.PutUInt32(OldestBilledDay);
+            output.PutBool(BillsMenuPayEnabled);
         }
 
         public void Deserialize(IoBuffer input, ISerializationContext context)
@@ -99,6 +101,7 @@ namespace FSO.Common.DatabaseService.Model
             BillsEnabled = input.HasRemaining && input.GetBool();
             OutstandingBills = input.HasRemaining ? input.GetUInt32() : 0;
             OldestBilledDay = input.HasRemaining ? input.GetUInt32() : 0;
+            BillsMenuPayEnabled = !input.HasRemaining || input.GetBool();
         }
     }
 

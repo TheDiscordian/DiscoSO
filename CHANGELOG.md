@@ -2,10 +2,15 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased
+## 1.0.19 — July 2026 👻
 
 ### Changed
 - TV-on hours now join the metered bills, at $1 per game hour. 📺
+- Bills can now be made payable only at your mailbox — paying from the Budget Window is a server option, and DiscoSO turns it off for the authentic walk-to-the-mailbox experience. 📬
+
+### Fixed
+- Sims no longer show as online in the city long after their player disconnected — the client now fully exits when closed (no more background zombie processes), and the server drops dead connections after a few minutes. 👻
+- Maids no longer give up and leave when they can't step inside a toilet stall to clean it — they clean it from the doorway instead. 🚽
 
 ## 1.0.18 — July 2026 💡
 

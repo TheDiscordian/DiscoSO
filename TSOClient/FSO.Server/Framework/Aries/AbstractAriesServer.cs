@@ -96,6 +96,8 @@ namespace FSO.Server.Framework.Aries
             }
 
             Acceptor = new AsyncSocketAcceptor();
+            //dead clients that never FIN (crash, sleep, half-open) otherwise hold sessions - and claims - forever
+            Acceptor.SessionConfig.SetIdleTime(Mina.Core.Session.IdleStatus.ReaderIdle, 600);
 
             try {
                 if (Config.Certificate != null)
@@ -117,6 +119,7 @@ namespace FSO.Server.Framework.Aries
 
                 //Bind in the plain too as a workaround until we can get Mina.NET to work nice for TLS in the AriesClient
                 PlainAcceptor = new AsyncSocketAcceptor();
+                PlainAcceptor.SessionConfig.SetIdleTime(Mina.Core.Session.IdleStatus.ReaderIdle, 600);
                 if (Debugger != null){
                     PlainAcceptor.FilterChain.AddLast("packetLogger", new AriesProtocolLogger(Debugger.GetPacketLogger(), Kernel.Get<ISerializationContext>()));
                 }
@@ -354,6 +357,9 @@ namespace FSO.Server.Framework.Aries
 
         public void SessionIdle(IoSession session, IdleStatus status)
         {
+            //nothing read from this session for the idle window - the peer is gone
+            LOG.Info("[SESSION-IDLE-CLOSE (" + Config.Call_Sign + ")]");
+            session.Close(true);
         }
 
         public void ExceptionCaught(IoSession session, Exception cause)
