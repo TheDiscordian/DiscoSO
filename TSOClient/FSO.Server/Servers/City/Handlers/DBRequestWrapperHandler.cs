@@ -198,7 +198,7 @@ namespace FSO.Server.Servers.City.Handlers
                         Categories = categories,
                         BillsDays = billsDays,
                         BillsEnabled = da.Tuning.AllCategory("discoso_bills", 0).Any(x => x.value > 0) || outstanding.Count > 0,
-                        BillsMenuPayEnabled = da.Tuning.AllCategory("discoso_bills", 0).FirstOrDefault(x => x.tuning_index == 10)?.value != 0, //absent = allowed; 0 = mailbox only
+                        BillsMenuPayEnabled = (da.Tuning.AllCategory("discoso_bills", 0).FirstOrDefault(x => x.tuning_index == 10)?.value ?? 0) != 0, //mailbox only unless 0:10 is set nonzero
                         OutstandingBills = (uint)outstanding.Sum(x => (long)x.amount),
                         OldestBilledDay = (uint)(outstanding.Count > 0 ? outstanding.Min(x => x.billed_day) : 0)
                     }
@@ -270,8 +270,8 @@ namespace FSO.Server.Servers.City.Handlers
 
             using (var checkDa = DAFactory.Get())
             {
-                //mailbox-only servers reject menu payment outright
-                if (checkDa.Tuning.AllCategory("discoso_bills", 0).FirstOrDefault(x => x.tuning_index == 10)?.value == 0) { return null; }
+                //bills are paid at the mailbox unless the server opts into menu payment (discoso_bills 0:10 nonzero)
+                if ((checkDa.Tuning.AllCategory("discoso_bills", 0).FirstOrDefault(x => x.tuning_index == 10)?.value ?? 0) == 0) { return null; }
             }
             if (request.AvatarId != session.AvatarId)
             {
