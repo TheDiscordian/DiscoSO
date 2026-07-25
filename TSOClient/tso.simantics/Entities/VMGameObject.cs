@@ -314,7 +314,9 @@ namespace FSO.SimAntics
         {
             var bmp = Object.Resource.Get<BMP>((ushort)((MasterDefinition ?? Object.OBJ).CatalogStringsID + store * 2000));
             if (bmp != null) return bmp.GetTexture(gd);
-            else return null;
+            //objects the game shipped without a catalog BMP get one drawn from their own sprites,
+            //the same fallback avatars use - otherwise the action queue shows a blank slot
+            return MissingIconProvider?.Invoke(this);
         }
 
         public override void PrePositionChange(VMContext context, bool roomChange)
