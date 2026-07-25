@@ -103,6 +103,15 @@ namespace FSO.Server.Servers.City.Handlers
                         return;
                     }
 
+                    //the residency requirement scales with the neighbourhood's age (its oldest lot),
+                    //so young neighbourhoods can still hold elections: min(max(1, ageDays - 7), cap)
+                    var oldestLotDate = da.Neighborhoods.GetOldestLotDate(packet.TargetNHood);
+                    if (oldestLotDate > 0)
+                    {
+                        var nhoodAgeDays = (int)((Epoch.Now - oldestLotDate) / (24 * 60 * 60));
+                        moveTime = Math.Min(Math.Max(1, nhoodAgeDays - 7), config.Election_Move_Penalty) * 24 * 60 * 60;
+                    }
+
                     //common info used by most requests
                     var myLotID = da.Roommates.GetAvatarsLots(session.AvatarId).FirstOrDefault();
                     var myLot = (myLotID == null) ? null : da.Lots.Get(myLotID.lot_id);

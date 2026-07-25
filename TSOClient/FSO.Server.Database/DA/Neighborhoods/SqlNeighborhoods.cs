@@ -115,6 +115,12 @@ namespace FSO.Server.Database.DA.Neighborhoods
             return Context.Connection.Query<DbNhoodBan>("SELECT * FROM fso_nhood_ban WHERE user_id = @user_id AND end_date > @date",
                 new { user_id = user_id, date = date }).FirstOrDefault();
         }
+
+        public uint GetOldestLotDate(uint neighborhood_id)
+        {
+            return Context.Connection.Query<uint?>("SELECT MIN(created_date) FROM fso_lots WHERE neighborhood_id = @neighborhood_id",
+                new { neighborhood_id }).FirstOrDefault() ?? 0;
+        }
         
         public bool AddNhoodBan(DbNhoodBan ban)
         {

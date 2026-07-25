@@ -19,6 +19,8 @@ namespace FSO.Server.Database.DA.Neighborhoods
         void UpdateFlag(uint neighborhood_id, uint flag);
 
         DbNhoodBan GetNhoodBan(uint user_id);
+
+        uint GetOldestLotDate(uint neighborhood_id);
         bool AddNhoodBan(DbNhoodBan ban);
 
         List<DbNeighborhood> SearchExact(int shard_id, string name, int limit);
