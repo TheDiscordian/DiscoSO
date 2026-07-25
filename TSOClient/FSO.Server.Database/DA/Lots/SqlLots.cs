@@ -143,10 +143,11 @@ namespace FSO.Server.Database.DA.Lots
 
         public List<DbBillableLot> GetBillableLots(int shard_id)
         {
-            //community lots never get bills
+            //community lots never get bills. category is a string enum - a numeric
+            //comparison would match MariaDB's 1-based enum index, not the VM category
             return Context.Connection.Query<DbBillableLot>(
                 "SELECT lot_id, owner_id, size FROM fso_lots "
-                + "WHERE shard_id = @shard_id AND owner_id IS NOT NULL AND category != 11",
+                + "WHERE shard_id = @shard_id AND owner_id IS NOT NULL AND category != 'community'",
                 new { shard_id = shard_id }).ToList();
         }
 
