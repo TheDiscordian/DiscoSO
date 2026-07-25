@@ -167,18 +167,23 @@ namespace FSO.Server.Servers.Lot.Domain
 
         public void DeliverLotBills(VM vm)
         {
-            //the mail carrier reached the mailbox - fold unbilled metered usage into today's bill
+            //the mail carrier is deciding whether to visit the mailbox - fold unbilled metered
+            //usage into today's bill, then push the true outstanding count to the mailbox so her
+            //insert check (and the Pay Bills pie test) only fire when bills actually exist
             if (((VMTSOLotState)vm.TSOState).PropertyCategory == (byte)FSO.Common.Enum.LotCategory.community) return;
             var lotId = Context.DbId;
             Host.InBackground(() =>
             {
                 try
                 {
+                    int count;
                     using (var db = DAFactory.Get())
                     {
                         var charge = Database.DA.LotBills.LotBillsUtils.DeliverUsage(db, lotId);
                         if (charge > 0) LOG.Info("Mail delivery: lot " + lotId + " billed $" + charge + " for metered usage.");
+                        count = db.LotBills.GetOutstanding(lotId).Count;
                     }
+                    vm.SendCommand(new VMNetMailboxBillsCmd { Count = count });
                 }
                 catch (Exception e)
                 {

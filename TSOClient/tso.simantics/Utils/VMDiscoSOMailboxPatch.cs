@@ -10,8 +10,8 @@ namespace FSO.SimAntics.Utils
     /// chunks corrupts them. Runs on both client and server so the VMs stay in lockstep.
     ///
     /// The interaction only shows while the mailbox holds bills (test tree: attribute 1,
-    /// "Number of Bills Inside" - set at lot init, bumped by the paper carrier's delivery,
-    /// zeroed on payment). The action tree routes the sim to the mailbox, plays the
+    /// "Number of Bills Inside" - set at lot init and pushed by the server on each carrier
+    /// delivery, zeroed on payment). The action tree routes the sim to the mailbox, plays the
     /// mailbox-open animation, asks the server for the outstanding total (interaction
     /// result -> TempXL 0), then confirms with a Yes/No dialog showing the amount before
     /// paying via generic TSO call 200.
