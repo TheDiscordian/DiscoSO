@@ -27,7 +27,7 @@ namespace FSO.Server.Database.DA.LotBills
                 new { lot_id, day, amount });
             if (updated > 0) return true;
             return Context.Connection.Execute(
-                "INSERT INTO fso_lot_bills (lot_id, amount, billed_day) VALUES (@lot_id, @amount, @day)",
+                "INSERT INTO fso_lot_bills (lot_id, amount, billed_day, kind) VALUES (@lot_id, @amount, @day, 'metered')",
                 new { lot_id, day, amount }) > 0;
         }
 
@@ -48,8 +48,10 @@ namespace FSO.Server.Database.DA.LotBills
 
         public int? LastBilledDay(int lot_id)
         {
+            //the daily task's billing cursor - metered bills must not advance it, or a
+            //carrier delivery earlier the same day makes the task skip the lot's daily fee
             return Context.Connection.Query<int?>(
-                "SELECT MAX(billed_day) FROM fso_lot_bills WHERE lot_id = @lot_id",
+                "SELECT MAX(billed_day) FROM fso_lot_bills WHERE lot_id = @lot_id AND kind = 'daily'",
                 new { lot_id = lot_id }).FirstOrDefault();
         }
 
