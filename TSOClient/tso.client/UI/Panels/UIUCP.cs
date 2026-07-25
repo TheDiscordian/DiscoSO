@@ -572,7 +572,9 @@ namespace FSO.Client.UI.Panels
                 {
                     case 3:
                     case 2:
-                        if (Game.InLot && Game.vm.TSOState.Roommates.Contains(Game.vm.MyUID)) FindController<CoreGameScreenController>()?.UploadLotThumbnail();
+                        if (Game.InLot && (Game.vm.TSOState.Roommates.Contains(Game.vm.MyUID)
+                            || (Game.vm.TSOState.CommunityLot && (Game.vm.GetAvatarByPersist(Game.vm.MyUID)?.AvatarState?.Permissions ?? VMTSOAvatarPermissions.Visitor) >= VMTSOAvatarPermissions.Admin)))
+                            FindController<CoreGameScreenController>()?.UploadLotThumbnail();
                         break;
                 }
                 DynamicOverlay.Remove(Panel);
