@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using FSO.Common.Model;
 using FSO.SimAntics.NetPlay.Model.Commands;
 using FSO.SimAntics.Primitives;
 using FSO.SimAntics.NetPlay.Model;
@@ -22,6 +24,7 @@ namespace FSO.SimAntics.Engine.TSOTransaction
         private Queue<VMNetArchitectureCmd> ArchBuffer = new Queue<VMNetArchitectureCmd>();
         public VMTSOStandaloneDatabase Database; // = new VMTSOStandaloneDatabase();
         private bool WaitingOnArch;
+        private VMLotUsageSampler UsageSampler = new VMLotUsageSampler();
 
         public void PerformTransaction(VM vm, bool testOnly, uint uid1, uint uid2, int amount, short type, short thread, VMAsyncTransactionCallback callback)
         {
@@ -73,24 +76,85 @@ namespace FSO.SimAntics.Engine.TSOTransaction
             return true;
         }
 
+        //Property bills. Sandbox charges metered usage only - a sandbox lot has no size on file and
+        //nothing runs the nightly task, so the daily property fee has no meaning here. The rules
+        //themselves are shared with the city server (LotBillsPolicy).
+
+        /// <summary>
+        /// This lot's bill ledger, or null when there is nothing to bill - no database (the check
+        /// tree link) or a community lot, which is never billed.
+        /// </summary>
+        private VMStandaloneLotBills BillsFor(VM vm)
+        {
+            if (Database == null) return null;
+            var state = vm.TSOState as VMTSOLotState;
+            if (state == null || state.PropertyCategory == (byte)FSO.Common.Enum.LotCategory.community) return null;
+            return Database.BillsForLot(state.Name ?? "Lot");
+        }
+
         public void PayLotBills(VM vm, uint payerId)
         {
-            //server-only behaviour; no client-side prediction needed
+            var bills = BillsFor(vm);
+            if (bills == null) return;
+            var ava = vm.GetAvatarByPersist(payerId);
+            if (ava == null || ((VMTSOAvatarState)ava.TSOState).Permissions < VMTSOAvatarPermissions.Roommate) return;
+
+            var outstanding = bills.Outstanding();
+            if (outstanding.Count == 0) return;
+            var total = outstanding.Sum(x => (long)x.Amount);
+            if (total <= 0 || total > int.MaxValue) return;
+            //CanTransact inside here is what rejects a payer who can't cover it
+            if (!PerformTransaction(vm, false, payerId, uint.MaxValue, (int)total)) return;
+
+            var today = LotBillsPolicy.Today;
+            foreach (var bill in outstanding) bill.PaidDay = today;
+            Database.Save();
+
+            vm.SendCommand(new VMNetAsyncResponseCmd(0, new VMTransferFundsState
+            {
+                Responded = true,
+                Success = true,
+                TransferAmount = (int)total,
+                UID1 = payerId,
+                Budget1 = ava.TSOState.Budget.Value,
+                UID2 = uint.MaxValue,
+                Budget2 = 0
+            }));
         }
 
         public void DeliverLotBills(VM vm)
         {
-            //stub: no server
+            //the carrier is deciding whether to visit the mailbox - settle metered usage, then push
+            //the outstanding count as the PENDING signal so her tree only walks over when bills exist
+            var bills = BillsFor(vm);
+            if (bills == null) return;
+            LotBillsPolicy.DeliverUsage(new VMStandaloneLotBillsStore(bills));
+            Database.Save();
+            vm.SendCommand(new VMNetMailboxBillsCmd { Count = bills.Outstanding().Count, Delivered = false });
         }
 
         public void DeliverLotBillsComplete(VM vm)
         {
-            //stub: no server
+            //she finished tucking them in - reveal the count on the box, which raises the Pay Bills pie
+            var bills = BillsFor(vm);
+            if (bills == null) return;
+            vm.SendCommand(new VMNetMailboxBillsCmd { Count = bills.Outstanding().Count, Delivered = true });
         }
 
         public void QueryLotBills(VM vm, uint callerId, ushort actionUID)
         {
-            //stub: no server
+            //the pay dialog reads the amount from TempXL 0 - always answer, even with nothing owed,
+            //or the interaction waits on a result that never arrives
+            var bills = BillsFor(vm);
+            var total = (bills == null) ? 0 : bills.Outstanding().Sum(x => (long)x.Amount);
+            vm.SendCommand(new VMNetInteractionResultCmd
+            {
+                ActorUID = callerId,
+                ActionUID = actionUID,
+                Accepted = true,
+                Value = (int)Math.Min(int.MaxValue, total),
+                TargetUID = callerId
+            });
         }
 
         public void PerformTransaction(VM vm, bool testOnly, uint uid1, uint uid2, int amount, short type, VMAsyncTransactionCallback callback)
@@ -113,6 +177,19 @@ namespace FSO.SimAntics.Engine.TSOTransaction
 
         public void Tick(VM vm)
         {
+            //metered usage: the shared sampler counts what's running once per in-game hour
+            var bills = BillsFor(vm);
+            if (bills != null)
+            {
+                var sample = UsageSampler.Tick(vm);
+                if (sample != null && sample.Value.Any)
+                {
+                    var usage = sample.Value;
+                    bills.AddUsage(usage.LitLamps, usage.OpenStalls, usage.PlayingStereos, usage.PlayingTvs);
+                    Database.Save();
+                }
+            }
+
             lock (ArchBuffer)
             {
                 while (!WaitingOnArch && ArchBuffer.Count > 0)

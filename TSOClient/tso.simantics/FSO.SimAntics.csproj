@@ -132,6 +132,8 @@
     <Compile Include="Engine\Routing\VMRectRouter.cs" />
     <Compile Include="Engine\TSOGlobalLink\IVMTSOGlobalLink.cs" />
     <Compile Include="Engine\TSOGlobalLink\Model\VMGLOutfit.cs" />
+    <Compile Include="Engine\TSOGlobalLink\VMLotUsageSampler.cs" />
+    <Compile Include="Engine\TSOGlobalLink\VMStandaloneLotBills.cs" />
     <Compile Include="Engine\TSOGlobalLink\VMTS1GlobalLinkStub.cs" />
     <Compile Include="Engine\TSOGlobalLink\VMTSOGlobalLinkStub.cs" />
     <Compile Include="Engine\TSOGlobalLink\VMTSOStandaloneDatabase.cs" />
