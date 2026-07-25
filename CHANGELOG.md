@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Changed
+- Election residency requirements now scale with a neighbourhood's age, so young neighbourhoods can hold their first elections — long-time residents qualify even before the full 30 days exist. 🗳️
+
 ## 1.0.19 — July 2026 👻
 
 ### Changed
