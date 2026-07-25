@@ -20,6 +20,7 @@ using System.Collections.Immutable;
 using FSO.Common.Enum;
 using FSO.Server.Common;
 using FSO.Server.Database.DA.Neighborhoods;
+using FSO.Server.Framework.Voltron;
 
 namespace FSO.Server.DataService.Providers
 {
@@ -265,6 +266,17 @@ namespace FSO.Server.DataService.Providers
             }
         }
 
+        private bool IsStaff(ISecurityContext context)
+        {
+            var session = context as IVoltronSession;
+            if (session == null || session.IsAnonymous) return false;
+            using (var da = DAFactory.Get())
+            {
+                var ava = da.Avatars.Get(session.AvatarId);
+                return ava != null && ava.moderation_level > 0;
+            }
+        }
+
         public override void DemandMutation(object entity, MutationType type, string path, object value, ISecurityContext context)
         {
             var lot = entity as Lot;
@@ -321,7 +333,11 @@ namespace FSO.Server.DataService.Providers
                     break;
                 //roommate only
                 case "Lot_Thumbnail":
-                    if (lot.Lot_Category == 11) context.DemandAvatar(lot.Lot_LeaderID, AvatarPermissions.WRITE);
+                    if (lot.Lot_Category == 11)
+                    {
+                        //community lots can have no owner, so staff may also update the preview
+                        if (!IsStaff(context)) context.DemandAvatar(lot.Lot_LeaderID, AvatarPermissions.WRITE);
+                    }
                     else context.DemandAvatars(roomies, AvatarPermissions.WRITE);
                     //TODO: needs to be generic data, png, size 288x288, less than 1MB
                     break;
