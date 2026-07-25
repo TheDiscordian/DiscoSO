@@ -448,10 +448,18 @@ namespace FSO.Client.UI.Controls.Catalog
             return IconCache[GUID];
         }
 
+        //a shipped catalog icon is two 37x37 snapshots of the object side by side - the first on
+        //a dark background, the second on a light one for hover. Matching that layout exactly
+        //lets the drawn icons take the same path through UICatalogItem as the real ones.
+        private const int ICON_FRAME = 37;
+        private static readonly Color IconBackNormal = new Color(56, 88, 120);
+        private static readonly Color IconBackHover = new Color(184, 212, 240);
+
         /// <summary>
-        /// Draws an icon from the object's own sprites, for objects the game shipped without a
-        /// catalog BMP (the Hygeia-O-Matic Toilet and friends). Squared off so UICatalogItem
-        /// treats it as a single-frame icon and scales it to fit rather than halving it.
+        /// Builds a catalog icon from the object's own sprites, for objects the game shipped
+        /// without a catalog BMP (the Hygeia-O-Matic Toilet and friends). Snapshots the object
+        /// at the same angle and zoom the shipped icons use, then lays it out as the usual
+        /// normal + hover frame pair.
         /// </summary>
         private Texture2D RenderObjIcon(GameObject obj)
         {
@@ -463,20 +471,56 @@ namespace FSO.Client.UI.Controls.Catalog
                 var comp = new ObjectComponent(obj);
                 thumb = world.GetObjectThumb(new ObjectComponent[] { comp }, new Vector3[] { Vector3.Zero }, GameFacade.GraphicsDevice);
                 if (thumb == null || thumb.Width == 0 || thumb.Height == 0) return null;
-                if (thumb.Width == thumb.Height) return thumb;
-
-                var size = Math.Max(thumb.Width, thumb.Height);
                 var src = new Color[thumb.Width * thumb.Height];
                 thumb.GetData(src);
-                var dest = new Color[size * size];
-                var ox = (size - thumb.Width) / 2;
-                var oy = (size - thumb.Height) / 2;
-                for (int y = 0; y < thumb.Height; y++)
-                    for (int x = 0; x < thumb.Width; x++)
-                        dest[(y + oy) * size + (x + ox)] = src[y * thumb.Width + x];
-                var square = new Texture2D(GameFacade.GraphicsDevice, size, size);
-                square.SetData(dest);
-                return square;
+
+                var scale = Math.Min(ICON_FRAME / (float)thumb.Width, ICON_FRAME / (float)thumb.Height);
+                var dw = Math.Max(1, Math.Min(ICON_FRAME, (int)(thumb.Width * scale)));
+                var dh = Math.Max(1, Math.Min(ICON_FRAME, (int)(thumb.Height * scale)));
+                var ox = (ICON_FRAME - dw) / 2;
+                var oy = (ICON_FRAME - dh) / 2;
+
+                var width = ICON_FRAME * 2;
+                var dest = new Color[width * ICON_FRAME];
+                for (int y = 0; y < ICON_FRAME; y++)
+                {
+                    for (int x = 0; x < ICON_FRAME; x++)
+                    {
+                        dest[y * width + x] = IconBackNormal;
+                        dest[y * width + ICON_FRAME + x] = IconBackHover;
+                    }
+                }
+
+                //box filter down to icon size. world sprites are premultiplied, so the channels
+                //average independently and composite as a plain over.
+                for (int y = 0; y < dh; y++)
+                {
+                    var sy0 = y * thumb.Height / dh;
+                    var sy1 = Math.Max(sy0 + 1, (y + 1) * thumb.Height / dh);
+                    for (int x = 0; x < dw; x++)
+                    {
+                        var sx0 = x * thumb.Width / dw;
+                        var sx1 = Math.Max(sx0 + 1, (x + 1) * thumb.Width / dw);
+                        int r = 0, g = 0, b = 0, a = 0, n = 0;
+                        for (int sy = sy0; sy < sy1; sy++)
+                        {
+                            for (int sx = sx0; sx < sx1; sx++)
+                            {
+                                var p = src[sy * thumb.Width + sx];
+                                r += p.R; g += p.G; b += p.B; a += p.A; n++;
+                            }
+                        }
+                        if (n == 0 || a == 0) continue;
+                        r /= n; g /= n; b /= n; a /= n;
+                        var i = (y + oy) * width + (x + ox);
+                        dest[i] = Over(r, g, b, a, IconBackNormal);
+                        dest[i + ICON_FRAME] = Over(r, g, b, a, IconBackHover);
+                    }
+                }
+
+                var tex = new Texture2D(GameFacade.GraphicsDevice, width, ICON_FRAME);
+                tex.SetData(dest);
+                return tex;
             }
             catch (Exception)
             {
@@ -484,8 +528,17 @@ namespace FSO.Client.UI.Controls.Catalog
             }
             finally
             {
-                if (thumb != null && !thumb.IsDisposed && (thumb.Width != thumb.Height)) thumb.Dispose();
+                if (thumb != null && !thumb.IsDisposed) thumb.Dispose();
             }
+        }
+
+        private static Color Over(int r, int g, int b, int a, Color back)
+        {
+            var inv = 255 - a;
+            return new Color(
+                Math.Min(255, r + back.R * inv / 255),
+                Math.Min(255, g + back.G * inv / 255),
+                Math.Min(255, b + back.B * inv / 255));
         }
 
         private class CatalogSorter : IComparer<UICatalogElement>
