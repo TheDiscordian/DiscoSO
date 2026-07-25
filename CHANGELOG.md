@@ -6,7 +6,7 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ### Changed
 - TV-on hours now join the metered bills, at $1 per game hour. 📺
-- Bills can now be made payable only at your mailbox — paying from the Budget Window is a server option, and DiscoSO turns it off for the authentic walk-to-the-mailbox experience. 📬
+- Bills are now paid at your mailbox — the authentic walk to the kerb. Paying from the Budget Window is off by default, as a server option for those who want it. 📬
 
 ### Fixed
 - Sims no longer show as online in the city long after their player disconnected — the client now fully exits when closed (no more background zombie processes), and the server drops dead connections after a few minutes. 👻
