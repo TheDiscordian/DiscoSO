@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.26 — July 2026 🚽
+
+### Fixed
+- Objects the game shipped without a catalogue picture now show their drawn icon in the action queue, not just in the catalogue. 🚽
+
 ## 1.0.25 — July 2026 🍽️
 
 ### Fixed
