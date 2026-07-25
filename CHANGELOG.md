@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.25 — July 2026 🍽️
+
+### Fixed
+- Quick meals cost §8 in sandbox mode too. The lower price was a live-server setting, so offline play was still charging the old §10. 🍽️
+
 ## 1.0.24 — July 2026 🧾
 
 ### Added
