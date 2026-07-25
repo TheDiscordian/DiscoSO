@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using FSO.Client.UI.Framework;
 using FSO.Content;
+using FSO.LotView.Components;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using FSO.Files.Formats.IFF.Chunks;
 using FSO.Client.UI.Panels.LotControls;
@@ -436,9 +438,54 @@ namespace FSO.Client.UI.Controls.Catalog
                 }
                 var bmp = obj.Resource.Get<BMP>(obj.OBJ.CatalogStringsID);
                 if (bmp != null) IconCache[GUID] = bmp.GetTexture(GameFacade.GraphicsDevice);
-                else IconCache[GUID] = null;
+                else
+                {
+                    var drawn = RenderObjIcon(obj);
+                    if (drawn == null) return null; //no world yet - retry on a later page build
+                    IconCache[GUID] = drawn;
+                }
             }
             return IconCache[GUID];
+        }
+
+        /// <summary>
+        /// Draws an icon from the object's own sprites, for objects the game shipped without a
+        /// catalog BMP (the Hygeia-O-Matic Toilet and friends). Squared off so UICatalogItem
+        /// treats it as a single-frame icon and scales it to fit rather than halving it.
+        /// </summary>
+        private Texture2D RenderObjIcon(GameObject obj)
+        {
+            var world = LotControl?.World;
+            if (world == null || obj.OBJ.BaseGraphicID == 0) return null;
+            Texture2D thumb = null;
+            try
+            {
+                var comp = new ObjectComponent(obj);
+                thumb = world.GetObjectThumb(new ObjectComponent[] { comp }, new Vector3[] { Vector3.Zero }, GameFacade.GraphicsDevice);
+                if (thumb == null || thumb.Width == 0 || thumb.Height == 0) return null;
+                if (thumb.Width == thumb.Height) return thumb;
+
+                var size = Math.Max(thumb.Width, thumb.Height);
+                var src = new Color[thumb.Width * thumb.Height];
+                thumb.GetData(src);
+                var dest = new Color[size * size];
+                var ox = (size - thumb.Width) / 2;
+                var oy = (size - thumb.Height) / 2;
+                for (int y = 0; y < thumb.Height; y++)
+                    for (int x = 0; x < thumb.Width; x++)
+                        dest[(y + oy) * size + (x + ox)] = src[y * thumb.Width + x];
+                var square = new Texture2D(GameFacade.GraphicsDevice, size, size);
+                square.SetData(dest);
+                return square;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            finally
+            {
+                if (thumb != null && !thumb.IsDisposed && (thumb.Width != thumb.Height)) thumb.Dispose();
+            }
         }
 
         private class CatalogSorter : IComparer<UICatalogElement>

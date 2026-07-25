@@ -8,6 +8,9 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 - Staff can now refresh a community lot's city-view preview by opening and closing Buy or Build mode on the lot — previously a community lot without an owner could never update its snapshot. 📸
 - Sims can hand each other up to §29,999 at a time, up from §999. 💸
 
+### Fixed
+- Objects the original game shipped without a catalogue picture — the Hygeia-O-Matic Toilet, the Flush Force 5 XLT, Hats Off to 2005 and a handful of others — now draw their own icon instead of showing an empty square. 🖼️
+
 ## 1.0.21 — July 2026 📬
 
 ### Changed
