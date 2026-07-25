@@ -2,7 +2,7 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased
+## 1.0.22 — July 2026 📸
 
 ### Changed
 - Staff can now refresh a community lot's city-view preview by opening and closing Buy or Build mode on the lot — previously a community lot without an owner could never update its snapshot. 📸
