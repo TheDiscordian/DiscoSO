@@ -168,8 +168,9 @@ namespace FSO.Server.Servers.Lot.Domain
         public void DeliverLotBills(VM vm)
         {
             //the mail carrier is deciding whether to visit the mailbox - fold unbilled metered
-            //usage into today's bill, then push the true outstanding count to the mailbox so her
-            //insert check (and the Pay Bills pie test) only fire when bills actually exist
+            //usage into today's bill, then push the outstanding count as the PENDING signal so
+            //her tree only walks to the box when bills actually exist. The visible count (and
+            //with it the Pay Bills pie) is revealed by DeliverLotBillsComplete after her insert
             if (((VMTSOLotState)vm.TSOState).PropertyCategory == (byte)FSO.Common.Enum.LotCategory.community) return;
             var lotId = Context.DbId;
             Host.InBackground(() =>
@@ -183,11 +184,35 @@ namespace FSO.Server.Servers.Lot.Domain
                         if (charge > 0) LOG.Info("Mail delivery: lot " + lotId + " billed $" + charge + " for metered usage.");
                         count = db.LotBills.GetOutstanding(lotId).Count;
                     }
-                    vm.SendCommand(new VMNetMailboxBillsCmd { Count = count });
+                    vm.SendCommand(new VMNetMailboxBillsCmd { Count = count, Delivered = false });
                 }
                 catch (Exception e)
                 {
                     LOG.Warn(e, "mail bill delivery failed for lot " + lotId);
+                }
+            });
+        }
+
+        public void DeliverLotBillsComplete(VM vm)
+        {
+            //the carrier finished tucking the bills in - reveal the count on the box (fresh
+            //query, so a payment that raced the animation still ends up reflected correctly)
+            if (((VMTSOLotState)vm.TSOState).PropertyCategory == (byte)FSO.Common.Enum.LotCategory.community) return;
+            var lotId = Context.DbId;
+            Host.InBackground(() =>
+            {
+                try
+                {
+                    int count;
+                    using (var db = DAFactory.Get())
+                    {
+                        count = db.LotBills.GetOutstanding(lotId).Count;
+                    }
+                    vm.SendCommand(new VMNetMailboxBillsCmd { Count = count, Delivered = true });
+                }
+                catch (Exception e)
+                {
+                    LOG.Warn(e, "mail bill reveal failed for lot " + lotId);
                 }
             });
         }
