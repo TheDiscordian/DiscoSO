@@ -13,6 +13,7 @@ using FSO.Client.Controllers;
 using FSO.Common.DatabaseService.Model;
 using FSO.Common;
 using FSO.Common.Enum;
+using FSO.Client.Rendering.City;
 using System.Collections.Immutable;
 
 namespace FSO.Client.UI.Panels
@@ -492,23 +493,57 @@ namespace FSO.Client.UI.Panels
             set
             {
                 _FilterList = value;
+                if (CheckingWelcome)
+                {
+                    //the welcome results are in. if none of those lots are actually up, there is
+                    //nothing to send a new player to - fall through to community and skip drawing
+                    //the dud set entirely.
+                    CheckingWelcome = false;
+                    if (!AnyOnline(value)) { SelectFilter("Community"); return; }
+                }
                 RegisterFilters();
             }
         }
 
-        private bool ShownWelcome;
+        private bool ChoseDefaultFilter;
+        private bool CheckingWelcome;
         public uint SimAge
         {
             set
             {
-                if (value < 14 && !ShownWelcome)
+                if (ChoseDefaultFilter) return;
+                ChoseDefaultFilter = true;
+                if (value < 14)
                 {
-                    ShownWelcome = true;
-                    GameThread.NextUpdate(e => {
-                        FiltersProperty.FilterClicked(FiltersProperty.GetChildren().FirstOrDefault(x => (x.ID?.IndexOf("Welcome") ?? -1) > -1));
-                        });
+                    //point new players at welcome lots, but only while any are running
+                    CheckingWelcome = true;
+                    GameThread.NextUpdate(e => SelectFilter("Welcome"));
                 }
+                else GameThread.NextUpdate(e => SelectFilter("Community"));
             }
+        }
+
+        private void SelectFilter(string name)
+        {
+            FiltersProperty.FilterClicked(FiltersProperty.GetChildren().FirstOrDefault(x => (x.ID?.IndexOf(name) ?? -1) > -1));
+        }
+
+        /// <summary>
+        /// True if any lot in the list is currently hosted. The terrain's tile flags are the only
+        /// place the client knows this - the filter vector is just locations.
+        /// </summary>
+        private bool AnyOnline(ImmutableList<uint> lots)
+        {
+            if (lots == null || lots.Count == 0) return false;
+            var terrain = (GameFacade.Screens.CurrentUIScreen as CoreGameScreen)?.CityRenderer;
+            if (terrain == null) return false;
+            foreach (var lot in lots)
+            {
+                LotTileEntry entry;
+                if (terrain.LotTileLookup.TryGetValue(new Microsoft.Xna.Framework.Vector2((int)lot >> 16, (int)lot & 0xFFFF), out entry)
+                    && (entry.flags & LotTileFlags.Online) > 0) return true;
+            }
+            return false;
         }
 
         private List<UILotButton> Btns = new List<UILotButton>();
