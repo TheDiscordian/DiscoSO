@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.29 — July 2026 🧾
+
+### Changed
+- Metered charges (lights, stalls, stereos, TVs) now land on your bill at 7am in game, the same moment the paper carrier makes her round — instead of the instant you close your lot. Leaving your property no longer bills you on the way out, and a lot that is offline still settles up on schedule. 🧾
+
 ## 1.0.28 — July 2026 🏘️
 
 ### Changed
