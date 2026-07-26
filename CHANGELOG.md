@@ -9,31 +9,37 @@ Changes made live by server settings alone. They carry no version because they n
 ### Changed
 - Needs can now overfill past the top of the bar — shown as a white bar — and how far depends on where you are. Romance lots push Social hardest, Entertainment lots push Fun and Social, Services lots push Hunger and Energy, and home lots give a solid top-up to the survival needs. Welcome and Community lots add a light boost to everything. 💪
 
+## 1.0.42 — July 2026 🌀
+
+### Fixed
+- The ceiling fan no longer dims once per rotation while it spins. 🌀
+- Switching a ceiling fan's light off now leaves its blades where they stopped, instead of snapping them back to their starting angle. 💡
+
 ## 1.0.41 — July 2026 🎅
 
 ### Fixed
-- The Scarefeast dining set now counts as Halloween. Its icons carry a snowflake rather than a pumpkin, so the holiday gate had been reading them as year-round. 🎃
-- The Jolly Fellow and The Fluffy White Omnivore are now Christmas items. Base game objects are catalogued in a file that comes with your own copy of the game, so their windows now live in one we ship instead. 🎅
+- The Scarefeast dining set is now a Halloween item. 🎃
+- The Jolly Fellow and The Fluffy White Omnivore are now Christmas items. 🎅
 
 ## 1.0.40 — July 2026 🏘️
 
 ### Fixed
-- The city view no longer opens on the Welcome filter with nothing in it. Community is now simply the default for everyone, chosen when the panel is built. 🏘️
+- The city view no longer opens on the Welcome filter with nothing in it. Community is now the default. 🏘️
 
 ## 1.0.39 — July 2026 🔌
 
 ### Fixed
-- A server restart no longer strands you. The client used to land on a city screen that could not be interacted with, and any attempt to join a lot loaded forever until you force-closed it. It now tells you the connection is gone and takes you back to login, and a lot that cannot be found gives up rather than loading forever. 🔌
+- A server restart no longer strands you on a city screen you cannot interact with. You are told the connection is gone and taken back to login, and a lot that cannot be found stops loading instead of hanging until you force-close the game. 🔌
 
 ## 1.0.38 — July 2026 🎃
 
 ### Fixed
-- The holiday gate now covers every holiday item. It was reading the badge off each object's catalogue icon and missing most of them, so Halloween bookcases, Christmas stockings, spring rock borders and others stayed on the shelves all year. 67 items are gated now, up from 33, and skull-badged items count as Halloween. 💀
+- Halloween bookcases, Christmas stockings, spring rock borders and others no longer stay on the shelves all year. 67 items are now held to their holiday, up from 33. 💀
 
 ## 1.0.37 — July 2026 🎃
 
 ### Fixed
-- Closing the game takes you offline right away. The server was not acting on connections a departed client had already hung up on, so the session stayed open and you stayed on the online list until a ten-minute idle timer swept it away. 👻
+- Closing the game takes you offline right away, instead of leaving you on the online list for up to ten minutes. 👻
 
 ### Changed
 - Holiday items are only in the catalogue during their holiday: Halloween Sep 15 – Nov 15 🎃, Christmas Nov 16 – Jan 31 🎁, Spring Mar 1 – May 31 🦋, Pride all of June 🌈, Summer Jul 1 – Aug 31 🌴. Out of season they are hidden from buy and build mode and cannot be bought. Ones you already own or have in inventory are unaffected — you can keep them out and place them any time of year.
