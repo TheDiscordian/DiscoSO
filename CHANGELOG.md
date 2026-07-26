@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.30 — July 2026 🧹
+
+### Changed
+- The maid now comes to community lots twice a day — her usual 10am round plus a second visit at 7pm — and the gardener turns up every day instead of every third. 🧹🌱
+
 ## 1.0.29 — July 2026 🧾
 
 ### Changed
