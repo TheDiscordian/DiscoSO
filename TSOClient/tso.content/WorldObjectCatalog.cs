@@ -22,6 +22,8 @@ namespace FSO.Content
 
             for (int i = 0; i < 30; i++) ItemsByCategory[i] = new List<ObjectCatalogItem>();
 
+            var seasonOverrides = ReadSeasonOverrides();
+
             var packingslip = new XmlDocument();
 
             packingslip.Load(content.GetPath("packingslips/catalog.xml"));
@@ -34,6 +36,7 @@ namespace FSO.Content
                 if (Category < 0) continue;
                 ushort seasonStart, seasonEnd;
                 ReadSeason(objectInfo, out seasonStart, out seasonEnd);
+                ApplySeasonOverride(seasonOverrides, guid, ref seasonStart, ref seasonEnd);
                 var item = new ObjectCatalogItem()
                 {
                     GUID = guid,
@@ -65,6 +68,7 @@ namespace FSO.Content
 
                     ushort dSeasonStart, dSeasonEnd;
                     ReadSeason(objectInfo, out dSeasonStart, out dSeasonEnd);
+                    ApplySeasonOverride(seasonOverrides, dguid, ref dSeasonStart, ref dSeasonEnd);
 
                     var ditem = new ObjectCatalogItem()
                     {
@@ -115,6 +119,39 @@ namespace FSO.Content
         {
             var now = DateTime.UtcNow;
             return ItemsByCategory[category].FindAll(item => item.InSeason(now));
+        }
+
+        //Windows for objects whose catalogue row we cannot ship. The base game's
+        //packingslips/catalog.xml belongs to the player's own TSO install, so a d= attribute can
+        //never be put on those rows - this file is ours and travels with the client.
+        private static Dictionary<uint, ushort[]> ReadSeasonOverrides()
+        {
+            var result = new Dictionary<uint, ushort[]>();
+            var path = Path.Combine(FSOEnvironment.ContentDir, "Objects/catalog_seasons.xml");
+            if (!File.Exists(path)) return result;
+            try
+            {
+                var doc = new XmlDocument();
+                doc.Load(path);
+                foreach (XmlNode node in doc.GetElementsByTagName("S"))
+                {
+                    var g = node.Attributes["g"]?.Value;
+                    if (g == null) continue;
+                    ushort start, end;
+                    ReadSeason(node, out start, out end);
+                    if (start == 0 || end == 0) continue;
+                    result[Convert.ToUInt32(g, 16)] = new ushort[] { start, end };
+                }
+            }
+            catch (Exception) { }
+            return result;
+        }
+
+        private static void ApplySeasonOverride(Dictionary<uint, ushort[]> overrides, uint guid,
+            ref ushort start, ref ushort end)
+        {
+            ushort[] window;
+            if (overrides.TryGetValue(guid, out window)) { start = window[0]; end = window[1]; }
         }
 
         //d="MMDD-MMDD" - the window this item is sold in. Absent or malformed = all year.
