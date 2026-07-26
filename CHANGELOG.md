@@ -12,7 +12,7 @@ Changes made live by server settings alone. They carry no version because they n
 ## 1.0.37 — July 2026 🎃
 
 ### Changed
-- Holiday items are only in the catalogue during their holiday: Halloween Sep 15 – Nov 15 🎃, Christmas Nov 16 – Jan 31 🎁, Spring Mar 1 – Apr 30 🦋, Pride all of June 🌈, Summer Jul 1 – Aug 31 ⛱️. Out of season they are hidden from buy and build mode and cannot be bought. Ones you already own or have in inventory are unaffected — you can keep them out and place them any time of year.
+- Holiday items are only in the catalogue during their holiday: Halloween Sep 15 – Nov 15 🎃, Christmas Nov 16 – Jan 31 🎁, Spring Mar 1 – May 31 🦋, Pride all of June 🌈, Summer Jul 1 – Aug 31 🌴. Out of season they are hidden from buy and build mode and cannot be bought. Ones you already own or have in inventory are unaffected — you can keep them out and place them any time of year.
 
 ## 1.0.36 — July 2026 🧹
 
