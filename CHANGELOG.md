@@ -7,6 +7,9 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 ### Changed
 - The city view opens with the Community filter already selected, so the lots that are actually open show up without hunting for them. Sims in their first 14 days still get pointed at Welcome lots instead — but only while some are running, otherwise they land on Community as well. 🏘️
 
+### Fixed
+- City view lot bubbles no longer sit behind the UCP or the gizmo. They now treat the panels as obstacles the same way they already avoided each other. 🫧
+
 ## 1.0.27 — July 2026 📊
 
 ### Fixed
