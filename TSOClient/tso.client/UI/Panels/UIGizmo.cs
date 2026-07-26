@@ -493,49 +493,27 @@ namespace FSO.Client.UI.Panels
             set
             {
                 _FilterList = value;
-                if (CheckingWelcome)
-                {
-                    //the welcome results are in. if none of those lots are actually up, there is
-                    //nothing to send a new player to - fall through to community and skip drawing
-                    //the dud set entirely.
-                    CheckingWelcome = false;
-                    if (!AnyOnline(value)) { SelectFilter("Community"); return; }
-                }
                 RegisterFilters();
             }
         }
 
         private bool ChoseDefaultFilter;
-        private bool CheckingWelcome;
-        private int WelcomeCheckTicks;
-        public uint SimAge
-        {
-            set
-            {
-                if (ChoseDefaultFilter) return;
-                ChoseDefaultFilter = true;
-                if (value < 14)
-                {
-                    //point new players at welcome lots, but only while any are running
-                    CheckingWelcome = true;
-                    WelcomeCheckTicks = FSOEnvironment.RefreshRate * 5;
-                    GameThread.NextUpdate(e => SelectFilter("Welcome"));
-                }
-                else GameThread.NextUpdate(e => SelectFilter("Community"));
-            }
-        }
 
         /// <summary>
-        /// Fall through to community if the welcome results never arrive. An empty or unchanged
-        /// result vector doesn't fire the binding at all, so waiting on it alone leaves Welcome
-        /// selected showing nothing - which is exactly the case this was meant to catch.
+        /// Community, whoever you are. Pointing new players at Welcome instead needs to know
+        /// whether any welcome lots are up, and the client cannot find that out without selecting
+        /// the filter - which is the thing that strands you when the answer is none, because an
+        /// empty result never arrives to say so. Until the server says up front, the safe default
+        /// is the one that always has lots in it.
+        ///
+        /// Chosen here rather than off the avatar binding: that only fires if the age is set after
+        /// the panel exists, so hanging the default on it leaves whatever the ui script picked.
         /// </summary>
-        private void TickWelcomeCheck()
+        private void ChooseDefaultFilter()
         {
-            if (!CheckingWelcome) return;
-            if (--WelcomeCheckTicks > 0) return;
-            CheckingWelcome = false;
-            SelectFilter("Community");
+            if (ChoseDefaultFilter) return;
+            ChoseDefaultFilter = true;
+            GameThread.NextUpdate(e => SelectFilter("Community"));
         }
 
         private void SelectFilter(string name)
@@ -543,23 +521,6 @@ namespace FSO.Client.UI.Panels
             FiltersProperty.FilterClicked(FiltersProperty.GetChildren().FirstOrDefault(x => (x.ID?.IndexOf(name) ?? -1) > -1));
         }
 
-        /// <summary>
-        /// True if any lot in the list is currently hosted. The terrain's tile flags are the only
-        /// place the client knows this - the filter vector is just locations.
-        /// </summary>
-        private bool AnyOnline(ImmutableList<uint> lots)
-        {
-            if (lots == null || lots.Count == 0) return false;
-            var terrain = (GameFacade.Screens.CurrentUIScreen as CoreGameScreen)?.CityRenderer;
-            if (terrain == null) return false;
-            foreach (var lot in lots)
-            {
-                LotTileEntry entry;
-                if (terrain.LotTileLookup.TryGetValue(new Microsoft.Xna.Framework.Vector2((int)lot >> 16, (int)lot & 0xFFFF), out entry)
-                    && (entry.flags & LotTileFlags.Online) > 0) return true;
-            }
-            return false;
-        }
 
         private List<UILotButton> Btns = new List<UILotButton>();
         public void RegisterFilters()
@@ -587,7 +548,6 @@ namespace FSO.Client.UI.Panels
         public override void Update(UpdateState state)
         {
             base.Update(state);
-            TickWelcomeCheck();
             if (Btns.Count > 0)
             {
                 var gamescreen = (GameFacade.Screens.CurrentUIScreen as CoreGameScreen);
@@ -689,12 +649,12 @@ namespace FSO.Client.UI.Panels
                 .WithBinding(PIP, "SimBox.Avatar.BodyOutfitId", "Avatar_Appearance.AvatarAppearance_BodyOutfitID")
                 .WithBinding(PIP, "SimBox.Avatar.HeadOutfitId", "Avatar_Appearance.AvatarAppearance_HeadOutfitID")
                 .WithBinding(PIP, "SimBox.Avatar.Appearance", "Avatar_Appearance.AvatarAppearance_SkinTone", (x) => (Vitaboy.AppearanceType)((byte)x))
-                .WithBinding(this, "SimAge", "Avatar_Age")
                 .WithBinding(this, "FilterList", "Avatar_Top100ListFilter.Top100ListFilter_ResultsVec");
 
             Tab = UIGizmoTab.Property;
             View = UIGizmoView.Filters;
             SetOpen(true);
+            ChooseDefaultFilter();
         }
 
         private void NHoodTabButton_OnButtonClick(UIElement button)
