@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace FSO.Server.Database.DA.LotUsage
 {
     public interface ILotUsage
@@ -6,6 +8,7 @@ namespace FSO.Server.Database.DA.LotUsage
         DbLotUsageTotal GetUsageBetween(int lot_id, int afterDay, int toDay);
         DbLotUsageTotal GetUnbilled(int lot_id);
         DbLotUsageTotal CollectUnbilled(int lot_id);
+        List<int> GetLotsWithUnbilled(int shard_id);
     }
 
     public class DbLotUsageTotal
