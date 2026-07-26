@@ -43,8 +43,6 @@ namespace FSO.Server.Framework.Aries
 
         public int UnexpectedDisconnectWaitSeconds = 0;
         public bool TimeoutIfNoAuth;
-        //close a session after this many seconds with nothing read from it. 0 = off.
-        public int ReaderIdleSeconds = 0;
 
         public AbstractAriesServer(AbstractAriesServerConfig config, IKernel kernel)
         {
@@ -98,7 +96,6 @@ namespace FSO.Server.Framework.Aries
             }
 
             Acceptor = new AsyncSocketAcceptor();
-            if (ReaderIdleSeconds > 0) Acceptor.SessionConfig.SetIdleTime(Mina.Core.Session.IdleStatus.ReaderIdle, ReaderIdleSeconds);
 
             try {
                 if (Config.Certificate != null)
@@ -120,7 +117,6 @@ namespace FSO.Server.Framework.Aries
 
                 //Bind in the plain too as a workaround until we can get Mina.NET to work nice for TLS in the AriesClient
                 PlainAcceptor = new AsyncSocketAcceptor();
-                if (ReaderIdleSeconds > 0) PlainAcceptor.SessionConfig.SetIdleTime(Mina.Core.Session.IdleStatus.ReaderIdle, ReaderIdleSeconds);
                 if (Debugger != null){
                     PlainAcceptor.FilterChain.AddLast("packetLogger", new AriesProtocolLogger(Debugger.GetPacketLogger(), Kernel.Get<ISerializationContext>()));
                 }
@@ -358,9 +354,11 @@ namespace FSO.Server.Framework.Aries
 
         public void SessionIdle(IoSession session, IdleStatus status)
         {
-            //nothing read from this session for the idle window - the peer is gone
-            LOG.Info("[SESSION-IDLE-CLOSE (" + Config.Call_Sign + ")]");
-            session.Close(true);
+            //DiscoSO: nothing here. We used to close the session on read idle, to get rid of
+            //players who had quit but whose client never said so. The client says so now, on the
+            //way out of the game, so the only thing this could still catch is somebody sitting
+            //still - and a quiet player is not a gone player. No idle time is configured either,
+            //so this never fires.
         }
 
         public void ExceptionCaught(IoSession session, Exception cause)
