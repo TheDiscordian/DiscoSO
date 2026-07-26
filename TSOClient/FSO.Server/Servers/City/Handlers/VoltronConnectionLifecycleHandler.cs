@@ -84,7 +84,10 @@ namespace FSO.Server.Servers.City.Handlers
                     }
 
                     //nuke the claim anyways to be sure.
-                    db.AvatarClaims.Delete(voltronSession.AvatarClaimId, Context.Config.Call_Sign);
+                    //DiscoSO: this used to be scoped to our own call sign, so it deleted nothing in
+                    //exactly the case it was written for - a player who quit while on a lot, whose
+                    //claim the LOT server owns. The row survived and they kept reading as online.
+                    db.AvatarClaims.DeleteAny(voltronSession.AvatarClaimId);
                 }
             });
         }

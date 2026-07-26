@@ -36,6 +36,15 @@ namespace FSO.Server.Database.DA.AvatarClaims
             Context.Connection.Query("DELETE FROM fso_avatar_claims WHERE owner = @owner AND avatar_claim_id = @claim_id", new { owner = owner, claim_id = (int)id });
         }
 
+        //DiscoSO: for the last-resort cleanup after an avatar's city session has gone. Whoever
+        //holds the claim at that point is holding it for a player who is no longer connected, so
+        //ownership must not be able to veto the delete. Claim ids are never reused, so this can
+        //only ever hit the row it was asked for.
+        public void DeleteAny(int id)
+        {
+            Context.Connection.Query("DELETE FROM fso_avatar_claims WHERE avatar_claim_id = @claim_id", new { claim_id = (int)id });
+        }
+
         public void DeleteAll(string owner)
         {
             Context.Connection.Query("DELETE FROM fso_avatar_claims WHERE owner = @owner", new { owner = owner });

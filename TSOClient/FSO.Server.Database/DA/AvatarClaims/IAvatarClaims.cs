@@ -16,6 +16,7 @@ namespace FSO.Server.Database.DA.AvatarClaims
         void RemoveRemaining(string previousOwner, uint location);
 
         void Delete(int id, string owner);
+        void DeleteAny(int id);
         void DeleteAll(string owner);
     }
 }
