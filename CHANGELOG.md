@@ -2,10 +2,13 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased
+## Server settings — July 2026 💪
+
+Changes made live by server settings alone. They carry no version because they need no new client.
 
 ### Changed
-- Needs can now overfill past the top of the bar — shown as a white bar — and how far depends on where you are. Romance lots push Social hardest, Entertainment lots push Fun and Social, Services lots push Hunger and Energy, and home lots give a solid top-up to the survival needs. Welcome and Community lots add a light boost to everything. 💪 (Live on the server since 26 July 2026.)
+- Needs can now overfill past the top of the bar — shown as a white bar — and how far depends on where you are. Romance lots push Social hardest, Entertainment lots push Fun and Social, Services lots push Hunger and Energy, and home lots give a solid top-up to the survival needs. Welcome and Community lots add a light boost to everything. 💪
+- How dirty something has to be before the maid will clean it is now a server setting, and it is dialled down from the stock value so she actually gets to work. 🧹
 
 ## 1.0.35 — July 2026 🧹
 
