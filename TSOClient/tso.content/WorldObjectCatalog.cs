@@ -32,13 +32,17 @@ namespace FSO.Content
                 sbyte Category = Convert.ToSByte(objectInfo.Attributes["s"].Value);
                 uint guid = Convert.ToUInt32(objectInfo.Attributes["g"].Value, 16);
                 if (Category < 0) continue;
+                ushort seasonStart, seasonEnd;
+                ReadSeason(objectInfo, out seasonStart, out seasonEnd);
                 var item = new ObjectCatalogItem()
                 {
                     GUID = guid,
                     Category = Category,
                     Price = Convert.ToUInt32(objectInfo.Attributes["p"].Value),
                     Name = objectInfo.Attributes["n"].Value,
-                    DisableLevel = Convert.ToByte(objectInfo.Attributes["r"]?.Value ?? "0")
+                    DisableLevel = Convert.ToByte(objectInfo.Attributes["r"]?.Value ?? "0"),
+                    SeasonStart = seasonStart,
+                    SeasonEnd = seasonEnd
                 };
                 ItemsByCategory[Category].Add(item);
                 ItemsByGUID[guid] = item;
@@ -59,6 +63,9 @@ namespace FSO.Content
                     if (dCategory < 0) continue;
                     catalogEnrich.TryGetValue(dguid, out var enrich);
 
+                    ushort dSeasonStart, dSeasonEnd;
+                    ReadSeason(objectInfo, out dSeasonStart, out dSeasonEnd);
+
                     var ditem = new ObjectCatalogItem()
                     {
                         GUID = dguid,
@@ -67,7 +74,9 @@ namespace FSO.Content
                         Name = objectInfo.Attributes["n"].Value,
                         Tags = objectInfo.Attributes["t"]?.Value,
                         CatalogName = enrich?.CatalogName,
-                        DisableLevel = Convert.ToByte(objectInfo.Attributes["r"]?.Value ?? "0")
+                        DisableLevel = Convert.ToByte(objectInfo.Attributes["r"]?.Value ?? "0"),
+                        SeasonStart = dSeasonStart,
+                        SeasonEnd = dSeasonEnd
                     };
 
                     if (ditem.DisableLevel > 1)
@@ -84,19 +93,42 @@ namespace FSO.Content
             catalogEnrich.Clear();
         }
 
+        //DiscoSO: everything stays loaded so prices, inventory and resale still resolve for a
+        //seasonal object a player already owns. These two are what stocks the catalogue screen,
+        //so this is where out-of-season items drop out. Checked per call rather than at load, so
+        //a season turning over does not need a restart to take effect.
         public List<ObjectCatalogItem> All()
         {
+            var now = DateTime.UtcNow;
             var result = new List<ObjectCatalogItem>();
             foreach (var cat in ItemsByCategory)
             {
-                result.AddRange(cat);
+                foreach (var item in cat)
+                {
+                    if (item.InSeason(now)) result.Add(item);
+                }
             }
             return result;
         }
 
         public List<ObjectCatalogItem> GetItemsByCategory(sbyte category)
         {
-            return ItemsByCategory[category];
+            var now = DateTime.UtcNow;
+            return ItemsByCategory[category].FindAll(item => item.InSeason(now));
+        }
+
+        //d="MMDD-MMDD" - the window this item is sold in. Absent or malformed = all year.
+        private static void ReadSeason(XmlNode info, out ushort start, out ushort end)
+        {
+            start = 0; end = 0;
+            var d = info.Attributes["d"]?.Value;
+            if (string.IsNullOrEmpty(d)) return;
+            var parts = d.Split('-');
+            if (parts.Length != 2) return;
+            if (!ushort.TryParse(parts[0].Trim(), out start) || !ushort.TryParse(parts[1].Trim(), out end))
+            {
+                start = 0; end = 0;
+            }
         }
 
         public ObjectCatalogItem? GetItemByGUID(uint guid)

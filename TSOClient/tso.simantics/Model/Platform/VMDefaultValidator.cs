@@ -92,7 +92,10 @@ namespace FSO.SimAntics.Model.Platform
                 var catalog = Content.Content.Get().WorldCatalog;
                 var item = catalog.GetItemByGUID(guid);
                 var whitelist = (ava.AvatarState.Permissions == VMTSOAvatarPermissions.Roommate) ? RoomieWhiteList : BuilderWhiteList;
-                if (item == null || !whitelist.Contains(item.Value.Category))
+                //DiscoSO: seasonal items leave the catalogue screen out of season, so a client that
+                //still lists one is out of date or modified - refuse the sale either way. Placing
+                //one already in inventory is untouched, that path never reaches here.
+                if (item == null || !whitelist.Contains(item.Value.Category) || !item.Value.InSeason())
                 {
                     if (ava.AvatarState.Permissions != VMTSOAvatarPermissions.Admin) return PurchaseMode.Disallowed;
                 }

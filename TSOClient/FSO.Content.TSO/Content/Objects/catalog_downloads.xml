@@ -1,10 +1,10 @@
 ﻿<Catalog>   
 <!-- SEASONAL CATALOG: SPRING -->
 
-   <P g="0FE699E4" s="3" p="15" t="spring, toddy, fae, fairy, mushroom" n="Fly Agaric Fungi" />
-   <P g="686B25FA" s="17" p="25" t="spring, toddy, fae, fairy, log, wood, cottage" n="Wooden Stepping Stones" />
-   <P g="7F49FE84" s="13" p="500" t="spring, toddy, fae, fairy, mushroom" n="Spotted Toadstool Table" />
-   <P g="6A17DB40" s="12" p="350" t="spring, toddy, fae, fairy, mushroom" n="Scarlet Spotted Stool" />
+   <P g="0FE699E4" s="3" p="15" t="spring, toddy, fae, fairy, mushroom" n="Fly Agaric Fungi" d="0301-0531" />
+   <P g="686B25FA" s="17" p="25" t="spring, toddy, fae, fairy, log, wood, cottage" n="Wooden Stepping Stones" d="0301-0531" />
+   <P g="7F49FE84" s="13" p="500" t="spring, toddy, fae, fairy, mushroom" n="Spotted Toadstool Table" d="0301-0531" />
+   <P g="6A17DB40" s="12" p="350" t="spring, toddy, fae, fairy, mushroom" n="Scarlet Spotted Stool" d="0301-0531" />
    <P g="02B9C7D7" s="19" p="220" t="spring, toddy, fae, fairy" n="Flora Garden Lamp" />
    <P g="59896C56" s="18" p="110" t="spring, toddy, fae, fairy" n="Leaf Note Sign" />
    <P g="2D5A3261" s="17" p="300" t="spring, toddy, fae, fairy, cottage" n="Butterfly Hanging Boards" />
@@ -36,13 +36,13 @@
 
 <!-- PRIDE -->
 <!-- FREESO SAID TRANS RIGHTS -->
-   <P g="4CCFB71A" s="19" p="590" t="pride, rainbow, 8-bit" n="8-bit Chromatic Cloud" />
-   <P g="3BF2E7FF" s="16" p="800" t="pride, rainbow, 8-bit, skill, charisma" n="Reflective Rainbow Arc" />
-   <P g="00053216" s="18" p="1234" t="pride, rainbow, 8-bit, costume props" n="Pride Heart Lockbox" />
-   <P g="713BAA03" s="17" p="850" t="pride, rainbow, 8-bit" n="Jumbo Gummy Buddy" />
-   <P g="69378294" s="17" p="100" t="pride, rainbow, 8-bit, rug" n="Heart of Equality Welcome Mat" />
-   <P g="10EF5396" s="13" p="550" t="pride, rainbow, 8-bit" n="Retro Rainbow Table" />
-   <P g="02B9B4AD" s="13" p="350" t="pride, rainbow, 8-bit" n="8-bit Pride Counter" />
+   <P g="4CCFB71A" s="19" p="590" t="pride, rainbow, 8-bit" n="8-bit Chromatic Cloud" d="0601-0630" />
+   <P g="3BF2E7FF" s="16" p="800" t="pride, rainbow, 8-bit, skill, charisma" n="Reflective Rainbow Arc" d="0601-0630" />
+   <P g="00053216" s="18" p="1234" t="pride, rainbow, 8-bit, costume props" n="Pride Heart Lockbox" d="0601-0630" />
+   <P g="713BAA03" s="17" p="850" t="pride, rainbow, 8-bit" n="Jumbo Gummy Buddy" d="0601-0630" />
+   <P g="69378294" s="17" p="100" t="pride, rainbow, 8-bit, rug" n="Heart of Equality Welcome Mat" d="0601-0630" />
+   <P g="10EF5396" s="13" p="550" t="pride, rainbow, 8-bit" n="Retro Rainbow Table" d="0601-0630" />
+   <P g="02B9B4AD" s="13" p="350" t="pride, rainbow, 8-bit" n="8-bit Pride Counter" d="0601-0630" />
    <P g="433AB6F7" s="17" p="250" t="pride, rainbow, 8-bit" n="Flying Pride Flag Pole" />
 
 <!-- SEASONAL CATALOG: SUMMER --> 
@@ -83,29 +83,29 @@
    <P g="2255081A" s="29" p="2021" t="toddy, fructose monsoon, admin" n="Hearts On Heads Spawner" />
 
    <P g="67B61F33" s="17" p="1000000" t="toddy, vehicle, limo"  n="The Pink Prowler" />
-   <P g="67B60CFD" s="17" p="500000" t="toddy, vehicle" n="'So ICY' Ice Cream Van" />
+   <P g="67B60CFD" s="17" p="500000" t="toddy, vehicle" n="'So ICY' Ice Cream Van" d="0701-0831" />
    
 <!-- SEASONAL CATALOG: AUTUMN -->
 
-   <P g="3FC802AC" s="17" p="60" t="pile, scatter, ground clutter" n="Wax Candy-like Floor Decorations" />
+   <P g="3FC802AC" s="17" p="60" t="pile, scatter, ground clutter" n="Wax Candy-like Floor Decorations" d="0915-1115" />
 
 
-   <P g="794AFED6" s="18" p="1500" t="candy bowl" n="Halloween Candy Dispenser" />
+   <P g="794AFED6" s="18" p="1500" t="candy bowl" n="Halloween Candy Dispenser" d="0915-1115" />
    <P g="04EF513C" s="14" p="2400" n="Stove - Witch's Cauldron" />
    <P g="07D7E3DD" s="17" p="430" n="Decorative Pumpkin Patch" />
-   <P g="08D7E3DD" s="17" p="860" n="The Giant Pumpkin Patch" />
-   <P g="92EF51A6" s="3" p="30" n="Dead Chic Tree" />
-   <P g="92EF51A7" s="3" p="30" n="Dead Chic Tree Grouping" />
+   <P g="08D7E3DD" s="17" p="860" n="The Giant Pumpkin Patch" d="0915-1115" />
+   <P g="92EF51A6" s="3" p="30" n="Dead Chic Tree" d="0915-1115" />
+   <P g="92EF51A7" s="3" p="30" n="Dead Chic Tree Grouping" d="0915-1115" />
    <P g="0DA95AAA" s="29" p="400" t="toddy" n="Spooktacular tip jar" />
    <P g="01EF5101" s="29" p="3000" t="toddy, buffet" n="Scarefest Snack Table" />
-   <P g="38EF5112" s="17" p="100" n="Commemorative Mini-Mystery Chest" />
+   <P g="38EF5112" s="17" p="100" n="Commemorative Mini-Mystery Chest" d="0915-1115" />
 
-   <P g="7F495D9E" s="13" p="500" t="toddy, mushroom" n="Cursed Toadstool Table" />
-   <P g="6A17D177" s="12" p="300" t="toddy, mushroom" n="Deadly Fungi Stool" />
-   <P g="79987862" s="19" p="450" t="toddy, lamp, light, pumpkin" n="Chains of the Veil" />
-   <P g="713C6827" s="17" p="30" t="toddy" n="DIY Front Lawn Flamingo Vulture " />
-   <P g="67B5658A" s="17" p="250000" t="toddy, vehicle" n="Pumpkin Patch Farm Truck" /> 
-   <P g="02B9A78F" s="19" p="100" t="toddy, lamp, light" n="Candle Border" />
+   <P g="7F495D9E" s="13" p="500" t="toddy, mushroom" n="Cursed Toadstool Table" d="0915-1115" />
+   <P g="6A17D177" s="12" p="300" t="toddy, mushroom" n="Deadly Fungi Stool" d="0915-1115" />
+   <P g="79987862" s="19" p="450" t="toddy, lamp, light, pumpkin" n="Chains of the Veil" d="0915-1115" />
+   <P g="713C6827" s="17" p="30" t="toddy" n="DIY Front Lawn Flamingo Vulture " d="0915-1115" />
+   <P g="67B5658A" s="17" p="250000" t="toddy, vehicle" n="Pumpkin Patch Farm Truck" d="0915-1115" /> 
+   <P g="02B9A78F" s="19" p="100" t="toddy, lamp, light" n="Candle Border" d="0915-1115" />
 
 <!-- 
    <P g="3FC802AC" s="29" p="60" t="pile, scatter, ground clutter" n="Wax Candy-like Floor Decorations" />
@@ -139,13 +139,13 @@
    <P g="2D5A41E8" s="18" p="55" t="winter, christams, cookies, biscuits" n="Santa Cookies" />
    <P g="2D5A41E9" s="17" p="25" t="brandon" n="Wall Decor - bsj96 - Christmas Stockings" />
    <P g="0D5792B8" s="17" p="500" n="&quot;Elves vs Reindeers&quot; Team Banner" />
-   <P g="713BAC08" s="17" p="450" t="toddy, costume props" n="Bit O' Baubles" /> 
+   <P g="713BAC08" s="17" p="450" t="toddy, costume props" n="Bit O' Baubles" d="1116-0131" /> 
    <P g="67B60E3B" s="17" p="250000" t="winter, toddy, vehicle, truck" n="Camion de Noël" />
    <P g="773CCD0A" s="14" p="1500" t="dica" n="H&amp;B's 'Atomic' Hot Cocoa Maker" />
 
-   <P g="62F5043E" s="17" p="1800" t="winter, christmas, toddy" n="Legally Distinct “Grunch” Tree" />
-   <P g="2995A478" s="17" p="950"  t="winter, toddy" n="Burred-Lap Christmas Tree" />
-   <P g="692304CA" s="17" p="200" n="Dreaming of a Red Bow Tree" />
+   <P g="62F5043E" s="17" p="1800" t="winter, christmas, toddy" n="Legally Distinct “Grunch” Tree" d="1116-0131" />
+   <P g="2995A478" s="17" p="950"  t="winter, toddy" n="Burred-Lap Christmas Tree" d="1116-0131" />
+   <P g="692304CA" s="17" p="200" n="Dreaming of a Red Bow Tree" d="1116-0131" />
 
 <!--
    <P g="6E140796" s="29" p="25" t="winter, snow, candy, sweets" n="Candied Cane" />
@@ -439,9 +439,9 @@
    <P g="0AEF513C" s="13" p="75" t="kegs" n="Greenbeard's Barrels Coffee Table" />
    <P g="0AEF513D" s="13" p="75" n="Greenbeard's Basic Barrel Table" />
    <P g="0AEF513E" s="17" p="150" n="Bunch o' Greenbeard's Barroom Barrels" />
-   <P g="2CB89BF8" s="18" p="100" n="Halloween Signs" />
-   <P g="12B9B1A7" s="19" p="320" n="HWeen Lantern - Ceiling" />
-   <P g="12B9B1A8" s="19" p="300" n="HWeen Lantern - Wall" />
+   <P g="2CB89BF8" s="18" p="100" n="Halloween Signs" d="0915-1115" />
+   <P g="12B9B1A7" s="19" p="320" n="HWeen Lantern - Ceiling" d="0915-1115" />
+   <P g="12B9B1A8" s="19" p="300" n="HWeen Lantern - Wall" d="0915-1115" />
    <P g="74CC0DC0" s="17" p="135" n="Balloons - Halloween" />
 
    <P g="1F2B80FB" s="18" p="520" n="Beach Cabana" />
@@ -450,7 +450,7 @@
    <P g="C1EF51A6" s="14" p="3000" n="fso Community Buffet Table" />
    <P g="98EF513C" s="14" p="600" n="The Outdoor X-Grill 1700" />   
    <P g="EEEF5108" s="15" p="9000" n="Ball Tub" />
-   <P g="12F5E1BE" s="15" p="200" n="Sunbathing Towel" />
+   <P g="12F5E1BE" s="15" p="200" n="Sunbathing Towel" d="0701-0831" />
    <P g="2471DF12" s="17" p="20" n="Bare Essentials Condiment Kit" />
    <P g="28EBD5CC" s="17" p="700" n="The Watering Hole (petplay fount)" />
    <P g="7998765B" s="19" p="340" n="'Cottingley' Fairy Lights" />
@@ -511,7 +511,7 @@
    <P g="12B9021B" s="29" p="2021" n="Skull Chandelier" />
    <P g="44DEA269" s="29" p="2021" n="'Skelelabra' Candelabra" />
    <P g="62F51101" s="29" p="2021" n="Pumpkin Pot" />
-   <P g="3BF27EB7" s="16" p="850" t="toddy, skill, charisma" n="Antique Wall Mirror" />
+   <P g="3BF27EB7" s="16" p="850" t="toddy, skill, charisma" n="Antique Wall Mirror" d="0915-1115" />
 
 <!-- objects from Andrew -->
 <P g="7D224616" s="14" p="50" n="Hand Sanitizer Dispenser - SO Clean" />
