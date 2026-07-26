@@ -2,6 +2,12 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.31 — July 2026 🧹
+
+### Fixed
+- The maid and gardener changes from 1.0.30 now apply to community lots only. They were going out to every property, so home lots were getting a daily gardener and a 7pm maid call they were never meant to have. 🏡
+- The maid's 7pm visit actually sticks around. She knocks off at 6pm by default, so the evening call added in 1.0.30 arrived and turned straight back around. On community lots she now works until 10pm — and still leaves early once there is nothing left to do. 🧹
+
 ## 1.0.30 — July 2026 🧹
 
 ### Changed
