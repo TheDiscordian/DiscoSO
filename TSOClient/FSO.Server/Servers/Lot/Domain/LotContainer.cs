@@ -935,27 +935,6 @@ namespace FSO.Server.Servers.Lot.Domain
 
         private VMLotUsageSampler UsageSampler = new VMLotUsageSampler();
 
-        //fold unbilled metered usage (lights, stalls) into today's bill.
-        //the mail carrier's mailbox delivery covers this while the lot is online
-        //(DiscoSODeliverBills); this covers the lot going offline.
-        private void DeliverUsageBill()
-        {
-            if (JobLot || LotPersist.category == LotCategory.community) return;
-            var lotId = Context.DbId;
-            try
-            {
-                using (var db = DAFactory.Get())
-                {
-                    var charge = LotBillsUtils.DeliverUsage(db, lotId);
-                    if (charge > 0) LOG.Info("Lot close: lot " + lotId + " billed $" + charge + " for metered usage.");
-                }
-            }
-            catch (Exception e)
-            {
-                LOG.Warn(e, "usage bill delivery failed for lot " + lotId);
-            }
-        }
-
         private void EnsureCommunityObjects()
         {
             var payphones = Lot.Context.ObjectQueries.GetObjectsByGUID(PAYPHONE_GUID)?.ToList(); //clone as we will be removing them
@@ -1746,7 +1725,8 @@ namespace FSO.Server.Servers.Lot.Domain
             }
             catch (Exception e) { }
             SaveRing();
-            DeliverUsageBill(); //the lot is going offline - fold any remaining metered charges into today's bill
+            //metered charges are NOT settled here. closing the lot used to bill you the moment you
+            //walked out; the bills_metered task now folds them in at game 7am like the carrier does
 
             //if we have a null owner, this lot needs to be deleted.
 

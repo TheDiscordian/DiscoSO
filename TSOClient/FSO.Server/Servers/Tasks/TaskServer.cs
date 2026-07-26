@@ -25,6 +25,7 @@ namespace FSO.Server.Servers.Tasks
             Engine.AddTask(DbTaskType.prune_database.ToString(), typeof(PruneDatabaseTask));
             Engine.AddTask(DbTaskType.bonus.ToString(), typeof(BonusTask));
             Engine.AddTask(DbTaskType.bills.ToString(), typeof(BillsTask));
+            Engine.AddTask(DbTaskType.bills_metered.ToString(), typeof(BillsMeteredTask));
             Engine.AddTask(DbTaskType.shutdown.ToString(), typeof(ShutdownTask));
             Engine.AddTask(DbTaskType.job_balance.ToString(), typeof(JobBalanceTask));
             Engine.AddTask(DbTaskType.neighborhood_tick.ToString(), typeof(NeighborhoodsTask));
