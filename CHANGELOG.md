@@ -11,6 +11,9 @@ Changes made live by server settings alone. They carry no version because they n
 
 ## 1.0.37 — July 2026 🎃
 
+### Fixed
+- Closing the game takes you offline right away. The client only queued its disconnect and then exited before it ran, so the connection just went quiet and the server did not notice you had gone until its idle timer expired ten minutes later — until then you were still listed as online. 👻
+
 ### Changed
 - Holiday items are only in the catalogue during their holiday: Halloween Sep 15 – Nov 15 🎃, Christmas Nov 16 – Jan 31 🎁, Spring Mar 1 – May 31 🦋, Pride all of June 🌈, Summer Jul 1 – Aug 31 🌴. Out of season they are hidden from buy and build mode and cannot be bought. Ones you already own or have in inventory are unaffected — you can keep them out and place them any time of year.
 

@@ -175,6 +175,23 @@ namespace FSO.Client.Regulators
             AsyncTransition("Disconnect");
         }
 
+        //DiscoSO: Disconnect() only QUEUES the state machine's disconnect, and on the way out of
+        //the game the process dies before that ever runs - so the client just went silent and the
+        //player stayed listed as online until the server's read-idle timer gave up on them. Say
+        //goodbye and close the socket inline instead.
+        public void DisconnectNow(int timeoutMs)
+        {
+            try
+            {
+                if (Client != null && Client.IsConnected)
+                {
+                    Client.Write(new ClientByePDU());
+                    Client.DisconnectNow(timeoutMs);
+                }
+            }
+            catch (Exception) { }
+        }
+
         protected override void OnAfterTransition(RegulatorState oldState, RegulatorState newState, object data)
         {
         }

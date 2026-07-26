@@ -268,7 +268,23 @@ namespace FSO.Client.Regulators
         {
             AsyncTransition("Disconnect");
         }
-        
+
+        //DiscoSO: see CityConnectionRegulator.DisconnectNow - the queued disconnect never runs on
+        //the way out of the game, so close this socket inline too.
+        public void DisconnectNow(int timeoutMs)
+        {
+            try
+            {
+                if (Client != null && Client.IsConnected)
+                {
+                    Client.Write(new ClientByePDU());
+                    Client.DisconnectNow(timeoutMs);
+                }
+            }
+            catch (Exception) { }
+        }
+
+
         public void JoinLot(uint id)
         {
             AsyncProcessMessage(new JoinLotRequest { LotId = id });
