@@ -13,7 +13,7 @@ Changes made live by server settings alone. They carry no version because they n
 
 ### Fixed
 - The Scarefeast dining set now counts as Halloween. Its icons carry a snowflake rather than a pumpkin, so the holiday gate had been reading them as year-round. 🎃
-- The Jolly Fellow is now a Christmas item. Base game objects are catalogued in a file that comes with your own copy of the game, so their windows now live in one we ship instead. 🎅
+- The Jolly Fellow and The Fluffy White Omnivore are now Christmas items. Base game objects are catalogued in a file that comes with your own copy of the game, so their windows now live in one we ship instead. 🎅
 
 ## 1.0.40 — July 2026 🏘️
 
