@@ -9,6 +9,11 @@ Changes made live by server settings alone. They carry no version because they n
 ### Changed
 - Needs can now overfill past the top of the bar — shown as a white bar — and how far depends on where you are. Romance lots push Social hardest, Entertainment lots push Fun and Social, Services lots push Hunger and Energy, and home lots give a solid top-up to the survival needs. Welcome and Community lots add a light boost to everything. 💪
 
+## 1.0.38 — July 2026 🎃
+
+### Fixed
+- The holiday gate now covers every holiday item. It was reading the badge off each object's catalogue icon and missing most of them, so Halloween bookcases, Christmas stockings, spring rock borders and others stayed on the shelves all year. 67 items are gated now, up from 33, and skull-badged items count as Halloween. 💀
+
 ## 1.0.37 — July 2026 🎃
 
 ### Fixed
