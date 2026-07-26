@@ -120,10 +120,8 @@ namespace FSO.Server.Clients
             }
         }
 
-        //DiscoSO: for the game's exit path. Disconnect() hands the close to Mina and returns, which
-        //is fine while the process lives on - but on exit nothing is left to run it, so the socket
-        //was never closed and the server had to wait out its read-idle timer before noticing.
-        //Flush what is queued and wait for the close to actually land.
+        //Disconnect() hands the close to Mina and returns; this waits for it to land, for callers
+        //that are about to end the process.
         public void DisconnectNow(int timeoutMs)
         {
             var session = Session;

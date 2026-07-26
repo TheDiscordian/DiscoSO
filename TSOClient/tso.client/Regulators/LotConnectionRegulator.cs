@@ -269,8 +269,7 @@ namespace FSO.Client.Regulators
             AsyncTransition("Disconnect");
         }
 
-        //DiscoSO: see CityConnectionRegulator.DisconnectNow - the queued disconnect never runs on
-        //the way out of the game, so close this socket inline too.
+        //Disconnect() only queues the transition, which is no use when the process is about to end.
         public void DisconnectNow(int timeoutMs)
         {
             try

@@ -354,11 +354,6 @@ namespace FSO.Server.Framework.Aries
 
         public void SessionIdle(IoSession session, IdleStatus status)
         {
-            //DiscoSO: nothing here. We used to close the session on read idle, to get rid of
-            //players who had quit but whose client never said so. The client says so now, on the
-            //way out of the game, so the only thing this could still catch is somebody sitting
-            //still - and a quiet player is not a gone player. No idle time is configured either,
-            //so this never fires.
         }
 
         public void ExceptionCaught(IoSession session, Exception cause)

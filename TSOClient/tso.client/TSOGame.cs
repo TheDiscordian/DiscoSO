@@ -294,10 +294,7 @@ namespace FSO.Client
             var kernel = FSOFacade.Kernel;
             if (kernel != null)
             {
-                //DiscoSO: synchronously, and BEFORE the game thread is killed. The queued form of
-                //this never got to run - the process was gone first - so the server only found out
-                //we had left when its read-idle timer expired, minutes later, and until then the
-                //player was still listed as online.
+                //synchronously, and before the game thread is killed, or it never happens
                 kernel.Get<LotConnectionRegulator>()?.DisconnectNow(1000);
                 kernel.Get<CityConnectionRegulator>()?.DisconnectNow(2000);
             }
