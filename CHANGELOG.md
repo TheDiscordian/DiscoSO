@@ -12,7 +12,7 @@ Changes made live by server settings alone. They carry no version because they n
 ## 1.0.36 — July 2026 🧹
 
 ### Fixed
-- The maid actually cleans now. She would only pick up after an object once it was filthier than anything on a lot realistically gets, so she would turn up, find nothing that qualified, stand about and go home again. She now gets to work on anything properly dirty — in sandbox too. 🧹
+- The maid now cleans things that are merely dirty, instead of holding out for the very worst. Her bar was set high enough that she would often arrive, find nothing that met it, stand about and go home again. Applies in sandbox too. 🧹
 
 ## 1.0.35 — July 2026
 
