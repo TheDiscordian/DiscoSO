@@ -54,7 +54,10 @@ namespace FSO.SimAntics.Engine.Primitives
 
         public static Dictionary<VMStackObjectVariable, short> Thresholds = new Dictionary<VMStackObjectVariable, short>()
         {
-            { VMStackObjectVariable.DirtyLevel, 800 },
+            //DiscoSO: 450, not the 800 we inherited. At 800 the maid discards everything a lot
+            //actually accumulates - Sandy Shores' filthiest fixture reaches 600 - so she arrives,
+            //matches nothing, idles out her grace loops and leaves without touching anything.
+            { VMStackObjectVariable.DirtyLevel, 450 },
             { VMStackObjectVariable.RepairState, 600 },
             { VMStackObjectVariable.GardeningValue, 15 }
         };
@@ -92,19 +95,7 @@ namespace FSO.SimAntics.Engine.Primitives
                         if (context.VM.TS1 || funcVar != VMStackObjectVariable.RepairState)
                         {
                             if (score <= 0) continue; // lots of invalid functions with 0 score. just ignore them.
-                            if (Thresholds.TryGetValue(funcVar, out threshold))
-                            {
-                                //DiscoSO: the stock dirt bar sits at 800, which on a busy community lot is
-                                //higher than anything actually reaches - the maid searches, matches nothing,
-                                //idles out her grace loops and leaves without touching a thing. Live tunable
-                                //(discoso 0:4) so it can be dialled without a release; 0/unset keeps stock.
-                                if (funcVar == VMStackObjectVariable.DirtyLevel)
-                                {
-                                    var tuned = context.VM.Tuning?.GetTuning("discoso", 0, 4) ?? 0f;
-                                    if (tuned > 0f && tuned < threshold) threshold = (short)tuned;
-                                }
-                                if (score < threshold) continue;
-                            }
+                            if (Thresholds.TryGetValue(funcVar, out threshold) && score < threshold) continue;
                         }
                         else if (ent is VMAvatar || !((VMTSOObjectState)ent.MultitileGroup.BaseObject.TSOState).Broken) continue;
                     }
