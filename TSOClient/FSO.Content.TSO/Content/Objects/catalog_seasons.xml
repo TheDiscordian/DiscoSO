@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Holiday windows for objects whose catalogue row we cannot ship.
+
+  Seasonal items in catalog_downloads.xml carry the window on the row itself, as d="MMDD-MMDD".
+  Base game objects are catalogued in packingslips/catalog.xml, which belongs to the player's own
+  TSO installation - we never ship that file, so their windows have to live here instead.
+
+  g = GUID, d = MMDD-MMDD. A start after the end wraps over new year, as Christmas does.
+-->
+<Seasons>
+  <!-- The Jolly Fellow (Sculptures - Holiday Santa) -->
+  <S g="3BA56A6C" d="1116-0131" />
+</Seasons>

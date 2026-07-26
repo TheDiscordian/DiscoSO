@@ -502,11 +502,11 @@
    <P g="04EF51D6" s="29" p="300" n="food - Halloween Cake" />
    <P g="04EF51E9" s="29" p="70" n="Halloween Cake Slice" />
    <P g="05FA2D97" s="29" p="70" n="food - Halloween CupCake" />
-   <P g="02EF5120" s="12" p="435" n="Scarefest Dining Chair" />
-   <P g="10EF5120" s="13" p="600" n="Scarefest Dining Table" />
+   <P g="02EF5120" s="12" p="435" n="Scarefest Dining Chair" d="0915-1115" />
+   <P g="10EF5120" s="13" p="600" n="Scarefest Dining Table" d="0915-1115" />
    <P g="0A8117F0" s="17" p="850" n="Decorative Sunflower Pot" /> 
 
-   <P g="1D4DE42A" s="13" p="950" n="Scarefest 'Square' Dining Table" />
+   <P g="1D4DE42A" s="13" p="950" n="Scarefest 'Square' Dining Table" d="0915-1115" />
    <P g="44DEB354" s="29" p="2021" t="skeleton, candle, wall light, lamp" n="'Spirit From The Other Side' Wall Frame" />
    <P g="12B9021B" s="29" p="2021" n="Skull Chandelier" />
    <P g="44DEA269" s="29" p="2021" n="'Skelelabra' Candelabra" />
