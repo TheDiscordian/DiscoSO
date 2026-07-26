@@ -45,7 +45,7 @@ namespace FSO.Server.Servers.Tasks.Domain
                     }
                     catch (System.Exception e)
                     {
-                        LOG.Warn(e, "metered settle failed for lot " + lotId);
+                        LOG.Warn("metered settle failed for lot " + lotId + ": " + e.ToString());
                     }
                 }
                 LOG.Info("Metered bills: walked " + lots.Count + " lot(s) with unbilled usage, charged " + settled + " for $" + total + ".");
