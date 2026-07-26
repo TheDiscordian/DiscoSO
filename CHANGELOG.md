@@ -2,7 +2,7 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased
+## 1.0.34 — July 2026 🏘️
 
 ### Fixed
 - The city view no longer sits on the Welcome filter showing an empty list. If no welcome lots are online it now falls through to Community, even when the server has nothing at all to say about welcome lots. 🏘️
