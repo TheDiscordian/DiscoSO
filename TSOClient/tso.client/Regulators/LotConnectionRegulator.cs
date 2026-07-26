@@ -268,7 +268,22 @@ namespace FSO.Client.Regulators
         {
             AsyncTransition("Disconnect");
         }
-        
+
+        //Disconnect() only queues the transition, which is no use when the process is about to end.
+        public void DisconnectNow(int timeoutMs)
+        {
+            try
+            {
+                if (Client != null && Client.IsConnected)
+                {
+                    Client.Write(new ClientByePDU());
+                    Client.DisconnectNow(timeoutMs);
+                }
+            }
+            catch (Exception) { }
+        }
+
+
         public void JoinLot(uint id)
         {
             AsyncProcessMessage(new JoinLotRequest { LotId = id });

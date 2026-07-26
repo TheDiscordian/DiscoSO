@@ -175,6 +175,20 @@ namespace FSO.Client.Regulators
             AsyncTransition("Disconnect");
         }
 
+        //Disconnect() only queues the transition, which is no use when the process is about to end.
+        public void DisconnectNow(int timeoutMs)
+        {
+            try
+            {
+                if (Client != null && Client.IsConnected)
+                {
+                    Client.Write(new ClientByePDU());
+                    Client.DisconnectNow(timeoutMs);
+                }
+            }
+            catch (Exception) { }
+        }
+
         protected override void OnAfterTransition(RegulatorState oldState, RegulatorState newState, object data)
         {
         }

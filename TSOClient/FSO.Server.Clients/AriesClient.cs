@@ -120,6 +120,22 @@ namespace FSO.Server.Clients
             }
         }
 
+        //Disconnect() hands the close to Mina and returns; this waits for it to land, for callers
+        //that are about to end the process.
+        public void DisconnectNow(int timeoutMs)
+        {
+            var session = Session;
+            if (session == null) return;
+            try
+            {
+                session.Close(false).Await(timeoutMs);
+            }
+            catch (Exception)
+            {
+                //the socket is going away regardless; nothing here is worth delaying the exit for
+            }
+        }
+
         public void Connect(IPEndPoint target)
         {
             if (Connector != null)

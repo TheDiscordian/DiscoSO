@@ -294,8 +294,9 @@ namespace FSO.Client
             var kernel = FSOFacade.Kernel;
             if (kernel != null)
             {
-                kernel.Get<LotConnectionRegulator>()?.Disconnect();
-                kernel.Get<CityConnectionRegulator>()?.Disconnect();
+                //synchronously, and before the game thread is killed, or it never happens
+                kernel.Get<LotConnectionRegulator>()?.DisconnectNow(1000);
+                kernel.Get<CityConnectionRegulator>()?.DisconnectNow(2000);
             }
             GameThread.SetKilled();
         }

@@ -33,7 +33,6 @@ namespace FSO.Server.Servers.City
         {
             this.UnexpectedDisconnectWaitSeconds = 30;
             this.TimeoutIfNoAuth = config.Timeout_No_Auth;
-            this.ReaderIdleSeconds = 600;
             this.Config = config;
             VoltronSessions = Sessions.GetOrCreateGroup(Groups.VOLTRON);
         }
