@@ -15,6 +15,8 @@ namespace FSO.Client.Regulators
     {
         //Lot connection client
         public AriesClient Client { get; internal set; }
+
+        private const int FIND_LOT_TIMEOUT_MS = 20000;
         private AriesClient City;
         private uint LotId;
         private bool IsDisconnecting = true;
@@ -125,6 +127,14 @@ namespace FSO.Client.Regulators
                     City.Write(new FSO.Server.Protocol.Electron.Packets.FindLotRequest {
                         LotId = ((JoinLotRequest)data).LotId
                     });
+                    //this asks the CITY server where the lot is, so a city connection that has
+                    //gone away leaves us waiting on a reply that is never coming. Nothing else
+                    //moves this state along - give up rather than sit on the loading screen.
+                    GameThread.SetTimeout(() =>
+                    {
+                        if (CurrentState?.Name == "FindLot")
+                            ThrowErrorAndReset(new Exception("Timed out asking the city for this lot."));
+                    }, FIND_LOT_TIMEOUT_MS);
                     break;
                 case "FoundLot":
                     var result = (FindLotResponse)data;
