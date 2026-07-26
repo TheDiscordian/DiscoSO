@@ -18,7 +18,6 @@ Changes made live by server settings alone. They carry no version because they n
 
 ### Fixed
 - Closing the game takes you offline right away. The server was not acting on connections a departed client had already hung up on, so the session stayed open and you stayed on the online list until a ten-minute idle timer swept it away. 👻
-- Sitting still no longer disconnects you. That idle timer was only ever there to clear up after the bug above, and it closed anyone who had been quiet for ten minutes — easily done sitting in the city view. 🪑
 
 ### Changed
 - Holiday items are only in the catalogue during their holiday: Halloween Sep 15 – Nov 15 🎃, Christmas Nov 16 – Jan 31 🎁, Spring Mar 1 – May 31 🦋, Pride all of June 🌈, Summer Jul 1 – Aug 31 🌴. Out of season they are hidden from buy and build mode and cannot be bought. Ones you already own or have in inventory are unaffected — you can keep them out and place them any time of year.
