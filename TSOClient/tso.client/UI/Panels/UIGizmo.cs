@@ -507,6 +507,7 @@ namespace FSO.Client.UI.Panels
 
         private bool ChoseDefaultFilter;
         private bool CheckingWelcome;
+        private int WelcomeCheckTicks;
         public uint SimAge
         {
             set
@@ -517,10 +518,24 @@ namespace FSO.Client.UI.Panels
                 {
                     //point new players at welcome lots, but only while any are running
                     CheckingWelcome = true;
+                    WelcomeCheckTicks = FSOEnvironment.RefreshRate * 5;
                     GameThread.NextUpdate(e => SelectFilter("Welcome"));
                 }
                 else GameThread.NextUpdate(e => SelectFilter("Community"));
             }
+        }
+
+        /// <summary>
+        /// Fall through to community if the welcome results never arrive. An empty or unchanged
+        /// result vector doesn't fire the binding at all, so waiting on it alone leaves Welcome
+        /// selected showing nothing - which is exactly the case this was meant to catch.
+        /// </summary>
+        private void TickWelcomeCheck()
+        {
+            if (!CheckingWelcome) return;
+            if (--WelcomeCheckTicks > 0) return;
+            CheckingWelcome = false;
+            SelectFilter("Community");
         }
 
         private void SelectFilter(string name)
@@ -572,6 +587,7 @@ namespace FSO.Client.UI.Panels
         public override void Update(UpdateState state)
         {
             base.Update(state);
+            TickWelcomeCheck();
             if (Btns.Count > 0)
             {
                 var gamescreen = (GameFacade.Screens.CurrentUIScreen as CoreGameScreen);
