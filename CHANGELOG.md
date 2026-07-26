@@ -8,12 +8,15 @@ Changes made live by server settings alone. They carry no version because they n
 
 ### Changed
 - Needs can now overfill past the top of the bar — shown as a white bar — and how far depends on where you are. Romance lots push Social hardest, Entertainment lots push Fun and Social, Services lots push Hunger and Energy, and home lots give a solid top-up to the survival needs. Welcome and Community lots add a light boost to everything. 💪
-- How dirty something has to be before the maid will clean it is now a server setting, and it is dialled down from the stock value so she actually gets to work. 🧹
 
-## 1.0.35 — July 2026 🧹
+## 1.0.36 — July 2026 🧹
 
 ### Fixed
-- The maid actually cleans now. She would only touch an object once it was filthier than almost anything ever gets in practice, so on a busy lot she arrived, found nothing that qualified, stood around and went home. How dirty something has to be before she will clean it is now a server setting. 🧹
+- The maid actually cleans now. She would only pick up after an object once it was filthier than anything on a lot realistically gets, so she would turn up, find nothing that qualified, stand about and go home again. She now gets to work on anything properly dirty — in sandbox too. 🧹
+
+## 1.0.35 — July 2026
+
+No player-facing changes — groundwork for the maid fix in 1.0.36.
 
 ## 1.0.34 — July 2026 🏘️
 
