@@ -2,7 +2,7 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased
+## 1.0.27 — July 2026 📊
 
 ### Fixed
 - Property statistics now count donated furniture. Donating an object gives up its resale value, and everything on a community lot is donated, so Furnishings, Yard, and Upkeep read off almost nothing however well furnished the property was. Objects with no resale value are now counted at their catalogue price. 📊
