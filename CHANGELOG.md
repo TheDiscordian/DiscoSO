@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.33 — July 2026 🧹
+
+### Changed
+- The maid and gardener stop loitering on community lots once the work is done. They used to stand around for about three minutes before heading off; now it is closer to twenty-five seconds. 🧹🌱
+
 ## 1.0.32 — July 2026 🧹
 
 ### Changed
