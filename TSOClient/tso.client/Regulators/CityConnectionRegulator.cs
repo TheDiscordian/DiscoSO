@@ -23,6 +23,9 @@ namespace FSO.Client.Regulators
     public class CityConnectionRegulator : AbstractRegulator, IAriesMessageSubscriber, IAriesEventSubscriber
     {
         public AriesClient Client { get; internal set; }
+
+        private const int RECONNECT_GIVE_UP_MS = 60000;
+        private bool LocalDisconnect;   //true when WE asked to leave, false when the server did
         public CityConnectionMode Mode { get; internal set; } = CityConnectionMode.NORMAL;
 
         private CityClient CityApi;
@@ -326,6 +329,16 @@ namespace FSO.Client.Regulators
                     }
                     else
                     {
+                        //a backstop on the whole reconnect sequence. Every step below has a way
+                        //to stall - a socket that opens but never answers, a reply that never
+                        //arrives - and stalling here leaves the player on a city screen that
+                        //looks fine and does nothing. Whatever happens, say so within the minute.
+                        GameThread.SetTimeout(() =>
+                        {
+                            var s = CurrentState?.Name;
+                            if (s != null && s != "Connected" && s != "Disconnected" && s != "Disconnect")
+                                FSOFacade.Controller.FatalNetworkError(23);
+                        }, RECONNECT_GIVE_UP_MS);
                         AsyncTransition("Reestablish");
                     }
                     break;
@@ -345,6 +358,7 @@ namespace FSO.Client.Regulators
                     break;
 
                 case "Reestablished":
+                    LocalDisconnect = false;
                     Client.Write(
                         new ClientOnlinePDU
                         {
@@ -368,6 +382,7 @@ namespace FSO.Client.Regulators
                     break;
 
                 case "Disconnect":
+                    LocalDisconnect = true;
                     ShardSelectResponse = null;
                     ReestablishAttempt = 0;
                     CanReestablish = false;
@@ -402,6 +417,11 @@ namespace FSO.Client.Regulators
                     ((ClientShards)Shards).CurrentShard = null;
                     ReestablishAttempt = 0;
                     CanReestablish = false;
+                    //Reaching here without having asked to leave means the server said goodbye -
+                    //it is going down. Nothing is listening for that: DisconnectController only
+                    //hears "Disconnected" when it started the disconnect itself, so otherwise the
+                    //player is left sitting on a city screen with nothing behind it.
+                    if (!LocalDisconnect) FSOFacade.Controller.FatalNetworkError(23);
                     break;
             }
         }
