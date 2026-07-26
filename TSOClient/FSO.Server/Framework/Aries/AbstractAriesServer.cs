@@ -384,6 +384,9 @@ namespace FSO.Server.Framework.Aries
 
         public void InputClosed(IoSession session)
         {
+            //the peer sent FIN - it is gone. Left empty this session sits in CLOSE_WAIT forever.
+            //Same as Mina's own IoHandlerAdapter does.
+            session.Close(true);
         }
 
         public override void Shutdown()
