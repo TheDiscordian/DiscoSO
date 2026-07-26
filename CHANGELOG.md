@@ -9,6 +9,11 @@ Changes made live by server settings alone. They carry no version because they n
 ### Changed
 - Needs can now overfill past the top of the bar — shown as a white bar — and how far depends on where you are. Romance lots push Social hardest, Entertainment lots push Fun and Social, Services lots push Hunger and Energy, and home lots give a solid top-up to the survival needs. Welcome and Community lots add a light boost to everything. 💪
 
+## 1.0.39 — July 2026 🔌
+
+### Fixed
+- A server restart no longer strands you. The client used to land on a city screen that could not be interacted with, and any attempt to join a lot loaded forever until you force-closed it. It now tells you the connection is gone and takes you back to login, and a lot that cannot be found gives up rather than loading forever. 🔌
+
 ## 1.0.38 — July 2026 🎃
 
 ### Fixed
