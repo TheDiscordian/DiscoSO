@@ -329,6 +329,21 @@ namespace FSO.Client.UI.Screens
             CityTooltipHitArea.SetSize(ScreenWidth, ScreenHeight);
         }
 
+        /// <summary>
+        /// Screen space the city view's own panels cover. Both are anchored to a screen edge, so
+        /// each rect runs from the panel's corner out to the edge it hugs. Lot bubbles route
+        /// around these rather than parking themselves behind the UCP or the gizmo.
+        /// </summary>
+        public List<Rectangle> GetChromeBounds()
+        {
+            var result = new List<Rectangle>();
+            if (ucp != null && ucp.Visible)
+                result.Add(new Rectangle((int)ucp.X, (int)ucp.Y, (int)ucp.Size.X, ScreenHeight - (int)ucp.Y));
+            if (gizmo != null && gizmo.Visible)
+                result.Add(new Rectangle((int)gizmo.X, (int)gizmo.Y, ScreenWidth - (int)gizmo.X, ScreenHeight - (int)gizmo.Y));
+            return result;
+        }
+
         public void Initialize(string cityName, int cityMap, TerrainController terrainController)
         {
             CalculateMatrix();

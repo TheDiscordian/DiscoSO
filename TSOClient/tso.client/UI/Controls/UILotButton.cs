@@ -119,7 +119,21 @@ namespace FSO.Client.UI.Controls
             Position = new Vector2(pos.X-40, pos.Y-110) / FSOEnvironment.DPIScaleFactor;
             ZOrder = pos.Z;
             Visible = (pos.Z < 0);
-            //AvoidOther();
+            //this path re-runs every frame as the camera moves, so a grid search would make the
+            //bubble hop about. lifting it clear of the panels is stable for a given position.
+            foreach (var rect in ChromeBounds())
+            {
+                if (rect.Intersects(new Rectangle((int)Position.X, (int)Position.Y, 80, 100)))
+                    Position = new Vector2(Position.X, Math.Max(0, rect.Top - 100));
+            }
+        }
+
+        /// <summary>
+        /// Screen areas covered by the city view's own panels, empty if the screen isn't up yet.
+        /// </summary>
+        private static List<Rectangle> ChromeBounds()
+        {
+            return (GameFacade.Screens.CurrentUIScreen as CoreGameScreen)?.GetChromeBounds() ?? new List<Rectangle>();
         }
 
         public float ZOrder;
@@ -184,6 +198,16 @@ namespace FSO.Client.UI.Controls
                     var xp2 = (int)child.Position.X / 80;
                     var yp2 = (int)child.Position.Y / 100;
                     if (xp2 < w && xp2 >= 0 && yp2 < h && yp2 >= 0) arry[xp2, yp2] = true;
+                }
+            }
+            //the panels are as much of an obstacle as another bubble - block their cells so the
+            //search below routes around them instead of hiding a lot behind the UCP or the gizmo
+            foreach (var rect in ChromeBounds())
+            {
+                for (int cx = Math.Max(0, rect.Left / 80); cx < w && cx * 80 < rect.Right; cx++)
+                {
+                    for (int cy = Math.Max(0, rect.Top / 100); cy < h && cy * 100 < rect.Bottom; cy++)
+                        arry[cx, cy] = true;
                 }
             }
             var xp = (int)Math.Round(Position.X / 80);

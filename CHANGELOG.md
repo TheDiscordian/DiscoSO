@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Fixed
+- City view lot bubbles no longer sit behind the UCP or the gizmo. They now treat the panels as obstacles the same way they already avoided each other. 🫧
+
 ## 1.0.27 — July 2026 📊
 
 ### Fixed
