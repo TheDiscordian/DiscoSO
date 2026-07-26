@@ -384,8 +384,10 @@ namespace FSO.Server.Framework.Aries
 
         public void InputClosed(IoSession session)
         {
-            //the peer sent FIN - it is gone. Left empty this session sits in CLOSE_WAIT forever.
-            //Same as Mina's own IoHandlerAdapter does.
+            //FIN from the peer: it hung up on purpose, so skip the reconnect grace SessionClosed
+            //would otherwise give it. A connection that actually drops times out or resets and
+            //never reaches here. Without the close the session sits in CLOSE_WAIT forever.
+            session.SetAttribute("dc", true);
             session.Close(true);
         }
 
