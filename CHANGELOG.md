@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.32 — July 2026 🧹
+
+### Changed
+- The two community-lot maids now work proper shifts: the 10am maid finishes at 6pm, and the 7pm maid stays through to 1am. 🧹
+
 ## 1.0.31 — July 2026 🧹
 
 ### Fixed
