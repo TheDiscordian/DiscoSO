@@ -81,7 +81,7 @@ namespace FSOiOS
             set.LightingMode = 3;
             set.AmbienceVolume = 10;
             set.FXVolume = 10;
-            set.MusicVolume = 10;
+            set.MusicVolume = 8;
             set.VoxVolume = 10;
             set.GraphicsWidth = (int)UIScreen.MainScreen.Bounds.Width;
             set.DirectionalLight3D = false;
