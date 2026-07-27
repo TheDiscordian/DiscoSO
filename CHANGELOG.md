@@ -4,6 +4,9 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 
 ## Unreleased
 
+### Fixed
+- Objects above the ground floor are lit by their own floor's lights again. They were reading the lighting of the floor below, so an upstairs room looked unlit however many lamps were in it while its floor and walls lit up normally. 🔦
+
 ### Changed
 - Music now starts at 80% instead of full volume on a fresh install. If you have already set a music level, yours is kept. 🎵
 
