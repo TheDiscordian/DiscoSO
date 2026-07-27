@@ -9,6 +9,11 @@ Changes made live by server settings alone. They carry no version because they n
 ### Changed
 - Needs can now overfill past the top of the bar — shown as a white bar — and how far depends on where you are. Romance lots push Social hardest, Entertainment lots push Fun and Social, Services lots push Hunger and Energy, and home lots give a solid top-up to the survival needs. Welcome and Community lots add a light boost to everything. 💪
 
+## 1.0.44 — July 2026 💡
+
+### Fixed
+- Turning a ceiling fan's light back on picks the blades up where they stopped, instead of restarting the rotation. 💡
+
 ## 1.0.43 — July 2026 🌀
 
 ### Fixed
