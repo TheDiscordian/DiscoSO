@@ -69,7 +69,7 @@ namespace FSO.Client
             { "EdgeScroll", "true"},
             { "Lighting", "true"},
             { "FXVolume", "10"},
-            { "MusicVolume", "10"},
+            { "MusicVolume", "8"},
             { "VoxVolume", "10"},
             { "AmbienceVolume", "8"},
             { "StartupPath", ""},

@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Changed
+- Music now starts at 80% instead of full volume on a fresh install. If you have already set a music level, yours is kept. 🎵
+
 ## Server settings — July 2026 💪
 
 Changes made live by server settings alone. They carry no version because they need no new client.
