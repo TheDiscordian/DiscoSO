@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Fixed
+- Objects above the ground floor are lit by their own floor's lights again. They were reading the lighting of the floor below, so an upstairs room looked unlit however many lamps were in it while its floor and walls lit up normally. 🔦
+
 ## Server settings — July 2026 💪
 
 Changes made live by server settings alone. They carry no version because they need no new client.

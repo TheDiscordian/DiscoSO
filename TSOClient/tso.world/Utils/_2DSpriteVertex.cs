@@ -29,7 +29,10 @@ namespace FSO.LotView.Utils
             this.Position = position;
             this.TextureCoordinate = textureCoords;
             this.WorldPosition = worldPosition;
-            this.ObjectID = new Vector2(objID/65535.0f, level - 1);
+            //the shader floors this to pick the object's floor out of the lightmap atlas, and an
+            //exact integer can interpolate a hair low, flooring to the storey below. bias it, the
+            //same way DGRPRenderer does for the 3d path.
+            this.ObjectID = new Vector2(objID/65535.0f, level - 0.999f);
             this.Room = new Vector2((room % 256) / 256f, (room / 256) / 256f);
         }
 
