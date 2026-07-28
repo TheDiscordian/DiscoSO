@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.47 — July 2026 🔧
+
+### Fixed
+- The repair added in 1.0.46 is now written back to your settings, so a client that had been pointed away from DiscoSO is mended on disk rather than patched up again on every launch. 🔧
+
 ## 1.0.46 — July 2026 🔌
 
 ### Fixed

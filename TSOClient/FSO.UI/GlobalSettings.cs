@@ -51,18 +51,19 @@ namespace FSO.Client
                         defaultInstance.DPIScaleFactor = 1; //sanity check
                     if (defaultInstance.ChatWindowsOpacity == 0 || defaultInstance.ChatWindowsOpacity > 1)
                         defaultInstance.ChatWindowsOpacity = 1; //sanity check
-                    //heal a config that names upstream's api - one written before the client
-                    //defaulted to us, or before the installer's seed config existed. it can only
-                    //fail to log in, so there is nothing to preserve.
-                    if (Unusable(defaultInstance.GameEntryUrl) || Unusable(defaultInstance.CitySelectorUrl))
+                    //heal a config that cannot reach us: one naming upstream's api (written before
+                    //the client defaulted to us, or before the installer's seed config existed), or
+                    //one with UseCustomServer off, whose branch of NetworkModule looks the server up
+                    //in a gameentry.ini we do not ship. both are dead ends, so nothing is lost by
+                    //replacing them - and the repair is saved, or it happens again every launch.
+                    if (Unusable(defaultInstance.GameEntryUrl) || Unusable(defaultInstance.CitySelectorUrl)
+                        || !defaultInstance.UseCustomServer)
                     {
-                        defaultInstance.GameEntryUrl = ServerUrl;
-                        defaultInstance.CitySelectorUrl = ServerUrl;
+                        if (Unusable(defaultInstance.GameEntryUrl)) defaultInstance.GameEntryUrl = ServerUrl;
+                        if (Unusable(defaultInstance.CitySelectorUrl)) defaultInstance.CitySelectorUrl = ServerUrl;
+                        defaultInstance.UseCustomServer = true;
                         defaultInstance.Save();
                     }
-                    //the other branch of NetworkModule looks the server up in gameentry.ini, which
-                    //we do not ship. a stored false is the same dead end as a stored upstream url.
-                    defaultInstance.UseCustomServer = true;
 
                 }
                 return defaultInstance;
