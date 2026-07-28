@@ -25,6 +25,8 @@ namespace FSO.Common.Rendering.Framework.Model
         public GameTime Time;
         public List<MultiMouse> MouseStates = new List<MultiMouse>();
         public MouseState MouseState;
+        public int MouseWheelDelta { get; private set; }
+        private int LastScrollWheel;
         public int CurrentMouseID;
         public KeyboardState KeyboardState;
         public bool ShiftDown
@@ -76,6 +78,13 @@ namespace FSO.Common.Rendering.Framework.Model
         {
             NewKeys.Clear();
             Depth = 0;
+
+            //wheel notches turned since the last frame. MonoGame reports a running total, and it
+            //resets to 0 whenever the window loses focus - a jump that large is not a real scroll.
+            var wheel = MouseState.ScrollWheelValue;
+            var wheelDelta = wheel - LastScrollWheel;
+            LastScrollWheel = wheel;
+            MouseWheelDelta = (Math.Abs(wheelDelta) > 1000) ? 0 : wheelDelta / 120;
 
             /**
              * If a key has been held down for X duration, treat it as if it is newly
