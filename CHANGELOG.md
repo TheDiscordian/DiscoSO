@@ -2,6 +2,12 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.50 — July 2026 🐈
+
+### Fixed
+- Your pet keeps what it earned while you were away. Its needs are stored on its carrier, and that store was only refreshed while the pet was idling — so anything it did for a long stretch, sleeping most of all, was thrown away when the lot next loaded. 🐈
+- Players no longer linger on the online list after they disconnect. A player who dropped while on a lot could leave a claim behind that nothing ever released, and everything that reports who is online counts those claims. 👻
+
 ## 1.0.49 — July 2026 🎃
 
 ### Fixed
