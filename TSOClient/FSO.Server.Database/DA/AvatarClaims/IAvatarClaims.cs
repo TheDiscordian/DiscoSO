@@ -16,6 +16,11 @@ namespace FSO.Server.Database.DA.AvatarClaims
         void RemoveRemaining(string previousOwner, uint location);
 
         void Delete(int id, string owner);
+
+        //DiscoSO: for the disconnect path, where the session is gone and it does not matter which
+        //server still has its name on the claim - see VoltronConnectionLifecycleHandler.
+        void DeleteById(int id);
+
         void DeleteAll(string owner);
     }
 }

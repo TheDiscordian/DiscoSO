@@ -36,6 +36,11 @@ namespace FSO.Server.Database.DA.AvatarClaims
             Context.Connection.Query("DELETE FROM fso_avatar_claims WHERE owner = @owner AND avatar_claim_id = @claim_id", new { owner = owner, claim_id = (int)id });
         }
 
+        public void DeleteById(int id)
+        {
+            Context.Connection.Query("DELETE FROM fso_avatar_claims WHERE avatar_claim_id = @claim_id", new { claim_id = (int)id });
+        }
+
         public void DeleteAll(string owner)
         {
             Context.Connection.Query("DELETE FROM fso_avatar_claims WHERE owner = @owner", new { owner = owner });

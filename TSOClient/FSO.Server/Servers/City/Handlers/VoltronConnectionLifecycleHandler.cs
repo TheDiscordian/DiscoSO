@@ -83,8 +83,14 @@ namespace FSO.Server.Servers.City.Handlers
                         }
                     }
 
-                    //nuke the claim anyways to be sure.
-                    db.AvatarClaims.Delete(voltronSession.AvatarClaimId, Context.Config.Call_Sign);
+                    //nuke the claim anyways to be sure. NOT scoped to our own call sign: a player
+                    //who drops while on a lot has had their claim handed to the lot server, so
+                    //deleting "where owner = the city" matched nothing and the row survived with
+                    //nobody left to release it. Those rows are what the online count is built from,
+                    //so every one of them is a player who looks online forever. The session is
+                    //already gone by here - the check above returns if it came back - so whoever
+                    //still has their name on the claim, it goes.
+                    db.AvatarClaims.DeleteById(voltronSession.AvatarClaimId);
                 }
             });
         }
