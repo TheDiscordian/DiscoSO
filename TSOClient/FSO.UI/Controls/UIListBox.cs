@@ -136,6 +136,21 @@ namespace FSO.Client.UI.Controls
                 m_Items = value;
                 SelectedItem = previousSelection;
                 CalculateScroll();
+
+                //the per-column update loop only matters for lists whose columns are elements,
+                //and it is the expensive part for long lists. detect rather than rely on every
+                //call site remembering to set the flag.
+                if (!UseChildElements && m_Items != null)
+                {
+                    foreach (var item in m_Items)
+                    {
+                        if (item.Columns != null && item.Columns.Any(x => x is UIElement))
+                        {
+                            UseChildElements = true;
+                            break;
+                        }
+                    }
+                }
             }
         }
 
