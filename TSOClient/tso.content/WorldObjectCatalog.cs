@@ -9,6 +9,9 @@ namespace FSO.Content
 {
     public class WorldObjectCatalog : IObjectCatalog
     {
+        //build mode's terrain button swaps to this category while an admin holds shift
+        public const sbyte ADMIN_CATEGORY = 29;
+
         private static List<ObjectCatalogItem>[] ItemsByCategory;
         private static Dictionary<uint, ObjectCatalogItem> ItemsByGUID;
         private List<uint> UntradableGUIDs;
@@ -112,13 +115,36 @@ namespace FSO.Content
                     if (item.InSeason(now)) result.Add(item);
                 }
             }
+            AppendGatedToAdmin(result, now);
             return result;
         }
 
         public List<ObjectCatalogItem> GetItemsByCategory(sbyte category)
         {
             var now = DateTime.UtcNow;
-            return ItemsByCategory[category].FindAll(item => item.InSeason(now));
+            var result = ItemsByCategory[category].FindAll(item => item.InSeason(now));
+            if (category == ADMIN_CATEGORY) AppendGatedToAdmin(result, now);
+            return result;
+        }
+
+        //DiscoSO: out of season an item sits in no category anyone can open, so the admin category
+        //takes a copy - reaching a gated object is what that category is for. A handful of seasonal
+        //rows ship a hand-written admin twin already, so only the guids without one are added.
+        private void AppendGatedToAdmin(List<ObjectCatalogItem> result, DateTime now)
+        {
+            var present = new HashSet<uint>();
+            foreach (var item in ItemsByCategory[ADMIN_CATEGORY]) present.Add(item.GUID);
+
+            foreach (var cat in ItemsByCategory)
+            {
+                foreach (var item in cat)
+                {
+                    if (item.InSeason(now) || !present.Add(item.GUID)) continue;
+                    var admin = item; //struct: this is a copy, the catalogue's own row is untouched
+                    admin.Category = ADMIN_CATEGORY;
+                    result.Add(admin);
+                }
+            }
         }
 
         //Windows for objects whose catalogue row we cannot ship. The base game's
