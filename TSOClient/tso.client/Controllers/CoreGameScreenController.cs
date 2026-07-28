@@ -390,7 +390,12 @@ namespace FSO.Client.Controllers
 
         public void HandleVMShutdown(VMCloseNetReason reason)
         {
-            JoinLotRegulator.AsyncTransition("Disconnect");
+            //already on the way out - queueing another transition just races the first one.
+            var state = JoinLotRegulator.CurrentState?.Name;
+            if (state != "Disconnected" && state != "Disconnect")
+            {
+                JoinLotRegulator.AsyncTransition("Disconnect");
+            }
         }
 
         public bool IsMe(uint id)

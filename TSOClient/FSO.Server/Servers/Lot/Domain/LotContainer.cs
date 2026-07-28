@@ -1304,15 +1304,62 @@ namespace FSO.Server.Servers.Lot.Domain
             evt.WaitOne();
         }
 
-        public bool IsAvatarOnLot(uint pid)
+        public bool IsAvatarOnLot(uint pid, Dictionary<uint, IVoltronSession> visitors)
         {
             //we need to check if the avatar's sim is still on the lot. their data + claim might have left, but the avatar could still be here.
             bool result = false;
             if (!ActiveYet) return false; //we are not on an inactive lot.
+
+            bool waitForDeletion = false;
+
             BlockOnLotThread(() =>
             {
-                result = Lot.Context.ObjectQueries.AvatarsByPersist.ContainsKey(pid);
+                var ava = Lot.GetAvatarByPersist(pid);
+
+                lock (visitors)
+                {
+                    result = ava != null || visitors.ContainsKey(pid);
+                }
+
+                if (result && ava == null)
+                {
+                    //their visitor entry should disappear soon.
+                    waitForDeletion = true;
+                }
+                else if (result && ava.KillTimeout != -1)
+                {
+                    //if this avatar has started the leave lot animation, we can get rid of them now
+                    //instead of making them wait out the kill timeout to rejoin.
+                    if (ava.Thread.Stack.Any(x => x.CalleePrivate.Name == "templateperson" && x.Routine.ID == 8373))
+                    {
+                        Lot.ForwardCommand(new VMNetDeleteObjectCmd()
+                        {
+                            ObjectID = ava.ObjectID,
+                            CleanupAll = true,
+                            Verified = true,
+                        });
+
+                        waitForDeletion = true;
+                    }
+                }
             });
+
+            if (waitForDeletion)
+            {
+                for (int i = 0; i < 30; i++)
+                {
+                    BlockOnLotThread(() =>
+                    {
+                        lock (visitors)
+                        {
+                            result = Lot.GetAvatarByPersist(pid) != null || visitors.ContainsKey(pid);
+                        }
+                    });
+
+                    if (!result) break;
+                }
+            }
+
             return result;
         }
 
