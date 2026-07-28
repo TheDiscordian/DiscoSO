@@ -17,7 +17,9 @@ namespace FSO.Client.UI.Controls
         private Texture2D m_Texture;
 
         /** Mouse handler for the thumb button **/
+        private UIMouseEventRef m_BackgroundEvent;
         private UIMouseEventRef m_ThumbEvent;
+        private bool m_MouseOver;
 
         public event ChangeDelegate OnChange;
         public event ChangeDelegate OnRangeChange;
@@ -142,6 +144,7 @@ namespace FSO.Client.UI.Controls
         public UISlider()
         {
             m_ThumbEvent = this.ListenForMouse(new Rectangle(0, 0, 0, 0), new UIMouseEvent(OnThumbClick));
+            m_BackgroundEvent = this.ListenForMouse(new Rectangle(0, 0, 0, 0), new UIMouseEvent(OnBackgroundMouse));
         }
 
         private bool m_ThumbDown;
@@ -166,12 +169,42 @@ namespace FSO.Client.UI.Controls
                 case UIMouseEventType.MouseUp:
                     m_ThumbDown = false;
                     break;
+
+                case UIMouseEventType.MouseOver:
+                    m_MouseOver = true;
+                    break;
+
+                case UIMouseEventType.MouseOut:
+                    m_MouseOver = false;
+                    break;
+            }
+        }
+
+        private void OnBackgroundMouse(UIMouseEventType type, UpdateState state)
+        {
+            switch (type)
+            {
+                case UIMouseEventType.MouseOver:
+                    m_MouseOver = true;
+                    break;
+
+                case UIMouseEventType.MouseOut:
+                    m_MouseOver = false;
+                    break;
             }
         }
 
         public override void Update(UpdateState state)
         {
             base.Update(state);
+
+            // Mouse wheel scrolling
+            if (m_MouseOver && state.MouseWheelDelta != 0)
+            {
+                float step = AllowDecimals ? 0.25f : 1f;
+                if (Orientation == 1) step *= -1;
+                Value += state.MouseWheelDelta * step;
+            }
             if (m_ThumbDown)
             {
                 /** Dragging the thumb **/
@@ -212,9 +245,12 @@ namespace FSO.Client.UI.Controls
         /// <param name="height"></param>
         public void SetSize(float width, float height)
         {
+            var minSize = (Orientation == 0 ? Texture?.Height : Texture?.Width) ?? 13;
             m_Width = width;
             m_Height = height;
             m_LayoutCache.Invalidate();
+
+            m_BackgroundEvent.Region = new Rectangle(0, 0, (int)Math.Max(minSize, width), (int)Math.Max(minSize, height));
         }
 
         private UISliderLayout CalculateLayout()

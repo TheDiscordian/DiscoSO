@@ -44,6 +44,7 @@ namespace FSO.LotView.Utils.Camera
                 var worldState = world.State;
                 var terrainHeight = CorrectCameraHeight(world);
                 var hz = FSOEnvironment.RefreshRate;
+                var power = 60f / hz;
                 if (state.WindowFocused)
                 {
                     var mx = (int)worldState.WorldSpace.WorldPxWidth / 2;
@@ -53,8 +54,8 @@ namespace FSO.LotView.Utils.Camera
                     var camera = Camera;
                     if (LastFP && !(mpos.X == 0 && mpos.Y == 0))
                     {
-                        RotationX -= ((mpos.X - mx) / 500f) * camera.FOV;
-                        RotationY += ((mpos.Y - my) / 500f) * camera.FOV;
+                        RotationX -= ((mpos.X - mx) / 500f) * camera.FOV * power;
+                        RotationY += ((mpos.Y - my) / 500f) * camera.FOV * power;
                     }
                     Mouse.SetPosition(mx, my);
 

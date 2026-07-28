@@ -49,7 +49,7 @@ namespace FSO.Client.UI.Panels
     public class UILotControl : UIContainer, IDisposable, ITouchable, IFocusableUI
     {
         private UIMouseEventRef MouseEvt;
-        public bool MouseIsOn;
+        public bool MouseIsOn { get; private set; }
 
         private UIPieMenu PieMenu;
         public UIChatPanel ChatPanel;
