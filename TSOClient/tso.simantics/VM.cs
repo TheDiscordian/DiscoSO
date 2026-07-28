@@ -233,12 +233,43 @@ namespace FSO.SimAntics
             PlatformState.ActivateValidator(this);
         }
 
+        //DiscoSO: a pet's needs live on its carrier, not in the lot save. On spawn the pet reads
+        //them ("Copy Attributes From Carrier", 8216, called from the pet's Main), and the carrier is
+        //written back by "Copy Attributes To Carrier" (8217) - whose ONLY live caller is
+        //"Cat - Interaction - Idle". So the carrier holds whatever the pet's needs were at its last
+        //idle tick: start any long interaction and it freezes there. A cat that sleeps all night
+        //comes back as tired as the moment before it lay down, because idle never ran again.
+        //The game has a tree for exactly this, "SG - Pet - Functional - House Unload" (8193), which
+        //calls 8217 - but it is wired to no entry point, so nothing has ever run it. Run it here,
+        //before the pet is deleted, and the carrier holds the needs the pet actually has.
+        private const ushort PET_HOUSE_UNLOAD = 8193;
+
+        private void StorePetNeeds(VMAvatar pet)
+        {
+            if (pet == null || pet.PersistID != 0 || !pet.IsPet) return;
+            var behavior = pet.GetRoutineWithOwner(PET_HOUSE_UNLOAD, Context);
+            if (behavior == null) return;
+            VMThread.EvaluateCheck(Context, pet, new VMStackFrame()
+            {
+                Caller = pet,
+                Callee = pet,
+                CodeOwner = behavior.owner,
+                StackObject = pet,
+                Routine = behavior.routine,
+                Args = new short[4]
+            });
+        }
+
         public void Reset()
         {
             //some objects expect that the server delete all avatars upon loading the lot (pets, food counters)
             //var avatars = new List<VMEntity>(Entities.Where(x => x is VMAvatar && x.PersistID > 0));
             var avatars = new List<VMEntity>(Context.ObjectQueries.Avatars);
-            foreach (var avatar in avatars) avatar.Delete(true, Context);
+            foreach (var avatar in avatars)
+            {
+                StorePetNeeds(avatar as VMAvatar);
+                avatar.Delete(true, Context);
+            }
 
             var ents = new List<VMEntity>(Entities);
             foreach (var ent in ents)
