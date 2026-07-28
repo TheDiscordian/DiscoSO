@@ -7,6 +7,10 @@ namespace FSO.Client
 {
     public class GlobalSettings : IniConfig
     {
+        //the only server this client can talk to. it is the default, not a suggestion - a config
+        //that names anything else cannot log in.
+        public const string ServerUrl = "https://tso.thedisco.zone";
+
         private static GlobalSettings defaultInstance;
 
         //settings live in the user profile so client updates and reinstalls don't reset them.
@@ -31,6 +35,11 @@ namespace FSO.Client
             }
         }
 
+        private static bool Unusable(string url)
+        {
+            return string.IsNullOrWhiteSpace(url) || url.Contains("api.freeso.org");
+        }
+
         public static GlobalSettings Default
         {
             get
@@ -42,11 +51,18 @@ namespace FSO.Client
                         defaultInstance.DPIScaleFactor = 1; //sanity check
                     if (defaultInstance.ChatWindowsOpacity == 0 || defaultInstance.ChatWindowsOpacity > 1)
                         defaultInstance.ChatWindowsOpacity = 1; //sanity check
-                    if (defaultInstance.GameEntryUrl == "http://api.freeso.org")
+                    //heal a config that names upstream's api - one written before the client
+                    //defaulted to us, or before the installer's seed config existed. it can only
+                    //fail to log in, so there is nothing to preserve.
+                    if (Unusable(defaultInstance.GameEntryUrl) || Unusable(defaultInstance.CitySelectorUrl))
                     {
-                        defaultInstance.GameEntryUrl = "https://api.freeso.org";
-                        defaultInstance.CitySelectorUrl = "https://api.freeso.org";
+                        defaultInstance.GameEntryUrl = ServerUrl;
+                        defaultInstance.CitySelectorUrl = ServerUrl;
+                        defaultInstance.Save();
                     }
+                    //the other branch of NetworkModule looks the server up in gameentry.ini, which
+                    //we do not ship. a stored false is the same dead end as a stored upstream url.
+                    defaultInstance.UseCustomServer = true;
 
                 }
                 return defaultInstance;
@@ -87,8 +103,8 @@ namespace FSO.Client
             { "SurroundingLotMode", "2" },
 
             { "UseCustomServer", "true" },
-            { "GameEntryUrl", "http://api.freeso.org" },
-            { "CitySelectorUrl", "http://api.freeso.org" },
+            { "GameEntryUrl", ServerUrl },
+            { "CitySelectorUrl", ServerUrl },
 
             { "TargetRefreshRate", "60" },
 
