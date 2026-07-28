@@ -153,12 +153,7 @@ namespace FSO.Server.Servers.Lot.Domain
         {
             0x3278BD34,
             0x5157DDF2,
-            0x352A8ACE,
-            //DiscoSO: a pet asleep in its bed is CONTAINED by the bed, so resetting the bed for
-            //being occupied destroyed the pet with it - the carrier then re-released the cat from
-            //the stats it stored when it last came out, throwing away everything it slept off.
-            //The lot save has the sleeping pet in it and always did; this stops the load discarding it.
-            0x22DB9CA9 //petbed
+            0x352A8ACE
         };
 
         public LotContainer(IDAFactory da, LotContext context, ILotHost host, IKernel kernel, LotServerConfiguration config, IRealestateDomain realestate)
