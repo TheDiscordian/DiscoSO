@@ -2,10 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased
+## 1.0.49 — July 2026 🎃
 
 ### Fixed
 - Out-of-season items are reachable again from build mode's admin category, instead of disappearing from the game until their holiday comes back around. 🎃
+- A pet asleep in its bed keeps what it slept off. A server restart used to bring it back awake with the energy it had before the nap. 🐈
 
 ## 1.0.48 — July 2026 🎉
 
