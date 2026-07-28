@@ -1587,7 +1587,7 @@ namespace FSO.Server.Servers.Lot.Domain
             {
                 if (!relDict.TryGetValue(rel.to_id, out var list))
                 {
-                    list = [];
+                    list = new List<int>();
                     relDict[rel.to_id] = list;
                 }
                 while (list.Count <= rel.index) list.Add(0);
@@ -1600,7 +1600,7 @@ namespace FSO.Server.Servers.Lot.Domain
             {
                 var marshal = new VMEntityPersistRelationshipMarshal();
                 marshal.Target = dictItem.Key;
-                marshal.Values = [.. dictItem.Value.Select(x => (short)x)];
+                marshal.Values = dictItem.Value.Select(x => (short)x).ToArray();
                 state.Relationships[relI++] = marshal;
             }
 
