@@ -86,8 +86,8 @@ namespace FSOiOS
             set.GraphicsWidth = (int)UIScreen.MainScreen.Bounds.Width;
             set.DirectionalLight3D = false;
             set.GraphicsHeight = (int)UIScreen.MainScreen.Bounds.Height;
-            set.CitySelectorUrl = "http://46.101.67.219:8081";
-            set.GameEntryUrl = "http://46.101.67.219:8081";
+            set.CitySelectorUrl = GlobalSettings.ServerUrl;
+            set.GameEntryUrl = GlobalSettings.ServerUrl;
 
             if (File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "The Sims Online.zip")))
                 File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "The Sims Online.zip"));

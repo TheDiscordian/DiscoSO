@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## 1.0.46 — July 2026 🔌
+
+### Fixed
+- A brand new install now connects to DiscoSO out of the box. The client was falling back to the upstream FreeSO address it inherits from the engine, so a first launch on a machine that had never run DiscoSO failed to log in. A client left pointing there repairs itself on startup. 🔌
+
 ## 1.0.45 — July 2026 🔦
 
 ### Fixed
