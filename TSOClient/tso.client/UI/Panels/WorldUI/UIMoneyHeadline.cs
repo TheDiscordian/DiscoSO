@@ -26,8 +26,11 @@ namespace FSO.Client.UI.Panels.WorldUI
             if (!Inited)
             {
                 Style = TextStyle.DefaultLabel.Clone();
-                var value = (int)(Runtime.Operand.Flags2 | (ushort)(Runtime.Operand.Duration << 16));
-                Text = (value > 0) ? ("$" + value) : ("-$" + value);
+                //the amount is packed across two operand fields. casting the high half to ushort
+                //discarded it, so anything over 65535 wrapped and anything negative came out
+                //positive - a bill payment reads -$1200, not -$-1200 or $64336.
+                var value = (int)(Runtime.Operand.Flags2 | (Runtime.Operand.Duration << 16));
+                Text = (value < 0) ? ("-$" + (-value)) : ("$" + value);
                 var measure = Style.MeasureString(Text);
 
                 var GD = GameFacade.GraphicsDevice;
