@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Changed
+- Paying your bills is now an occasion: your sim throws their hands up, the payout jingle plays, and the amount floats over their head — the same send-off a money object gives you. 🎉
+
 ## 1.0.47 — July 2026 🔧
 
 ### Fixed

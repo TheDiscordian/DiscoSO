@@ -14,7 +14,8 @@ namespace FSO.SimAntics.Utils
     /// delivery, zeroed on payment). The action tree routes the sim to the mailbox, plays the
     /// mailbox-open animation, asks the server for the outstanding total (interaction
     /// result -> TempXL 0), then confirms with a Yes/No dialog showing the amount before
-    /// paying via generic TSO call 200.
+    /// paying via generic TSO call 200. A paid bill then gets the payout celebration every
+    /// money object plays: the success sting, the amount over the sim's head, and a woohoo.
     /// </summary>
     public static class VMDiscoSOMailboxPatch
     {
@@ -110,7 +111,7 @@ namespace FSO.SimAntics.Utils
                 Type = template?.Type ?? 0,
                 Version = template?.Version ?? 0,
                 Args = 0,
-                Locals = 2,
+                Locals = 3,
                 Instructions = new BHAVInstruction[]
                 {
                     Instr(27, 1, 255, new byte[] { 0x00, 0x00, 0x00, 0xFE, 0x00, 0x00, 0x06, 0x00 }),  //0: route in front of + facing the mailbox
@@ -130,11 +131,25 @@ namespace FSO.SimAntics.Utils
                     Instr(2, 16, 15, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2a, 0x07 }),   //14: temp xl 0 > 0 (the amount arrived?)
                     Instr(280, 12, 253, new byte[] { 0x1e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),//15: global Idle(30 ticks), poll again
                     Instr(36, 17, 21, new byte[] { 0x00, 0x00, msg, yes, no, 0x01, title, 0x00 }),     //16: yes/no dialog with $MoneyXL:0
-                    Instr(2, 18, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x0a, 0x19 }),  //17: stack obj id := local 0 (pie callee)
+                    Instr(2, 22, 253, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x0a, 0x19 }),  //17: stack obj id := local 0 (pie callee)
                     Instr(1, 19, 253, new byte[] { 0xC8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }),  //18: generic 200 - server pays all bills
                     Instr(2, 20, 253, new byte[] { 0x01, 0x00, 0x00, 0x00, 0x00, 0x05, 0x01, 0x07 }),  //19: attr 1 ("Number of Bills Inside") := 0
                     Instr(44, 254, 20, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 }), //20: animation reset, paid (true)
-                    Instr(44, 255, 21, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 })  //21: animation reset, declined/timeout/fallback (false)
+                    Instr(44, 255, 21, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 }), //21: animation reset, declined/timeout/fallback (false)
+
+                    //the payout celebration, in the order the canning station's "Interaction -
+                    //Celebrate Payout" plays it. 300 and 312 are not in the mailbox, so play_sound
+                    //falls through to the globals, where they live.
+                    //it runs BEFORE the pay call, not after: the payment tears the interaction down
+                    //the moment it lands (the thread's stack and queue are both empty on the very
+                    //next tick), so nothing following instruction 18 executes - which is why 19 and
+                    //20 have never run either. confirmed against the unmodified tree.
+                    Instr(23, 23, 253, new byte[] { 0x38, 0x01, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00 }), //22: sound 312 "sting_econ_success" from the mailbox
+                    Instr(2, 24, 253, new byte[] { 0x02, 0x00, 0x00, 0x00, 0x00, 0x05, 0x19, 0x07 }),  //23: local 2 := 0
+                    Instr(2, 25, 253, new byte[] { 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x19, 0x2a }),  //24: local 2 -= temp xl 0 (the amount, so the balloon reads -$)
+                    Instr(2, 26, 253, new byte[] { 0x01, 0x00, 0x02, 0x00, 0x00, 0x05, 0x12, 0x19 }),  //25: person data 1 "money over head" := local 2
+                    Instr(23, 27, 253, new byte[] { 0x2C, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }), //26: sound 300 "ui_object_place" from the sim
+                    Instr(44, 18, 27, new byte[] { 0x51, 0x01, 0x00, 0x00, 0x03, 0x20, 0x01, 0x00 })   //27: animate 337 "a2o-puphap-woohoo", then pay
                 }
             };
             mailbox.Resource.MainIff.AddChunk(action);
