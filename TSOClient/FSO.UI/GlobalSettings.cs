@@ -60,6 +60,9 @@ namespace FSO.Client
                         defaultInstance.CitySelectorUrl = ServerUrl;
                         defaultInstance.Save();
                     }
+                    //the other branch of NetworkModule looks the server up in gameentry.ini, which
+                    //we do not ship. a stored false is the same dead end as a stored upstream url.
+                    defaultInstance.UseCustomServer = true;
 
                 }
                 return defaultInstance;
