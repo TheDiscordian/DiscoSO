@@ -237,13 +237,19 @@ namespace FSO.Client.UI.Panels
 
         private void SwitchModeButton_OnButtonClick(UIElement button)
         {
-            if (GraphicsModeControl.Mode == LotView.Model.GlobalGraphicsMode.Hybrid2D)
+            //cycle all three. this used to flip between Hybrid2D and Full3D only, which left
+            //Full2D unreachable once 3d became the default.
+            switch (GraphicsModeControl.Mode)
             {
-                GraphicsModeControl.ChangeMode(LotView.Model.GlobalGraphicsMode.Full3D);
-            }
-            else if (GraphicsModeControl.Mode == LotView.Model.GlobalGraphicsMode.Full3D)
-            {
-                GraphicsModeControl.ChangeMode(LotView.Model.GlobalGraphicsMode.Hybrid2D);
+                case LotView.Model.GlobalGraphicsMode.Full2D:
+                    GraphicsModeControl.ChangeMode(LotView.Model.GlobalGraphicsMode.Hybrid2D);
+                    break;
+                case LotView.Model.GlobalGraphicsMode.Hybrid2D:
+                    GraphicsModeControl.ChangeMode(LotView.Model.GlobalGraphicsMode.Full3D);
+                    break;
+                case LotView.Model.GlobalGraphicsMode.Full3D:
+                    GraphicsModeControl.ChangeMode(LotView.Model.GlobalGraphicsMode.Full2D);
+                    break;
             }
         }
 

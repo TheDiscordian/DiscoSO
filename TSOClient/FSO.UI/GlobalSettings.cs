@@ -136,7 +136,7 @@ namespace FSO.Client
             { "ChatWindowsOpacity", "0.8" },
 
             { "ComplexShaders", "false" },
-            { "GlobalGraphicsMode", "0" }, //2d, 2d hybrid, 3d
+            { "GlobalGraphicsMode", "-1" }, //-1 = unset, then 2d, 2d hybrid, 3d
             { "EnableTransitions", "true" }
         };
         public override Dictionary<string, string> DefaultValues
