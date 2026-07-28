@@ -2,6 +2,11 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased
+
+### Fixed
+- Out-of-season items are reachable again from build mode's admin category, instead of disappearing from the game until their holiday comes back around. 🎃
+
 ## 1.0.48 — July 2026 🎉
 
 ### Changed
