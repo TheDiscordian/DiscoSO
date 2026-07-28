@@ -2,10 +2,13 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased
+## 1.0.48 — July 2026 🎉
 
 ### Changed
 - Paying your bills is now an occasion: your sim throws their hands up, the payout jingle plays, and the amount floats over their head — the same send-off a money object gives you. 🎉
+
+### Fixed
+- The piñata shows what you actually collected. It was reading the payout a moment before the bonus was applied, so a tripled payout still displayed at face value — the money was always right, only the number over your sim's head was stale. 🪅
 
 ## 1.0.47 — July 2026 🔧
 
