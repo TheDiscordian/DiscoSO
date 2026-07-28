@@ -2,6 +2,27 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
+## Unreleased 🩹
+
+Fixes brought over from upstream FreeSO's ongoing work.
+
+### Fixed
+- A property no longer shuts itself down because it went quiet for half a minute. One slow moment was enough to convince the server the lot had locked up; it now needs two in a row. 🏚️
+- Rejoining your own property as a roommate no longer leaves you stuck watching it as a spectator. 👀
+- The clock reads the right time the moment you arrive on a property, instead of catching up a beat later. 🕰️
+- A property comes back a full ten seconds sooner after a server restart. ⚡
+- Sims are created with their motives at zero. Every new sim was starting with one hidden motive set to a nonsense value. 😌
+- Buying a lot no longer risks crashing the game while the purchase dialog opens. 🏡
+- The game no longer crashes on certain sound effects. 🔊
+- Lights read their own room's floor and extent again where a room joins onto another space. 💡
+- Snow stops falling when you load a lot that was saved in winter. ❄️
+- Buttons on OK dialogs are no longer clipped at the edge. 🔲
+- Searching for a sim in the mail dialog works again. 📬
+- The live-mode panel opens by itself when a game needs it, rather than leaving you to find it. 🎲
+- Clicking the city map lets go of whatever text box you were typing in. 🗺️
+- Object shading in the standard view uses the correct blending, and objects no longer stay invisible after the game finishes preparing their graphics. 🎨
+- Water lots no longer get a bumpy shoreline where the ground should be flat. 🌊
+
 ## 1.0.50 — July 2026 🐈
 
 ### Fixed
