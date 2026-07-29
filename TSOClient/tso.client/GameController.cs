@@ -377,11 +377,13 @@ namespace FSO.Client
 
         public void EnterSandboxMode(string lotName, bool external)
         {
-            var screen = new SandboxGameScreen();
-            GameFacade.Screens.RemoveCurrent();
-            GameFacade.Screens.AddScreen(screen);
-            screen.Initialize(lotName, external);
-            DiscordRpcEngine.SendFSOPresence("Playing Sandbox Mode");
+            //goes through ChangeState so the controller is disposed on the way out - swapping
+            //the screen by hand left the sandbox lot and its scenes in memory.
+            ChangeState<SandboxGameScreen, SandboxGameScreenController>((screen, controller) =>
+            {
+                screen.Initialize(lotName, external);
+                DiscordRpcEngine.SendFSOPresence("Playing Sandbox Mode");
+            });
         }
 
         public void ShowCredits()
