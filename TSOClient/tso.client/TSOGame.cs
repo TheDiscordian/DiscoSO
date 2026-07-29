@@ -48,6 +48,11 @@ namespace FSO.Client
             Content.RootDirectory = FSOEnvironment.GFXContentDir;
             Graphics.SynchronizeWithVerticalRetrace = true;
 
+            if (GraphicsAdapter.DefaultAdapter.IsProfileSupported(GraphicsProfile.HiDef))
+            {
+                Graphics.GraphicsProfile = GraphicsProfile.HiDef;
+            }
+
             FSOEnvironment.DPIScaleFactor = GlobalSettings.Default.DPIScaleFactor;
             if (!FSOEnvironment.SoftwareDepth)
             {
@@ -136,14 +141,21 @@ namespace FSO.Client
                 settings.Save();
             }
 
-            var initialMode = (GlobalGraphicsMode)settings.GlobalGraphicsMode;
-            if (FSOEnvironment.Enable3D)
+            GlobalGraphicsMode initialMode;
+            if (!FSOEnvironment.Enable3D)
             {
-                if (initialMode == GlobalGraphicsMode.Full2D) initialMode = GlobalGraphicsMode.Full3D;
+                initialMode = GlobalGraphicsMode.Full2D;
+            }
+            else if (settings.GlobalGraphicsMode == -1)
+            {
+                //nothing stored yet. 2d is the default view; 3d is opt-in from the graphics
+                //options. upstream forces Full2D to Full3D here on every launch, which makes
+                //a 2d preference impossible to keep.
+                initialMode = GlobalGraphicsMode.Full2D;
             }
             else
             {
-                initialMode = GlobalGraphicsMode.Full2D;
+                initialMode = (GlobalGraphicsMode)settings.GlobalGraphicsMode;
             }
             GraphicsModeControl.ChangeMode(initialMode);
             GraphicsModeControl.ModeChanged += SaveGraphicsModePreference;
