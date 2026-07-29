@@ -29,6 +29,7 @@ namespace FSO.Client.Controllers
         private IShardRealestateDomain Realestate;
         private PurchaseLotRegulator PurchaseRegulator;
         private LotThumbContent LotThumbs;
+        private uint ShardId;
 
         private Binding<Lot> CurrentHoverLot;
         private Binding<City> CurrentCity;
@@ -50,7 +51,8 @@ namespace FSO.Client.Controllers
             PurchaseRegulator.OnError += PurchaseRegulator_OnError;
             PurchaseRegulator.OnTransition += PurchaseRegulator_OnTransition;
             PurchaseRegulator.OnPurchased += PurchaseRegulator_OnPurchased;
-            Realestate = domain.GetByShard(network.MyShard.Id);
+            ShardId = (uint)network.MyShard.Id;
+            Realestate = domain.GetByShard((int)ShardId);
 
             CurrentHoverLot = new Binding<Lot>()
                 .WithMultiBinding(RefreshTooltip, "Lot_Price", "Lot_IsOnline", "Lot_Name", "Lot_NumOccupants", "Lot_LeaderID");
@@ -133,26 +135,29 @@ namespace FSO.Client.Controllers
             if (CurrentCity.Value != null)
             {
                 var mapData = LotTileEntry.GenFromCity(CurrentCity.Value);
+                var mapDataFlat = mapData.Values.ToArray();
                 var neighJSON = CurrentCity.Value.City_NeighJSON;
 
                 //We know if lots are online, we can update the data service
-                DataService.GetMany<Lot>(mapData.Select(x => (object)(uint)x.packed_pos).ToArray()).ContinueWith(x =>
+                DataService.GetMany<Lot>(mapDataFlat.Select(x => (object)(uint)x.packed_pos).ToArray()).ContinueWith(x =>
                 {
-                    if (!x.IsCompleted){
+                    if (!x.IsCompleted)
+                    {
                         return;
                     }
 
                     foreach (var lot in x.Result)
                     {
-                        var mapItem = mapData.FirstOrDefault(y => y.packed_pos == lot.Id);
-                        if (mapItem != null) {
+                        if (mapData.TryGetValue(lot.Id, out var mapItem))
+                        {
                             lot.Lot_IsOnline = (mapItem.flags & LotTileFlags.Online) == LotTileFlags.Online;
                         }
                     }
                 });
 
-                GameThread.NextUpdate((state) => {
-                    View.populateCityLookup(mapData);
+                GameThread.NextUpdate((state) =>
+                {
+                    View.populateCityLookup(mapDataFlat);
                     if (neighJSON != LastLotJSON)
                     {
                         try
@@ -168,8 +173,7 @@ namespace FSO.Client.Controllers
 
                         LastLotJSON = neighJSON;
                     }
-
-                    });        
+                });        
             }
         }
 
@@ -229,37 +233,37 @@ namespace FSO.Client.Controllers
         }
 
         public Texture2D RequestLotThumb(uint location) {
-            return LotThumbs.GetLotThumbForFrame((uint)Network.MyShard.Id, location);
+            return LotThumbs.GetLotThumbForFrame(ShardId, location);
         }
 
         public FSOF RequestLotFacade(uint location)
         {
-            return LotThumbs.GetLotFacadeForFrame((uint)Network.MyShard.Id, location);
+            return LotThumbs.GetLotFacadeForFrame(ShardId, location);
         }
 
         public void OverrideLotThumb(uint location, Texture2D tex)
         {
-            LotThumbs.OverrideLotThumb((uint)Network.MyShard.Id, location, tex);
+            LotThumbs.OverrideLotThumb(ShardId, location, tex);
         }
 
         public LotThumbEntry LockLotThumb(uint location)
         {
-            return LotThumbs.GetLotEntry((uint)Network.MyShard.Id, location, false);
+            return LotThumbs.GetLotEntry(ShardId, location, false);
         }
 
         public void UnlockLotThumb(uint location)
         {
-            LotThumbs.ReleaseLotThumb((uint)Network.MyShard.Id, location, false);
+            LotThumbs.ReleaseLotThumb(ShardId, location, false);
         }
 
         public LotThumbEntry LockLotFacade(uint location)
         {
-            return LotThumbs.GetLotEntry((uint)Network.MyShard.Id, location, true);
+            return LotThumbs.GetLotEntry(ShardId, location, true);
         }
 
         public void UnlockLotFacade(uint location)
         {
-            LotThumbs.ReleaseLotThumb((uint)Network.MyShard.Id, location, true);
+            LotThumbs.ReleaseLotThumb(ShardId, location, true);
         }
 
         public void ClickLot(int x, int y)

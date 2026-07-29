@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace FSO.Client.Rendering.City
 {
@@ -55,22 +56,10 @@ namespace FSO.Client.Rendering.City
                     
                     Client.GetFacadeAsync(shardID, location, (data) =>
                     {
-                        if (data != null && !result.Dead && !result.Loaded)
+                        if (data != null && !result.Dead && !result.Loading)
                         {
-                            using (var mem = new MemoryStream(data))
-                            {
-                                result.Loaded = true;
-                                try
-                                {
-                                    result.LotFacade = new FSOF();
-                                    result.LotFacade.Read(mem);
-                                    result.LotFacade.LoadGPU(GameFacade.GraphicsDevice);
-                                }
-                                catch
-                                {
-                                    result.LotFacade = null;
-                                }
-                            }
+                            result.Loading = true;
+                            result.LoadFSOFAsync(data);
                         }
                     });
                     
@@ -80,20 +69,10 @@ namespace FSO.Client.Rendering.City
                     result.LotTexture = DefaultThumb;
                     Client.GetThumbnailAsync(shardID, location, (data) =>
                     {
-                        if (data != null && !result.Dead && !result.Loaded)
+                        if (data != null && !result.Dead && !result.Loading)
                         {
-                            using (var mem = new MemoryStream(data))
-                            {
-                                result.Loaded = true;
-                                try
-                                {
-                                    result.LotTexture = ImageLoader.FromStream(GameFacade.GraphicsDevice, mem);
-                                }
-                                catch
-                                {
-                                    result.LotTexture = new Texture2D(GameFacade.GraphicsDevice, 1, 1);
-                                }
-                            }
+                            result.Loading = true;
+                            result.LoadTextureAsync(data);
                         }
                     });
                 }
@@ -218,7 +197,71 @@ namespace FSO.Client.Rendering.City
         public FSOF LotFacade;
         public int Held;
         public bool Loaded;
+        public bool Loading;
         public bool Dead;
         public bool FacadeEntry;
+
+        public void LoadTextureAsync(byte[] data)
+        {
+            Task.Run(() =>
+            {
+                using (var mem = new MemoryStream(data))
+                {
+                    Func<Texture2D> loader;
+                    try
+                    {
+                        loader = ImageLoader.NonUIFromStream(GameFacade.GraphicsDevice, mem);
+                    }
+                    catch
+                    {
+                        loader = () => new Texture2D(GameFacade.GraphicsDevice, 1, 1);
+                    }
+
+                    GameThread.InUpdate(() =>
+                    {
+                        if (Dead || Loaded)
+                        {
+                            // If we're already loaded, then the thumbnail has an override.
+                            return;
+                        }
+
+                        LotTexture = loader?.Invoke() ?? new Texture2D(GameFacade.GraphicsDevice, 1, 1);
+                        Loaded = true;
+                    });
+                }
+            });
+        }
+
+        public void LoadFSOFAsync(byte[] data)
+        {
+            Task.Run(() =>
+            {
+                using (var mem = new MemoryStream(data))
+                {
+                    FSOF facade;
+                    try
+                    {
+                        facade = new FSOF();
+                        facade.Read(mem);
+                    }
+                    catch
+                    {
+                        facade = null;
+                    }
+
+                    GameThread.InUpdate(() =>
+                    {
+                        if (Dead)
+                        {
+                            return;
+                        }
+
+                        LotFacade = facade;
+                        LotFacade?.LoadGPU(GameFacade.GraphicsDevice);
+                        Loaded = true;
+                    });
+                }
+            });
+        }
     }
 }
