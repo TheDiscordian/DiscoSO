@@ -14,8 +14,8 @@ namespace FSO.SimAntics.Utils
     /// delivery, zeroed on payment). The action tree routes the sim to the mailbox, plays the
     /// mailbox-open animation, asks the server for the outstanding total (interaction
     /// result -> TempXL 0), then confirms with a Yes/No dialog showing the amount before
-    /// paying via generic TSO call 200. A paid bill then gets the payout celebration every
-    /// money object plays: the success sting, the amount over the sim's head, and a woohoo.
+    /// paying via generic TSO call 200. A paid bill gets the sounds a money object's payout
+    /// plays and the amount over the sim's head, but no celebration animation.
     /// </summary>
     public static class VMDiscoSOMailboxPatch
     {
