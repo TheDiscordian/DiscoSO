@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using FSO.Client.UI.Framework;
 using FSO.Client.UI.Framework.Parser;
 using Microsoft.Xna.Framework;
@@ -7,10 +8,11 @@ using Microsoft.Xna.Framework.Graphics;
 using FSO.Common.Rendering.Framework.IO;
 using FSO.Common.Rendering.Framework.Model;
 using FSO.Common.Utils;
+using Microsoft.Xna.Framework.Input;
 
 namespace FSO.Client.UI.Controls
 {
-    public class UIListBox : UIElement
+    public class UIListBox : UIElement, IFocusableUI
     {
         private UIMouseEventRef MouseHandler;
         public event ChangeDelegate OnChange;
@@ -21,15 +23,13 @@ namespace FSO.Client.UI.Controls
 
         public bool AllowDisabledSelection = false;
         public bool Mask = false;
+        private bool IsFocused;
 
         public UIListBox()
         {
             MouseHandler = this.ListenForMouse(new Rectangle(0, 0, 10, 10), OnMouseEvent);
             RowHeight = 16;
         }
-
-
-
 
         #region Fields
 
@@ -136,6 +136,21 @@ namespace FSO.Client.UI.Controls
                 m_Items = value;
                 SelectedItem = previousSelection;
                 CalculateScroll();
+
+                //the per-column update loop only matters for lists whose columns are elements,
+                //and it is the expensive part for long lists. detect rather than rely on every
+                //call site remembering to set the flag.
+                if (!UseChildElements && m_Items != null)
+                {
+                    foreach (var item in m_Items)
+                    {
+                        if (item.Columns != null && item.Columns.Any(x => x is UIElement))
+                        {
+                            UseChildElements = true;
+                            break;
+                        }
+                    }
+                }
             }
         }
 
@@ -174,7 +189,7 @@ namespace FSO.Client.UI.Controls
             }
         }
 
-
+        public bool UseChildElements { get; set; }
 
         #endregion
 
@@ -245,29 +260,47 @@ namespace FSO.Client.UI.Controls
         public override void Update(UpdateState state)
         {
             base.Update(state);
-            var i = 0;
-            foreach (var item in Items)
+
+            if (UseChildElements)
             {
-                foreach (var col in item.Columns)
+                var i = 0;
+                foreach (var item in Items)
                 {
-                    if (col is UIElement)
+                    foreach (var col in item.Columns)
                     {
-                        var container = ((UIElement)col);
-                        container.Visible = i >= ScrollOffset && i < ScrollOffset + NumVisibleRows;
-                        if (container.Visible)
+                        if (col is UIElement)
                         {
-                            container.Parent = this.Parent;
-                            container.InvalidateMatrix();
-                            container.Update(state);
-                            container.Parent = null;
-                        } else
-                        {
-                            container.Update(state);
+                            var container = ((UIElement)col);
+                            container.Visible = i >= ScrollOffset && i < ScrollOffset + NumVisibleRows;
+                            if (container.Visible)
+                            {
+                                container.Parent = this.Parent;
+                                container.InvalidateMatrix();
+                                container.Update(state);
+                                container.Parent = null;
+                            }
+                            else
+                            {
+                                container.Update(state);
+                            }
                         }
                     }
+                    i++;
                 }
-                i++;
             }
+
+            if (IsFocused)
+            {
+                if (state.NewKeys.Contains(Keys.Up) && Items.Count > 0) 
+                    InternalSelect((m_SelectedRow < 0 ? Items.Count - 1 : (m_SelectedRow - 1 + Items.Count) % Items.Count));
+
+                if (state.NewKeys.Contains(Keys.Down) && Items.Count > 0) 
+                    InternalSelect((m_SelectedRow + 1) % Items.Count);
+
+                if (SelectedItem != null && state.NewKeys.Contains(Keys.Enter)) 
+                    OnDoubleClick?.Invoke(this);
+            }
+
             if (m_MouseOver)
             {
                 var overRow = GetRowUnderMouse(state);
@@ -307,6 +340,7 @@ namespace FSO.Client.UI.Controls
                         /** Cant deselect once selected **/
                         InternalSelect(row);
                     }
+                    GameFacade.Screens.inputManager.SetFocus(this);
                     break;
             }
         }
@@ -341,6 +375,15 @@ namespace FSO.Client.UI.Controls
         {
             Invalidate();
             m_SelectedRow = index;
+            
+            // Ensure selection is visible
+            if (index < ScrollOffset && index != -1)
+                ScrollOffset = index;
+            else if (index >= ScrollOffset + NumVisibleRows)
+                ScrollOffset = index - NumVisibleRows + 1;
+            
+            if (m_Slider != null)
+                m_Slider.Value = ScrollOffset;
 
             if (OnChange != null)
             {
@@ -629,6 +672,10 @@ namespace FSO.Client.UI.Controls
             base.Removed();
         }
 
+        public void OnFocusChanged(FocusEvent newFocus)
+        {
+            IsFocused = newFocus == FocusEvent.FocusIn;
+        }
     }
 
     public class UIListBoxColumn
