@@ -821,8 +821,9 @@ namespace FSO.Server.Servers.Lot.Domain
                 {
                     Tuning = Tuning
                 });
-                Lot.Tick();
             }
+
+            Lot.Tick();
 
             Lot.Context.UpdateTSOBuildableArea();
 
@@ -873,8 +874,6 @@ namespace FSO.Server.Servers.Lot.Domain
                     }
                 }
             }
-            LotActive.Set();
-            ActiveYet = true;
 
             if (JobLot)
             {
@@ -886,7 +885,11 @@ namespace FSO.Server.Servers.Lot.Domain
                     State = Lot.Save(),
                     Run = false,
                 });
+                Lot.Tick();
             }
+
+            LotActive.Set();
+            ActiveYet = true;
         }
 
         public void UpdateTuning(IEnumerable<DynTuningEntry> tuning)
@@ -1149,7 +1152,8 @@ namespace FSO.Server.Servers.Lot.Domain
                             TimeToShutdown = (Context.Action == ClaimAction.LOT_CLEANUP) ? 1 : TICKRATE * 40;
                         }
 
-                        if (--TimeToShutdown < TICKRATE * 10)
+                        // Only do the following if there are definitely avatars on the property. (and we can verify their permissions)
+                        if (--TimeToShutdown < TICKRATE * 10 && preTickAvatars.Count > 0)
                         {
                             //no roommates are here, so all visitors must be kicked out.
                             if (preTickAvatars.Count > 0)
@@ -1198,15 +1202,6 @@ namespace FSO.Server.Servers.Lot.Domain
                     {
                         //avatars that are being killed could die before their user disconnects. It's important to save them immediately.
                         SaveAvatars(beingKilled, true);
-                    }
-
-                    foreach (var avatar in Lot.Context.ObjectQueries.AvatarsByPersist)
-                    {
-                        if (avatar.Value.KillTimeout == 1)
-                        {
-                            //this avatar has begun being killed. Save them immediately.
-                            SaveAvatar(avatar.Value);
-                        }
                     }
 
                     if (--AvatarSaveTicker <= 0)
@@ -1587,23 +1582,26 @@ namespace FSO.Server.Servers.Lot.Domain
             }
             state.MotiveData = motives;
 
-            var relDict = new Dictionary<uint, List<int>>();
+            var relDict = new Dictionary<uint, List<int>>(rels.Count);
             foreach (var rel in rels)
             {
-                if (!relDict.ContainsKey(rel.to_id)) relDict[rel.to_id] = new List<int>();
-                var list = relDict[rel.to_id];
+                if (!relDict.TryGetValue(rel.to_id, out var list))
+                {
+                    list = new List<int>();
+                    relDict[rel.to_id] = list;
+                }
                 while (list.Count <= rel.index) list.Add(0);
                 list[(int)rel.index] = rel.value;
             }
 
             state.Relationships = new VMEntityPersistRelationshipMarshal[relDict.Count];
-            for (int i=0; i<relDict.Count; i++)
+            int relI = 0;
+            foreach (var dictItem in relDict)
             {
-                var dictItem = relDict.ElementAt(i);
                 var marshal = new VMEntityPersistRelationshipMarshal();
                 marshal.Target = dictItem.Key;
-                marshal.Values = dictItem.Value.ConvertAll(x => (short)x).ToArray();
-                state.Relationships[i] = marshal;
+                marshal.Values = dictItem.Value.Select(x => (short)x).ToArray();
+                state.Relationships[relI++] = marshal;
             }
 
             return state;

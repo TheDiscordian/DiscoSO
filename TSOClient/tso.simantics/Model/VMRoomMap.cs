@@ -37,9 +37,12 @@ namespace FSO.SimAntics.Model
             bool remaining = true;
             bool outside = true;
             int i = 0;
+
+            var spread = new Stack<SpreadItem>(width + height);
+
             while (remaining)
             {
-                var spread = new Stack<SpreadItem>();
+                spread.Clear();
                 remaining = false;
                 while (i < Map.Length)
                 {
@@ -216,6 +219,8 @@ namespace FSO.SimAntics.Model
                             minRoom = room.LightBaseRoom;
                         }
                         room.AdjRooms.Add(myRoom);
+
+                        // This might not be working recursively in certain situations.
                         if (outside) MakeOutside(rooms, room);
                         else if (room.IsOutside) outside = true;
                     }

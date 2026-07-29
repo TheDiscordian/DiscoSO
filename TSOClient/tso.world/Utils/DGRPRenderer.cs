@@ -118,6 +118,8 @@ namespace FSO.LotView.Utils
             }
         }
 
+        public bool CanHaveBounds => DGRP != null && Mesh != null && Mesh.Geoms.Count > 0;
+
         public void InvalidateRotation()
         {
             _TextureDirty = true;
@@ -410,7 +412,7 @@ namespace FSO.LotView.Utils
             if (mode.IsSet(ComponentRenderMode._2D))
                 ValidateSprite(world);
 
-            if (mode.IsSet(ComponentRenderMode._3D))
+            if (mode.IsSet(ComponentRenderMode._3D) || world.CameraMode != CameraRenderMode._2D || WorldConfig.Current.UltraLighting)
             {
                 if (_Dirty.IsSet(ComponentRenderMode._3D))
                 {

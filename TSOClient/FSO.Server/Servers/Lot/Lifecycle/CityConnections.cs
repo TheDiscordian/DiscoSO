@@ -107,6 +107,15 @@ namespace FSO.Server.Servers.Lot.Lifecycle
                     {
                         LOG.Info("Attempting connection!");
                         connection.Connect();
+                        CityConnectionEvent connectionEvent = null;
+
+                        connectionEvent = (conn) =>
+                        {
+                            conn.OnConnected -= connectionEvent;
+                            conn.Write(capacity);
+                        };
+
+                        connection.OnConnected += connectionEvent;
                     }else{
                         connection.Write(capacity);
                     }

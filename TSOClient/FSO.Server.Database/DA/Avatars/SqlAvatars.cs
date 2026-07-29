@@ -65,10 +65,10 @@ namespace FSO.Server.Database.DA.Avatars
         {
             return (uint)Context.Connection.Query<int>("INSERT INTO fso_avatars (shard_id, user_id, name, " +
                                         "gender, date, skin_tone, head, body, description, budget, moderation_level, " +
-                                        " body_swimwear, body_sleepwear) " +
+                                        " body_swimwear, body_sleepwear, motive_data) " +
                                         " VALUES (@shard_id, @user_id, @name, @gender, @date, " +
                                         " @skin_tone, @head, @body, @description, @budget, @moderation_level, "+
-                                        " @body_swimwear, @body_sleepwear); SELECT LAST_INSERT_ID();", new
+                                        " @body_swimwear, @body_sleepwear, @motive_data); SELECT LAST_INSERT_ID();", new
                                         {
                                             shard_id = avatar.shard_id,
                                             user_id = avatar.user_id,
@@ -82,7 +82,10 @@ namespace FSO.Server.Database.DA.Avatars
                                             budget = avatar.budget,
                                             moderation_level = avatar.moderation_level,
                                             body_swimwear = avatar.body_swimwear,
-                                            body_sleepwear = avatar.body_sleepwear
+                                            body_sleepwear = avatar.body_sleepwear,
+                                            //the column default is a literal '0' byte followed by 31 nulls,
+                                            //which reads back as HappyLife = 0x3000. write real zeroes.
+                                            motive_data = new byte[32]
                                         }).First();
             //for now, everything else assumes default values.
         }
