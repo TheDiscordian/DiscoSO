@@ -187,6 +187,9 @@ namespace FSO.Client.UI.Screens
                 };
                 Add(TS1NeighPanel);
             }
+
+            //shows remesh/reconnect progress, same as the city screen
+            Add(new UINetStatusTray());
         }
 
         public override void GameResized()
