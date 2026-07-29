@@ -137,9 +137,10 @@ namespace FSO.SimAntics.Utils
                     Instr(44, 254, 20, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 }), //20: animation reset, paid (true)
                     Instr(44, 255, 21, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x03, 0x20, 0x02, 0x00 }), //21: animation reset, declined/timeout/fallback (false)
 
-                    //the payout celebration, in the order the canning station's "Interaction -
-                    //Celebrate Payout" plays it. 300 and 312 are not in the mailbox, so play_sound
-                    //falls through to the globals, where they live.
+                    //the payout sounds and the money balloon, in the order the canning station's
+                    //"Interaction - Celebrate Payout" plays them. 300 and 312 are not in the
+                    //mailbox, so play_sound falls through to the globals, where they live.
+                    //no woohoo animation - paying a bill is not something to cheer about.
                     //it runs BEFORE the pay call, not after: the payment tears the interaction down
                     //the moment it lands (the thread's stack and queue are both empty on the very
                     //next tick), so nothing following instruction 18 executes - which is why 19 and
@@ -148,8 +149,7 @@ namespace FSO.SimAntics.Utils
                     Instr(2, 24, 253, new byte[] { 0x02, 0x00, 0x00, 0x00, 0x00, 0x05, 0x19, 0x07 }),  //23: local 2 := 0
                     Instr(2, 25, 253, new byte[] { 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x19, 0x2a }),  //24: local 2 -= temp xl 0 (the amount, so the balloon reads -$)
                     Instr(2, 26, 253, new byte[] { 0x01, 0x00, 0x02, 0x00, 0x00, 0x05, 0x12, 0x19 }),  //25: person data 1 "money over head" := local 2
-                    Instr(23, 27, 253, new byte[] { 0x2C, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }), //26: sound 300 "ui_object_place" from the sim
-                    Instr(44, 18, 27, new byte[] { 0x51, 0x01, 0x00, 0x00, 0x03, 0x20, 0x01, 0x00 })   //27: animate 337 "a2o-puphap-woohoo", then pay
+                    Instr(23, 18, 253, new byte[] { 0x2C, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })  //26: sound 300 "ui_object_place" from the sim, then pay
                 }
             };
             mailbox.Resource.MainIff.AddChunk(action);
