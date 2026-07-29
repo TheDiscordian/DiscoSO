@@ -21,6 +21,7 @@ namespace FSO.Client.Regulators
         private uint LotId;
         private bool IsDisconnecting = true;
         private string LastAddress;
+        private int _ConnectionId;
         private int _ReestablishAttempt;
         private int ReestablishAttempt
         {
@@ -119,6 +120,7 @@ namespace FSO.Client.Regulators
             {
                 case "SelectLot":
                     IsDisconnecting = false;
+                    _ConnectionId++;
                     AsyncTransition("FindLot", data);
                     break;
 
@@ -196,8 +198,13 @@ namespace FSO.Client.Regulators
                     }
                     else
                     {
+                        //we might be disconnecting on purpose, so give it a moment before
+                        //re-establishing. if a new connection started in the meantime this one
+                        //is stale and must not touch the state machine.
+                        var oldId = _ConnectionId;
                         GameThread.SetTimeout(() =>
                         {
+                            if (_ConnectionId != oldId) return;
                             if (CurrentState?.Name == "UnexpectedDisconnect")
                             {
                                 AsyncTransition("Reestablish");
