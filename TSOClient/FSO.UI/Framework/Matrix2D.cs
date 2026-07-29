@@ -80,18 +80,12 @@ namespace FSO.Client.UI.Framework
             );
         }
 
-        public static float[] ExtractScale(this float[] M)
-        {
-            return new float[2]{
-                (float)Math.Sqrt(M[0] * M[0] + M[1] * M[1]),
-                (float)Math.Sqrt(M[2] * M[2] + M[3] * M[3])
-            };
-        }
-
         public static Vector2 ExtractScaleVector(this float[] M)
         {
-            float[] result = ExtractScale(M);
-            return new Vector2(result[0], result[1]);
+            return new Vector2(
+                (float)Math.Sqrt(M[0] * M[0] + M[1] * M[1]),
+                (float)Math.Sqrt(M[2] * M[2] + M[3] * M[3])
+            );
         }
 
         public static float[] CloneMatrix(this float[] M)
@@ -99,7 +93,14 @@ namespace FSO.Client.UI.Framework
             return new float[6] { M[0], M[1], M[2], M[3], M[4], M[5] };
         }
 
-
-
+        public static void CopyMatrix(this float[] M, float[] to)
+        {
+            to[0] = M[0];
+            to[1] = M[1];
+            to[2] = M[2];
+            to[3] = M[3];
+            to[4] = M[4];
+            to[5] = M[5];
+        }
     }
 }
