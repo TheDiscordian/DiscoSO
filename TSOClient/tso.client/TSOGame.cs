@@ -148,10 +148,10 @@ namespace FSO.Client
             }
             else if (settings.GlobalGraphicsMode == -1)
             {
-                //nothing stored yet, so start in 3d. once the mode is saved below a stored
-                //Full2D is honoured — upstream forces 3d here every launch instead, which
-                //makes a 2d preference impossible to keep.
-                initialMode = GlobalGraphicsMode.Full3D;
+                //nothing stored yet. 2d is the default view; 3d is opt-in from the graphics
+                //options. upstream forces Full2D to Full3D here on every launch, which makes
+                //a 2d preference impossible to keep.
+                initialMode = GlobalGraphicsMode.Full2D;
             }
             else
             {
