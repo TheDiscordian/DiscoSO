@@ -37,9 +37,12 @@ namespace FSO.SimAntics.Model
             bool remaining = true;
             bool outside = true;
             int i = 0;
+
+            var spread = new Stack<SpreadItem>(width + height);
+
             while (remaining)
             {
-                var spread = new Stack<SpreadItem>();
+                spread.Clear();
                 remaining = false;
                 while (i < Map.Length)
                 {
