@@ -730,7 +730,7 @@ namespace FSO.SimAntics.Engine
                     result = VMPrimitiveExitCode.GOTO_TRUE;
                 else if (result == VMPrimitiveExitCode.RETURN_FALSE)
                     result = VMPrimitiveExitCode.GOTO_FALSE;
-                var currentFrame = Stack[^1];
+                var currentFrame = Stack[Stack.Count - 1];
                 HandleResult(currentFrame, currentFrame.GetCurrentInstruction(), result);
             }
             else // :(
