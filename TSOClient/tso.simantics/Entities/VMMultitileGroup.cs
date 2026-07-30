@@ -163,6 +163,7 @@ namespace FSO.SimAntics.Entities
 
             var count = Objects.Count;
             VMEntity[] OldContainers = new VMEntity[count];
+            //upstream uses stackalloc Span here; Span is not available on our target frameworks
             short[] OldSlotNum = new short[count];
             bool[] RoomChange = new bool[count];
             LotTilePos[] Targets = new LotTilePos[count];
