@@ -2,26 +2,41 @@
 
 Player-facing changes to DiscoSO — the game client and server, the launcher, and the website.
 
-## Unreleased 🩹
+## 1.1.0 — July 2026 🪩
 
-Fixes brought over from upstream FreeSO's ongoing work.
+A pass over upstream FreeSO's ongoing work, taking the fixes that apply to a live shard.
+
+### Changed
+- A fresh install starts in 2.5D — 3D architecture with the familiar object sprites — and the graphics options cycle 2D, 2.5D and 3D, keeping whichever you pick. The renderer also asks for a higher graphics profile where your card supports it. 🎨
+- Paying a bill keeps the jingle, the ka-ching and the amount over your sim's head, but they no longer throw their hands up about it. 💸
+- Your sim climbs into bed noticeably quicker — the route no longer detours through the bed's head section. 🛏️
 
 ### Fixed
-- A property no longer shuts itself down because it went quiet for half a minute. One slow moment was enough to convince the server the lot had locked up; it now needs two in a row. 🏚️
-- Rejoining your own property as a roommate no longer leaves you stuck watching it as a spectator. 👀
-- The clock reads the right time the moment you arrive on a property, instead of catching up a beat later. 🕰️
+- A property no longer shuts itself down because it went quiet for half a minute. One slow moment used to convince the server the lot had locked up; it now takes two in a row. 🏚️
+- Rejoining your own property as a roommate no longer leaves you stuck watching as a spectator. 👀
+- Leaving a lot and going straight back in works. You used to be turned away as already being there until your sim finished walking out. 🔁
+- The clock reads the right time the moment you arrive somewhere. 🕰️
 - A property comes back a full ten seconds sooner after a server restart. ⚡
-- Sims are created with their motives at zero. Every new sim was starting with one hidden motive set to a nonsense value. 😌
-- Buying a lot no longer risks crashing the game while the purchase dialog opens. 🏡
+- Lights in a room that opens onto another space use their own room's floor and extent again. 💡
+- Neighbouring properties are picked correctly — the game was pulling in lots that only lined up on one axis. 🏘️
+- Buying a lot no longer risks crashing the game as the dialog opens. 🏡
 - The game no longer crashes on certain sound effects. 🔊
-- Lights read their own room's floor and extent again where a room joins onto another space. 💡
-- Snow stops falling when you load a lot that was saved in winter. ❄️
-- Buttons on OK dialogs are no longer clipped at the edge. 🔲
-- Searching for a sim in the mail dialog works again. 📬
-- The live-mode panel opens by itself when a game needs it, rather than leaving you to find it. 🎲
-- Clicking the city map lets go of whatever text box you were typing in. 🗺️
-- Object shading in the standard view uses the correct blending, and objects no longer stay invisible after the game finishes preparing their graphics. 🎨
+- Snow stops falling when you load a lot saved in winter. ❄️
 - Water lots no longer get a bumpy shoreline where the ground should be flat. 🌊
+- New sims are created with their motives at zero — every sim was starting with one hidden motive set to a nonsense value. 😌
+- Buttons on OK dialogs are no longer clipped. 🔲
+- Searching for a sim in the mail dialog works again. 📬
+- The live-mode panel opens by itself when a game needs it. 🎲
+- Clicking the city map lets go of whatever text box you were typing in. 🗺️
+- Clicking a row in a list no longer makes the list jump; arrow keys and Enter work in them, and the mouse wheel scrolls sliders, text boxes and the city map. ⚙️
+- Rain falls at the same speed whatever your monitor's refresh rate. 🌧️
+- Object shading in the standard view uses the correct blending. 🎨
+- City view and lot loading do less work — thumbnails and lot facades are prepared off the main thread, and image decoding, terrain and the city's online-lot check are all cheaper. ⚡
+
+### Sandbox
+- Leaving sandbox mode releases the lot instead of leaving it in memory. 🏖️
+- The status tray now shows there too, so remesh and reconnect progress is visible.
+- `/tickrate` and `/speed` chat commands for driving the clock and sim speed.
 
 ## 1.0.50 — July 2026 🐈
 
