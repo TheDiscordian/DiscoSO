@@ -141,10 +141,11 @@ namespace FSO.Server.Servers.City.Domain
             {
                 var online = Sessions.Clone().OfType<IVoltronSession>().Count(x => !x.IsAnonymous);
                 float skillMul, socialMul, petMul;
-                if (online <= 2) { skillMul = 3f; socialMul = 1f / 3f; petMul = 2f; }       //1-2 online
-                else if (online <= 4) { skillMul = 2f; socialMul = 0.5f; petMul = 2f; }     //3-4 online
-                else if (online <= 6) { skillMul = 1.5f; socialMul = 0.75f; petMul = 1.5f; }//5-6 online
-                else { skillMul = 1f; socialMul = 1f; petMul = 1f; }                        //7+ normal
+                if (online <= 2) { skillMul = 3f; socialMul = 1f / 3f; petMul = 1.5f; }      //1-2 online
+                else if (online <= 4) { skillMul = 2.5f; socialMul = 0.5f; petMul = 1.25f; }//3-4 online
+                else if (online <= 6) { skillMul = 2f; socialMul = 0.7f; petMul = 1.1f; }   //5-6 online
+                else if (online <= 8) { skillMul = 1.5f; socialMul = 0.85f; petMul = 1f; }  //7-8 online
+                else { skillMul = 1f; socialMul = 1f; petMul = 1f; }                        //9+ normal
                 if (skillMul != LastBonusMul)
                 {
                     using (var da = DA.Get())
