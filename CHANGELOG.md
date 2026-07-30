@@ -7,6 +7,9 @@ Player-facing changes to DiscoSO — the game client and server, the launcher, a
 A pass over upstream FreeSO's ongoing work, taking the fixes that apply to a live shard.
 
 ### Changed
+- The quiet-server bonus tapers off gently instead of dropping away, and it now reaches further up the population: skill and money gain runs at 3× / 2.5× / 2× / 1.5× with 1–2 / 3–4 / 5–6 / 7–8 players online, and normal rates start at 9. 🎚️
+- Pets are far easier to keep happy on a quiet shard. Their social need used to drain twice as fast whenever four or fewer players were online; the penalty is now 1.5× at its harshest and gone entirely from 7 players up. 🐈
+- A money lot pays 10% more on its job objects. It previously applied no payout bonus at all. 💰
 - A fresh install starts in 2.5D — 3D architecture with the familiar object sprites — and the graphics options cycle 2D, 2.5D and 3D, keeping whichever you pick. The renderer also asks for a higher graphics profile where your card supports it. 🎨
 - Paying a bill keeps the jingle, the ka-ching and the amount over your sim's head, but they no longer throw their hands up about it. 💸
 - Your sim climbs into bed noticeably quicker — the route no longer detours through the bed's head section. 🛏️
